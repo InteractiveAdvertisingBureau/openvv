@@ -14,14 +14,14 @@
  * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
  * TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
-package openvv
+package org.openvv
 {
   import flash.display.Sprite;
   import flash.external.ExternalInterface;
   import flash.events.TimerEvent;
   import flash.utils.Timer;
-  import openvv.OVVCheck;
-  import openvv.events.OVVEvent;
+  import org.openvv.OVVCheck;
+  import org.openvv.events.OVVEvent;
 
   public class OVVAsset extends Sprite
   {
