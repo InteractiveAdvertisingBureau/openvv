@@ -29,6 +29,7 @@ package org.openvv
     private static const IMPRESSION_DELAY:Number = 250;
     private static const VIEWABLE_AREA_THRESHOLD:Number = 50;
 
+    private var _initialized:Boolean = false;
     private var _id:String;
     private var _viewabilityCheck:OVVCheck;
     private var _impressionTimer:Timer;
@@ -38,12 +39,13 @@ package org.openvv
     {
       _id = id;
 
-      if (!ExternalInterface.available)
+      if (!externalInterfaceIsAvailable())
       {
         raiseError("ExternalInterface unavailable");
         return;
       }
 
+      _initialized = true;
       _viewabilityCheck = new OVVCheck(_id);
 
       _intervalsInView = 0;
@@ -54,6 +56,9 @@ package org.openvv
 
     public function checkViewability():Object
     {
+      if (!_initialized)
+        raiseError("ExternalInterface unavailable");
+
       return performCheck();
     }
 
@@ -99,6 +104,19 @@ package org.openvv
     {
       var d:* = {"message":msg};
       dispatchEvent(new OVVEvent(OVVEvent.OVVError, d));
+    }
+
+    private function externalInterfaceIsAvailable():Boolean
+    {
+      var isEIAvailable:Boolean = false;
+
+      try
+      {
+        isEIAvailable = !!ExternalInterface.call("function() { return 1; }");
+      }
+      catch (e:SecurityError) { }
+
+      return isEIAvailable;
     }
   }
 }
