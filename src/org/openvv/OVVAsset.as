@@ -39,7 +39,7 @@ package org.openvv
     {
       _id = id;
 
-      if (!externalInterfaceIsAvailable())
+      if (!OVVCheck.externalInterfaceIsAvailable())
       {
         raiseError("ExternalInterface unavailable");
         return;
@@ -106,17 +106,5 @@ package org.openvv
       dispatchEvent(new OVVEvent(OVVEvent.OVVError, d));
     }
 
-    private function externalInterfaceIsAvailable():Boolean
-    {
-      var isEIAvailable:Boolean = false;
-
-      try
-      {
-        isEIAvailable = !!ExternalInterface.call("function() { return 1; }");
-      }
-      catch (e:SecurityError) { }
-
-      return isEIAvailable;
-    }
   }
 }
