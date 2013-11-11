@@ -20,14 +20,24 @@ import flash.external.ExternalInterface;
 public class OVVCheck {
 	public var results:Object;
 	public function OVVCheck( uniqueId:String ) {
-		ExternalInterface.addCallback( uniqueId, flashProbe );
-		results = checkViewability( uniqueId );
+    if (OVVCheck.externalInterfaceIsAvailable)
+    {
+		  ExternalInterface.addCallback( uniqueId, flashProbe );
+		  results = checkViewability( uniqueId );
+    }
+    else
+    {
+      return { "error": "ExternalInterface not available" };
+    }
 	}
 	//Callback function attached to HTML Object to identify it:
 	public function flashProbe( someData:* ):void {
 		return;
 	}
 	public function checkViewability( uniqueId:String ):Object {
+    if (!OVVCheck.externalInterfaceIsAvailable)
+      return { "error": "ExternalInterface not available" };
+
 		var js:XML = <script><![CDATA[
 				function a( obfuFn ) {
 					var results = {};
@@ -130,5 +140,18 @@ public class OVVCheck {
 			]]></script>;
 		return ExternalInterface.call(js, uniqueId ) as Object;
 	}
+
+  public static function externalInterfaceIsAvailable():Boolean
+  {
+    var isEIAvailable:Boolean = false;
+
+    try
+    {
+      isEIAvailable = !!ExternalInterface.call("function() { return 1; }");
+    }
+    catch (e:SecurityError) { }
+
+    return isEIAvailable;
+  }
 }
 }
