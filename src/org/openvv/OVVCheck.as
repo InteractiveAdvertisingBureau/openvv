@@ -34,10 +34,19 @@ public class OVVCheck {
 					if ( window.self === window.top ) { //Check for iFrames
 						//Find Object by looking for obfuFn (Obfuscated Function set by Flash)
 						var myObj = null;
-						var objs = document.getElementsByTagName("object");
-						for (var i = 0; i < objs.length; i++) {
-							if ( !!objs[i][ obfuFn ] ) {
-								myObj = objs[i];
+						//When IE is detected, some pages only use an embed:
+						var embeds = document.getElementsByTagName("embed");
+						for (var i = 0; i < embeds.length; i++) {
+							if ( !!embeds[i][ obfuFn ] ) {
+								myObj = embeds[i];
+							}
+						}
+						if ( myObj == null ) {
+							var objs = document.getElementsByTagName("object");
+							for (var i = 0; i < objs.length; i++) {
+								if ( !!objs[i][ obfuFn ] ) {
+									myObj = objs[i];
+								}
 							}
 						}
 						if ( myObj == null ) {
