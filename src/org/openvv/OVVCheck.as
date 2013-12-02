@@ -18,24 +18,31 @@ package org.openvv {
 import flash.external.ExternalInterface;
 
 public class OVVCheck {
-	public var results:Object;
-	public function OVVCheck( uniqueId:String ) {
-    if (OVVCheck.externalInterfaceIsAvailable)
+	private var _results:Object;
+
+	public function OVVCheck(uniqueId:String) {
+    if (OVVCheck.externalInterfaceIsAvailable())
     {
-		  ExternalInterface.addCallback( uniqueId, flashProbe );
-		  results = checkViewability( uniqueId );
+		  ExternalInterface.addCallback(uniqueId, flashProbe);
+		  _results = checkViewability(uniqueId);
     }
     else
     {
-      return { "error": "ExternalInterface not available" };
+      _results { "error": "ExternalInterface not available" };
     }
 	}
+
+  public function get results():Object
+  {
+    return _results;
+  }
+
 	//Callback function attached to HTML Object to identify it:
 	public function flashProbe( someData:* ):void {
 		return;
 	}
 	public function checkViewability( uniqueId:String ):Object {
-    if (!OVVCheck.externalInterfaceIsAvailable)
+    if (!OVVCheck.externalInterfaceIsAvailable())
       return { "error": "ExternalInterface not available" };
 
 		var js:XML = <script><![CDATA[
@@ -138,8 +145,29 @@ public class OVVCheck {
 					return results;
 				}
 			]]></script>;
-		return ExternalInterface.call(js, uniqueId ) as Object;
+		var results:Object = ExternalInterface.call(js, uniqueId ) as Object;
+    _results = finalizeResults(results);
+
+    return _results;
 	}
+
+  // Based on data, determine whether unit is invi
+  private function finalizeResults(results:Object):Object
+  {
+    results['viewabilityState'] = "unmeasurable"
+
+    // error? all done
+    if (results['error'])
+      return results;
+
+    // viewable if in view relative to window and flash is rendering the player.
+    if (results['percentViewable'] != null)
+    {
+      results['viewabilityState'] = (results['percentViewable'] >= 50 && results['focus']) ? "viewable" : "notViewable";
+    }
+
+    return results;
+  }
 
   public static function externalInterfaceIsAvailable():Boolean
   {

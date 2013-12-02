@@ -16,36 +16,34 @@
  */
 package org.openvv
 {
-  import flash.display.Sprite;
+  import flash.display.DisplayObject;
   import flash.external.ExternalInterface;
+  import flash.events.EventDispatcher;
   import flash.events.TimerEvent;
   import flash.utils.Timer;
   import org.openvv.OVVCheck;
   import org.openvv.events.OVVEvent;
 
-  public class OVVAsset extends Sprite
+  public class OVVAsset extends EventDispatcher
   {
     private static const IMPRESSION_THRESHOLD:Number = 20;
     private static const IMPRESSION_DELAY:Number = 250;
     private static const VIEWABLE_AREA_THRESHOLD:Number = 50;
 
-    private var _initialized:Boolean = false;
     private var _id:String;
     private var _viewabilityCheck:OVVCheck;
     private var _impressionTimer:Timer;
     private var _intervalsInView:Number;
 
-    public function OVVAsset(id:String="")
+    public function OVVAsset()
     {
-      _id = id;
-
-      if (!OVVCheck.externalInterfaceIsAvailable())
+      if (!ExternalInterface.available)
       {
         raiseError("ExternalInterface unavailable");
         return;
       }
 
-      _initialized = true;
+      _id = generateId();
       _viewabilityCheck = new OVVCheck(_id);
 
       _intervalsInView = 0;
@@ -56,9 +54,6 @@ package org.openvv
 
     public function checkViewability():Object
     {
-      if (!_initialized)
-        raiseError("ExternalInterface unavailable");
-
       return performCheck();
     }
 
@@ -89,6 +84,11 @@ package org.openvv
       }
     }
 
+    private function generateId():String
+    {
+      return "ovv" + Math.floor(Math.random()*1000000000).toString();
+    }
+
     private function raiseImpression():void
     {
       dispatchEvent(new OVVEvent(OVVEvent.OVVImpression));
@@ -105,6 +105,5 @@ package org.openvv
       var d:* = {"message":msg};
       dispatchEvent(new OVVEvent(OVVEvent.OVVError, d));
     }
-
   }
 }
