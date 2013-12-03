@@ -28,7 +28,7 @@ public class OVVCheck {
     }
     else
     {
-      _results { "error": "ExternalInterface not available" };
+      _results = { "error": "ExternalInterface not available" };
     }
 	}
 
