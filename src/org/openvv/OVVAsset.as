@@ -17,8 +17,9 @@
 package org.openvv
 {
   import flash.display.Sprite;
-  import flash.external.ExternalInterface;
+  import flash.events.EventDispatcher;
   import flash.events.TimerEvent;
+  import flash.external.ExternalInterface;
   import flash.utils.Timer;
   import org.openvv.OVVCheck;
   import org.openvv.events.OVVEvent;
@@ -55,9 +56,6 @@ package org.openvv
 
     public function checkViewability():Object
     {
-      if (!_initialized)
-        raiseError("ExternalInterface unavailable");
-
       return performCheck();
     }
 
