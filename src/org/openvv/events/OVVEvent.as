@@ -19,6 +19,7 @@ package org.openvv.events
   import flash.events.Event;
   public class OVVEvent extends Event
   {
+    public static const OVVDiscernibleImpression:String = "OVVDiscernibleImpression";
     public static const OVVImpression:String = "OVVImpression";
     public static const OVVLog:String = "OVVLog";
     public static const OVVError:String = "OVVError";
