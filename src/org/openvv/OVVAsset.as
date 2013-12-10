@@ -17,15 +17,16 @@
 package org.openvv
 {
   import flash.display.Sprite;
-  import flash.external.ExternalInterface;
   import flash.events.TimerEvent;
+  import flash.external.ExternalInterface;
   import flash.utils.Timer;
   import org.openvv.OVVCheck;
   import org.openvv.events.OVVEvent;
 
   public class OVVAsset extends Sprite
   {
-    private static const IMPRESSION_THRESHOLD:Number = 20;
+    private static const VIEWABLE_IMPRESSION_THRESHOLD:Number = 20;
+	private static const DISCERNABLE_IMPRESSION_THRESHOLD:Number = 4;
     private static const IMPRESSION_DELAY:Number = 250;
     private static const VIEWABLE_AREA_THRESHOLD:Number = 50;
 
@@ -34,6 +35,7 @@ package org.openvv
     private var _viewabilityCheck:OVVCheck;
     private var _impressionTimer:Timer;
     private var _intervalsInView:Number;
+    private var _hasDispatchedDImp:Boolean = false;
 
     public function OVVAsset(id:String="")
     {
@@ -82,7 +84,12 @@ package org.openvv
       else
         _intervalsInView = 0;
 
-      if (_intervalsInView >= IMPRESSION_THRESHOLD)
+      if(_intervalsInView >= DISCERNABLE_IMPRESSION_THRESHOLD && !_hasDispatchedDImp)
+	  {
+		_hasDispatchedDImp = true;
+        dispatchEvent(new OVVEvent(OVVEvent.OVVDiscernibleImpression));
+	  }
+	  else if (_intervalsInView >= VIEWABLE_IMPRESSION_THRESHOLD)
       {
         raiseImpression();
         _impressionTimer.stop();
