@@ -27,7 +27,7 @@ package org.openvv
   public class OVVAsset extends EventDispatcher
   {
     private static const VIEWABLE_IMPRESSION_THRESHOLD:Number = 20;
-    private static const DISCERNABLE_IMPRESSION_THRESHOLD:Number = 4;
+    private static const DISCERNIBLE_IMPRESSION_THRESHOLD:Number = 4;
     private static const IMPRESSION_DELAY:Number = 250;
     private static const VIEWABLE_AREA_THRESHOLD:Number = 50;
 
@@ -79,7 +79,7 @@ package org.openvv
       else
         _intervalsInView = 0;
 
-      if(_intervalsInView >= DISCERNABLE_IMPRESSION_THRESHOLD && !_hasDispatchedDImp)
+      if(_intervalsInView >= DISCERNIBLE_IMPRESSION_THRESHOLD && !_hasDispatchedDImp)
       {
         _hasDispatchedDImp = true;
         dispatchEvent(new OVVEvent(OVVEvent.OVVDiscernibleImpression));
