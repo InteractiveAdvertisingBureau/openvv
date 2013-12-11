@@ -17,35 +17,35 @@
 package org.openvv
 {
   import flash.display.Sprite;
-  import flash.external.ExternalInterface;
+  import flash.events.EventDispatcher;
   import flash.events.TimerEvent;
+  import flash.external.ExternalInterface;
   import flash.utils.Timer;
   import org.openvv.OVVCheck;
   import org.openvv.events.OVVEvent;
 
-  public class OVVAsset extends Sprite
+  public class OVVAsset extends EventDispatcher
   {
-    private static const IMPRESSION_THRESHOLD:Number = 20;
+    private static const VIEWABLE_IMPRESSION_THRESHOLD:Number = 20;
+    private static const DISCERNIBLE_IMPRESSION_THRESHOLD:Number = 4;
     private static const IMPRESSION_DELAY:Number = 250;
     private static const VIEWABLE_AREA_THRESHOLD:Number = 50;
 
-    private var _initialized:Boolean = false;
     private var _id:String;
     private var _viewabilityCheck:OVVCheck;
     private var _impressionTimer:Timer;
     private var _intervalsInView:Number;
+    private var _hasDispatchedDImp:Boolean = false;
 
-    public function OVVAsset(id:String="")
+    public function OVVAsset()
     {
-      _id = id;
-
-      if (!OVVCheck.externalInterfaceIsAvailable())
+      if (!ExternalInterface.available)
       {
         raiseError("ExternalInterface unavailable");
         return;
       }
 
-      _initialized = true;
+      _id = generateId();
       _viewabilityCheck = new OVVCheck(_id);
 
       _intervalsInView = 0;
@@ -56,9 +56,6 @@ package org.openvv
 
     public function checkViewability():Object
     {
-      if (!_initialized)
-        raiseError("ExternalInterface unavailable");
-
       return performCheck();
     }
 
@@ -82,11 +79,21 @@ package org.openvv
       else
         _intervalsInView = 0;
 
-      if (_intervalsInView >= IMPRESSION_THRESHOLD)
+      if(_intervalsInView >= DISCERNIBLE_IMPRESSION_THRESHOLD && !_hasDispatchedDImp)
+      {
+        _hasDispatchedDImp = true;
+        dispatchEvent(new OVVEvent(OVVEvent.OVVDiscernibleImpression));
+      }
+      else if (_intervalsInView >= VIEWABLE_IMPRESSION_THRESHOLD)
       {
         raiseImpression();
         _impressionTimer.stop();
       }
+    }
+
+    private function generateId():String
+    {
+      return "ovv" + Math.floor(Math.random()*1000000000).toString();
     }
 
     private function raiseImpression():void
@@ -105,6 +112,5 @@ package org.openvv
       var d:* = {"message":msg};
       dispatchEvent(new OVVEvent(OVVEvent.OVVError, d));
     }
-
   }
 }
