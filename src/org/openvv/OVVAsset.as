@@ -74,7 +74,9 @@ package org.openvv
     // Once asset has been visible for 5s, raise impression
     private function timerHandler(e:TimerEvent):void
     {
-      if (checkViewability().percentViewable >= VIEWABLE_AREA_THRESHOLD)
+		var results:Object = checkViewability();
+		
+      if (results['viewabilityState'] == "viewable")
         _intervalsInView++;
       else
         _intervalsInView = 0;
