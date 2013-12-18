@@ -76,7 +76,7 @@ package org.openvv
     {
 		var results:Object = checkViewability();
 		
-      if (results.percentViewable >= VIEWABLE_AREA_THRESHOLD && results['focus'])
+      if (results['viewabilityState'] == "viewable")
         _intervalsInView++;
       else
         _intervalsInView = 0;
