@@ -16,8 +16,8 @@ package
     public class Main extends Sprite 
     {
         private static const OVV_CHECK_INTERVAL:uint = 1000; // 1 sec
-        private static const LOG:Boolean = false;
-        
+        private static const LOG:Boolean = true;
+
         private var id:String = new String(new Date().getTime() + Math.random()); 
         private var ovvCheck:OVVCheck;
         private var timer:Timer;
