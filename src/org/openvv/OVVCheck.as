@@ -16,18 +16,24 @@
  */
 package org.openvv {
 import flash.display.Sprite;
+import flash.events.Event;
 import flash.external.ExternalInterface;
 
 public class OVVCheck {
 	private var _results:Object;
 	private var _renderMeter:OVVRenderMeter;
+	private var _throttleState:String;
 
 	public function OVVCheck(uniqueId:String) 
 	{
 	    if (OVVCheck.externalInterfaceIsAvailable())
 	    {
 			  ExternalInterface.addCallback(uniqueId, flashProbe);
-			  _renderMeter = new OVVRenderMeter(new Sprite());
+			  
+			  var sprite:Sprite = new Sprite();
+			  _renderMeter = new OVVRenderMeter(sprite);
+			  sprite.addEventListener("throttle", onThrottle);
+			  
 			  _results = checkViewability(uniqueId);
 	    }
 	    else
@@ -35,7 +41,15 @@ public class OVVCheck {
 	      _results = { "error": "ExternalInterface not available" };
 	    }
 	}
-
+	
+	protected function onThrottle(event:Event):void
+	{
+		if(event.hasOwnProperty('state'))
+		{
+			_throttleState = event['state'];
+		}
+	}
+	
 	public function get results():Object
 	{
 		return _results;
@@ -161,9 +175,16 @@ public class OVVCheck {
     if (results['error'])
       return results;
 	
-	results['focus'] = _renderMeter.fps > 8;
-	
-    // viewable if in view relative to window and flash is rendering the player.
+	if(_throttleState != null)
+	{
+		results['focus'] =  _throttleState = OVVThrottleType.RESUME; 
+	}
+	else
+	{
+		results['focus'] = _renderMeter.fps > 8;
+	}
+
+	// viewable if in view relative to window and flash is rendering the player.
     if (results['percentViewable'] != null)
     {
       results['viewabilityState'] = (results['percentViewable'] >= 50 && results['focus']) ? "viewable" : "notViewable";
