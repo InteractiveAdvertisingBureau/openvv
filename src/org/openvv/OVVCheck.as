@@ -15,32 +15,37 @@
  * TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 package org.openvv {
+import flash.display.Sprite;
 import flash.external.ExternalInterface;
 
 public class OVVCheck {
 	private var _results:Object;
+	private var _renderMeter:OVVRenderMeter;
 
-	public function OVVCheck(uniqueId:String) {
-    if (OVVCheck.externalInterfaceIsAvailable())
-    {
-		  ExternalInterface.addCallback(uniqueId, flashProbe);
-		  _results = checkViewability(uniqueId);
-    }
-    else
-    {
-      _results = { "error": "ExternalInterface not available" };
-    }
+	public function OVVCheck(uniqueId:String) 
+	{
+	    if (OVVCheck.externalInterfaceIsAvailable())
+	    {
+			  ExternalInterface.addCallback(uniqueId, flashProbe);
+			  _renderMeter = new OVVRenderMeter(new Sprite());
+			  _results = checkViewability(uniqueId);
+	    }
+	    else
+	    {
+	      _results = { "error": "ExternalInterface not available" };
+	    }
 	}
 
-  public function get results():Object
-  {
-    return _results;
-  }
+	public function get results():Object
+	{
+		return _results;
+	}
 
 	//Callback function attached to HTML Object to identify it:
 	public function flashProbe( someData:* ):void {
 		return;
 	}
+	
 	public function checkViewability( uniqueId:String ):Object {
     if (!OVVCheck.externalInterfaceIsAvailable())
       return { "error": "ExternalInterface not available" };
@@ -133,10 +138,6 @@ public class OVVCheck {
 									var visibleObjectArea = ( xMax - xMin + 1 ) * ( yMax - yMin + 1 );
 									results[ 'percentViewable' ] = Math.round( visibleObjectArea / totalObjectArea * 100 );
 								}
-								//Report window focus (Is the window active?):
-								var chromeNotVisible = 	!!document.webkitVisibilityState &&
-														document.webkitVisibilityState != 'visible';
-								results[ 'focus' ] = window.document.hasFocus() && !chromeNotVisible;
 							}
 						}
 					} else {
@@ -159,7 +160,9 @@ public class OVVCheck {
     // error? all done
     if (results['error'])
       return results;
-
+	
+	results['focus'] = _renderMeter.fps > 8;
+	
     // viewable if in view relative to window and flash is rendering the player.
     if (results['percentViewable'] != null)
     {
