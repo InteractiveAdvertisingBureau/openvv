@@ -16,16 +16,18 @@
  */
 package org.openvv
 {
-  import flash.display.Sprite;
   import flash.events.EventDispatcher;
   import flash.events.TimerEvent;
   import flash.external.ExternalInterface;
   import flash.utils.Timer;
-  import org.openvv.OVVCheck;
+  
   import org.openvv.events.OVVEvent;
 
   public class OVVAsset extends EventDispatcher
   {
+    [Embed(source = "/../js/beacon.js", mimeType = "application/octet-stream")]
+    public static const BeaconJS:Class;
+	
     private static const VIEWABLE_IMPRESSION_THRESHOLD:Number = 20;
     private static const DISCERNIBLE_IMPRESSION_THRESHOLD:Number = 4;
     private static const IMPRESSION_DELAY:Number = 250;
@@ -47,7 +49,11 @@ package org.openvv
 
       _id = generateId();
       _viewabilityCheck = new OVVCheck(_id);
-
+	  
+	  // add SWFs to the page
+	  ExternalInterface.call("eval", new BeaconJS().toString());
+	  ExternalInterface.call("addSWFs", _id);
+	  
       _intervalsInView = 0;
       _impressionTimer = new Timer(IMPRESSION_DELAY);
       _impressionTimer.addEventListener(TimerEvent.TIMER, timerHandler);
