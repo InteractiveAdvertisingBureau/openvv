@@ -4,6 +4,7 @@ package org.openvv
 	import flash.display.Sprite;
 	import flash.events.Event;
 	import flash.external.ExternalInterface;
+	import flash.system.Security;
 	
 	[SWF(height="1", width="1", frameRate="24")]
 	public final class OVVBeacon extends Sprite
@@ -16,33 +17,31 @@ package org.openvv
 		public function OVVBeacon()
 		{
 			super();
-			
+
+			Security.allowDomain("*");
+
 			addEventListener(Event.ADDED_TO_STAGE, onAddedToStage);			
-			
 			addEventListener("throttle", onThrottle);
-			_renderMeter = new OVVRenderMeter(this);
-			
-			if (OVVCheck.externalInterfaceIsAvailable())
-			{
-				ExternalInterface.addCallback("isVisible", isVisible);
-			}
-			
-			ExternalInterface.call("console.error", "Beacon on page!");
 		}
 		
 		protected function onAddedToStage(event:Event):void
 		{
+			_renderMeter = new OVVRenderMeter(this);
+
+			ExternalInterface.addCallback("isVisible", isVisible);
+			ExternalInterface.call("console.debug", "Beacon on page!");
+
 			var bg:Sprite = new Sprite();
 			var g:Graphics = bg.graphics;
-			
+
 			g.beginFill(0xFF0000, 1.0);
 			g.drawRect(0, 0, stage.stageWidth, stage.stageHeight);
 			g.endFill();
-			
+
 			addChild(bg);
 		}
 		
-		public function isVisible():Boolean
+		public function isVisible(data:*=null):Boolean
 		{
 			if (_throttleState != null)
 			{
@@ -55,7 +54,7 @@ package org.openvv
 		protected function onThrottle(event:Event):void
 		{
 			_throttleState = event['state'];
-			ExternalInterface.call(throttleCallback, event['state'], event['stageFrameRate'], event['targetFrameRate']); 
+ 			ExternalInterface.call(throttleCallback, event['state'], event['targetFrameRate']); 
 		}
 	}
 }

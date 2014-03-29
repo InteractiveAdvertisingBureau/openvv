@@ -64,6 +64,9 @@ public class OVVCheck {
     if (!OVVCheck.externalInterfaceIsAvailable())
       return { "error": "ExternalInterface not available" };
 
+	
+	var visible:String = ExternalInterface.call("document.getElementById('OVVBeacon1').isVisible()");
+	
 		var js:XML = <script><![CDATA[
 				function a( obfuFn ) {
 					var results = {};
@@ -184,6 +187,8 @@ public class OVVCheck {
 		results['focus'] = _renderMeter.fps > 8;
 	}
 
+	var viewable:Boolean = ExternalInterface.call("isPlayerVisible");
+	
 	// viewable if in view relative to window and flash is rendering the player.
     if (results['percentViewable'] != null)
     {

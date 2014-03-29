@@ -14,7 +14,7 @@ function addSWFs(playerId)
 	var wmode = "direct"; //TODO
 	var BEACON_SIZE = 2; //TODO
 
-	for(var index = 1; index < 6; index++)
+	for(var index = 1; index <= 5; index++)
 	{
 		var left, top;
 
@@ -54,14 +54,14 @@ function addSWFs(playerId)
 			swfContainer.style.top = top + "px";
 
 		var html =
-			'<object id="OVVBeacon" classid="clsid:D27CDB6E-AE6D-11cf-96B8-444553540000" width="' + BEACON_SIZE + '" height="' + BEACON_SIZE + '">' +
+			'<object classid="clsid:D27CDB6E-AE6D-11cf-96B8-444553540000" width="' + BEACON_SIZE + '" height="' + BEACON_SIZE + '">' +
 				'<param name="movie" value="http://localhost/OVVBeacon.swf" />' +
 				'<param name="quality" value="low" />' +
 				'<param name="bgcolor" value="#ffffff" />' +
 				'<param name="allowScriptAccess" value="always" />' +
 				'<param name="allowFullScreen" value="false" />' +
 					'<!--[if !IE]>-->' +
-					'<object type="application/x-shockwave-flash" data="http://localhost/OVVBeacon.swf" width="' + BEACON_SIZE + '" height="' + BEACON_SIZE + '">' +
+					'<object id="OVVBeacon' + index + '" type="application/x-shockwave-flash" data="http://localhost/OVVBeacon.swf" width="' + BEACON_SIZE + '" height="' + BEACON_SIZE + '">' +
 						'<param name="quality" value="low" />' +
 						'<param name="bgcolor" value="#ff0000" />' +
 						'<param name="allowScriptAccess" value="always" />' +
@@ -74,9 +74,26 @@ function addSWFs(playerId)
 	}
 }
 
+function isPlayerVisible()
+{
+	var visible = 0;
+
+	for(var index = 1; index <= 5; index++)
+	{
+		// console.error('OVVBeacon' + index '.isVisible(): ' + document.getElementById('OVVBeacon' + index).isVisible());
+
+		if(document.getElementById('OVVBeacon' + index).isVisible())
+		{
+			visible += 1;
+		}
+	}
+
+	return visible >= 3;
+}
+
 function findPlayer(id)
 {
-	console.debug("findPlayer() " + id);
+	console.debug("findPlayer('" + id + "')");
 
 	//When IE is detected, some pages only use an embed:
 	var embeds = document.getElementsByTagName("embed");

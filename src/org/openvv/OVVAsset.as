@@ -62,17 +62,12 @@ package org.openvv
 
     public function checkViewability():Object
     {
-      return performCheck();
-    }
+		var results:Object = _viewabilityCheck.checkViewability(_id);
 
-    private function performCheck():Object
-    {
-      var results:Object = _viewabilityCheck.checkViewability(_id);
+      	if (!!results.error)
+        	raiseError(results.error);
 
-      if (!!results.error)
-        raiseError(results.error);
-
-      return results;
+      	return results;
     }
 
     // Every 250ms, check to see if asset is visible
