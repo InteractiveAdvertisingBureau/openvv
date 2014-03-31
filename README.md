@@ -1,7 +1,7 @@
 #openvv (with 3rd party integration)
 
-This openvv release is intended to allow for exposing of viewability data, as well as VPAID data, to third party vendors via a JavaScript API. 
-The release extends the functionality of OVVAsset.as and intends for it to be used as the base class for integrating openvv into SWF Ads. 
+This update to the OpenVV code base  allows 3rd parties to more easily provide video viewability measurement by exposing the VPAID data as well as the viewability data via a JavaScript API.  The release extends the functionality of OVVAsset.as for it to be used as the base class for integrating openvv into SWF Ads.
+
 ## Demo
 A working demo based on the openvv demo is available here: http://video.doubleverify.com
 ## Overview
