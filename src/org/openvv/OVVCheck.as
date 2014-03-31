@@ -14,7 +14,7 @@
  * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
  * TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
-package org.openvv {
+package org.openvv  {
 import flash.external.ExternalInterface;
 
 public class OVVCheck {
@@ -27,7 +27,7 @@ public class OVVCheck {
     }
     else
     {
-      return { "error": "ExternalInterface not available" };
+      	return = { "error": "ExternalInterface not available" };
     }
 	}
 	//Callback function attached to HTML Object to identify it:
