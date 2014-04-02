@@ -44,8 +44,8 @@ var OpenVV_OVVID = (function(){
 		}
 
 		var playerLocation = player.getClientRects()[0];
-		var wmode = "direct"; //TODO
-		var BEACON_SIZE = 2; //TODO
+		var wmode = "transparent"; //TODO
+		var BEACON_SIZE = 20; //TODO
 
 		for(var index = 1; index <= 5; index++)
 		{
@@ -91,12 +91,14 @@ var OpenVV_OVVID = (function(){
 					'<param name="movie" value="' + url + '?id=' + id + '&index=' + index +'" />' +
 					'<param name="quality" value="low" />' +
 					'<param name="bgcolor" value="#ffffff" />' +
+					'<param name="wmode" value="' + wmode + '" />' +
 					'<param name="allowScriptAccess" value="always" />' +
 					'<param name="allowFullScreen" value="false" />' +
 						'<!--[if !IE]>-->' +
 						'<object id="OVVBeacon_' + index + '_' + id + '" type="application/x-shockwave-flash" data="' + url + '?id=' + id + '&index=' + index +'" width="' + BEACON_SIZE + '" height="' + BEACON_SIZE + '">' +
 							'<param name="quality" value="low" />' +
 							'<param name="bgcolor" value="#ff0000" />' +
+							'<param name="wmode" value="' + wmode + '" />' +
 							'<param name="allowScriptAccess" value="always" />' +
 							'<param name="allowFullScreen" value="false" />' +
 						'<!--<![endif]-->' +

@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<project name="OpenVV"
+		 basedir="."
+		 default="compileBeacon">
+
+	<property name="FLEX_HOME"
+			  value="/Applications/Adobe Flash Builder 4.7/sdks/4.6.0/"/>
+
+	<taskdef resource="flexTasks.tasks"
+			 classpath="${FLEX_HOME}/ant/lib/flexTasks.jar"/>
+
+	<target name="compileBeacon">
+		<mxmlc file="src/org/openvv/OVVBeacon.as"
+			   output="bin-debug/OVVBeacon.swf"
+			   static-rsls="true">
+			<source-path path-element="src"/>
+		</mxmlc>
+	</target>
+
+	<target name="swc">
+		<compc output="bin/openvv.swc">
+			<include-classes dir="src"
+							 includes="*"
+							 excludes="OVVBeacon.as"/>
+		</compc>
+	</target>
+
+	<target name="clean">
+		<delete>
+			<fileset dir="bin-debug"
+					 includes="**/*.swf"
+					 defaultexcludes="false"/>
+		</delete>
+	</target>
+
+</project>
