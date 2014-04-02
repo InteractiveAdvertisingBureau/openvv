@@ -18,10 +18,9 @@
 	</target>
 
 	<target name="swc">
-		<compc output="bin/openvv.swc">
-			<include-classes dir="src"
-							 includes="*"
-							 excludes="OVVBeacon.as"/>
+		<compc output="bin/openvv.swc"
+			   include-classes="org.openvv.OVVAsset org.openvv.OVVCheck org.openvv.OVVRenderMeter org.openvv.OVVThrottleType org.openvv.events.OVVEvent">
+			<source-path path-element="src"/>
 		</compc>
 	</target>
 
@@ -29,6 +28,9 @@
 		<delete>
 			<fileset dir="bin-debug"
 					 includes="**/*.swf"
+					 defaultexcludes="false"/>
+			<fileset dir="bin"
+					 includes="**/*"
 					 defaultexcludes="false"/>
 		</delete>
 	</target>
