@@ -39,7 +39,7 @@ package org.openvv
     private var _intervalsInView:Number;
     private var _hasDispatchedDImp:Boolean = false;
 
-    public function OVVAsset()
+    public function OVVAsset(beaconSwfUrl:String)
     {
       if (!ExternalInterface.available)
       {
@@ -50,9 +50,9 @@ package org.openvv
       _id = generateId();
       _viewabilityCheck = new OVVCheck(_id);
 	  
-	  // add SWFs to the page
-	  ExternalInterface.call("eval", new BeaconJS().toString());
-	  ExternalInterface.call("addSWFs", _id);
+	  var source:String = new BeaconJS().toString();
+	  source = source.replace(/OVVID/g, _id).replace("BEACON_SWF_URL", beaconSwfUrl);
+  	  ExternalInterface.call("eval", source);
 	  
       _intervalsInView = 0;
       _impressionTimer = new Timer(IMPRESSION_DELAY);

@@ -23,9 +23,12 @@ public class OVVCheck {
 	private var _results:Object;
 	private var _renderMeter:OVVRenderMeter;
 	private var _throttleState:String;
+	private var _id:String;
 
 	public function OVVCheck(uniqueId:String) 
 	{
+		_id = uniqueId;
+		
 	    if (OVVCheck.externalInterfaceIsAvailable())
 	    {
 			  ExternalInterface.addCallback(uniqueId, flashProbe);
@@ -187,13 +190,8 @@ public class OVVCheck {
 		results['focus'] = _renderMeter.fps > 8;
 	}
 
-	var viewable:Boolean = ExternalInterface.call("isPlayerVisible");
-	
-	// viewable if in view relative to window and flash is rendering the player.
-    if (results['percentViewable'] != null)
-    {
-      results['viewabilityState'] = (results['percentViewable'] >= 50 && results['focus']) ? "viewable" : "notViewable";
-    }
+	var viewable:Boolean = ExternalInterface.call("OpenVV_" + _id + ".isPlayerVisible");
+	results['viewabilityState'] = viewable ? "viewable" : "notViewable";
 
     return results;
   }

@@ -1,120 +1,137 @@
-var SWF_URL = "http://localhost/OVVBeacon.swf";
+var OpenVV_OVVID = (function(){
 
-function addSWFs(playerId)
-{
-	var player = findPlayer(playerId);
+	var id = 'OVVID'; // 'OVVID' is string substituted from AS
+	var beaconsStarted = {};
 
-	if (player === null)
+	function findPlayer()
 	{
-		console.error("Couldn't find player!");
-		return;
-	}
+		var embeds = document.getElementsByTagName("embed");
 
-	var playerLocation = player.getClientRects()[0];
-	var wmode = "direct"; //TODO
-	var BEACON_SIZE = 2; //TODO
-
-	for(var index = 1; index <= 5; index++)
-	{
-		var left, top;
-
-		switch(index)
+		for (var i = 0; i < embeds.length; i++)
 		{
-			case 1: // TOP LEFT
-				left = playerLocation.left;
-				top = playerLocation.top;
-				break;
-
-			case 2: // TOP RIGHT
-				left = playerLocation.left + playerLocation.width - BEACON_SIZE;
-				top = playerLocation.top;
-				break;
-
-			case 3: // CENTER
-				left = playerLocation.left + ((playerLocation.width - BEACON_SIZE) / 2);
-				top = playerLocation.top + ((playerLocation.height - BEACON_SIZE) / 2);
-				break;
-
-			case 4: // BOTTOM LEFT
-				left = playerLocation.left;
-				top = playerLocation.top + playerLocation.height - BEACON_SIZE;
-				break;
-
-			case 5: // BOTTOM RIGHT
-				left = playerLocation.left + playerLocation.width - BEACON_SIZE;
-				top = playerLocation.top + playerLocation.height - BEACON_SIZE;
-				break;
+			if (!!embeds[i][id])
+			{
+				return embeds[i];
+			}
 		}
 
-		var swfContainer = document.createElement("DIV");
-			swfContainer.id = "OVVBeaconContainer" + index;
-			swfContainer.style.position = "absolute";
-			swfContainer.style.zIndex = 99999;
-			swfContainer.style.left = left + "px";
-			swfContainer.style.top = top + "px";
+		var objs = document.getElementsByTagName("object");
 
-		var html =
-			'<object classid="clsid:D27CDB6E-AE6D-11cf-96B8-444553540000" width="' + BEACON_SIZE + '" height="' + BEACON_SIZE + '">' +
-				'<param name="movie" value="http://localhost/OVVBeacon.swf" />' +
-				'<param name="quality" value="low" />' +
-				'<param name="bgcolor" value="#ffffff" />' +
-				'<param name="allowScriptAccess" value="always" />' +
-				'<param name="allowFullScreen" value="false" />' +
-					'<!--[if !IE]>-->' +
-					'<object id="OVVBeacon' + index + '" type="application/x-shockwave-flash" data="http://localhost/OVVBeacon.swf" width="' + BEACON_SIZE + '" height="' + BEACON_SIZE + '">' +
-						'<param name="quality" value="low" />' +
-						'<param name="bgcolor" value="#ff0000" />' +
-						'<param name="allowScriptAccess" value="always" />' +
-						'<param name="allowFullScreen" value="false" />' +
-					'<!--<![endif]-->' +
-			'</object>';
-
-		swfContainer.innerHTML = html;
-		document.body.insertBefore(swfContainer, document.body.firstChild);
-	}
-}
-
-function isPlayerVisible()
-{
-	var visible = 0;
-
-	for(var index = 1; index <= 5; index++)
-	{
-		// console.error('OVVBeacon' + index '.isVisible(): ' + document.getElementById('OVVBeacon' + index).isVisible());
-
-		if(document.getElementById('OVVBeacon' + index).isVisible())
+		for (var i = 0; i < objs.length; i++)
 		{
-			visible += 1;
+			if (!!objs[i][id])
+			{
+				return objs[i];
+			}
 		}
+
+		return null;
 	}
 
-	return visible >= 3;
-}
-
-function findPlayer(id)
-{
-	console.debug("findPlayer('" + id + "')");
-
-	//When IE is detected, some pages only use an embed:
-	var embeds = document.getElementsByTagName("embed");
-
-	for (var i = 0; i < embeds.length; i++)
+	function addSWFs(url)
 	{
-		if (!!embeds[i][id])
+		if(url === "" || url === ("BEACON" + "_SWF_" + "URL"))
 		{
-			return embeds[i];
+			return;
 		}
-	}
 
-	var objs = document.getElementsByTagName("object");
+		var player = findPlayer();
 
-	for (var i = 0; i < objs.length; i++)
-	{
-		if (!!objs[i][id])
+		if (player === null)
 		{
-			return objs[i];
+			console.error("Couldn't find player!");
+			return;
+		}
+
+		var playerLocation = player.getClientRects()[0];
+		var wmode = "direct"; //TODO
+		var BEACON_SIZE = 2; //TODO
+
+		for(var index = 1; index <= 5; index++)
+		{
+			var left, top;
+
+			switch(index)
+			{
+				case 1: // TOP LEFT
+					left = playerLocation.left;
+					top = playerLocation.top;
+					break;
+
+				case 2: // TOP RIGHT
+					left = playerLocation.left + playerLocation.width - BEACON_SIZE;
+					top = playerLocation.top;
+					break;
+
+				case 3: // CENTER
+					left = playerLocation.left + ((playerLocation.width - BEACON_SIZE) / 2);
+					top = playerLocation.top + ((playerLocation.height - BEACON_SIZE) / 2);
+					break;
+
+				case 4: // BOTTOM LEFT
+					left = playerLocation.left;
+					top = playerLocation.top + playerLocation.height - BEACON_SIZE;
+					break;
+
+				case 5: // BOTTOM RIGHT
+					left = playerLocation.left + playerLocation.width - BEACON_SIZE;
+					top = playerLocation.top + playerLocation.height - BEACON_SIZE;
+					break;
+			}
+
+			var swfContainer = document.createElement("DIV");
+				swfContainer.id = "OVVBeaconContainer_" + index + "_" + id;
+				swfContainer.style.position = "absolute";
+				swfContainer.style.zIndex = 99999;
+				swfContainer.style.left = left + "px";
+				swfContainer.style.top = top + "px";
+
+			var html =
+				'<object classid="clsid:D27CDB6E-AE6D-11cf-96B8-444553540000" width="' + BEACON_SIZE + '" height="' + BEACON_SIZE + '">' +
+					'<param name="movie" value="' + url + '?id=' + id + '&index=' + index +'" />' +
+					'<param name="quality" value="low" />' +
+					'<param name="bgcolor" value="#ffffff" />' +
+					'<param name="allowScriptAccess" value="always" />' +
+					'<param name="allowFullScreen" value="false" />' +
+						'<!--[if !IE]>-->' +
+						'<object id="OVVBeacon_' + index + '_' + id + '" type="application/x-shockwave-flash" data="' + url + '?id=' + id + '&index=' + index +'" width="' + BEACON_SIZE + '" height="' + BEACON_SIZE + '">' +
+							'<param name="quality" value="low" />' +
+							'<param name="bgcolor" value="#ff0000" />' +
+							'<param name="allowScriptAccess" value="always" />' +
+							'<param name="allowFullScreen" value="false" />' +
+						'<!--<![endif]-->' +
+				'</object>';
+
+			swfContainer.innerHTML = html;
+			document.body.insertBefore(swfContainer, document.body.firstChild);
 		}
 	}
 
-	return null;
-}
+	function isPlayerVisible()
+	{
+		var visible = 0;
+
+		for(var index = 1; index <= 5; index++)
+		{
+			if(document.getElementById('OVVBeacon_' + index + '_' + id).isVisible())
+			{
+				visible += 1;
+			}
+		}
+
+		return visible >= 3;
+	}
+
+	function beaconStarted(index)
+	{
+		beaconsStarted[index] = true;
+	}
+
+	addSWFs('BEACON_SWF_URL'); // 'BEACON_SWF_URL' is string substituted from AS
+
+	return {
+		isPlayerVisible: isPlayerVisible,
+		beaconStarted: beaconStarted
+	};
+
+})();

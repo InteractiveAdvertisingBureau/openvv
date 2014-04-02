@@ -13,12 +13,17 @@ package org.openvv
 		
 		private var _throttleState:String;
 		private var _renderMeter:OVVRenderMeter;
+		private var _index:int;
+		private var _id:String; 
 		
 		public function OVVBeacon()
 		{
 			super();
 
 			Security.allowDomain("*");
+			
+			_id = loaderInfo.parameters.id;
+			_index = loaderInfo.parameters.index;
 
 			addEventListener(Event.ADDED_TO_STAGE, onAddedToStage);			
 			addEventListener("throttle", onThrottle);
@@ -29,7 +34,11 @@ package org.openvv
 			_renderMeter = new OVVRenderMeter(this);
 
 			ExternalInterface.addCallback("isVisible", isVisible);
-			ExternalInterface.call("console.debug", "Beacon on page!");
+			
+			if(_id && _index)
+			{
+				ExternalInterface.call("OpenVV_" + _id + ".beaconStarted", _index);	
+			}
 
 			var bg:Sprite = new Sprite();
 			var g:Graphics = bg.graphics;
