@@ -68,8 +68,6 @@ public class OVVCheck {
       return { "error": "ExternalInterface not available" };
 
 	
-	var visible:String = ExternalInterface.call("document.getElementById('OVVBeacon1').isVisible()");
-	
 		var js:XML = <script><![CDATA[
 				function a( obfuFn ) {
 					var results = {};
@@ -190,8 +188,12 @@ public class OVVCheck {
 		results['focus'] = _renderMeter.fps > 8;
 	}
 
-	var viewable:Boolean = ExternalInterface.call("OpenVV_" + _id + ".isPlayerVisible");
-	results['viewabilityState'] = viewable ? "viewable" : "notViewable";
+	var isReady:Boolean = ExternalInterface.call("OpenVV_" + _id + ".isReady");
+	if (isReady)
+	{
+		var viewable:Boolean = ExternalInterface.call("OpenVV_" + _id + ".isPlayerVisible");
+		results['viewabilityState'] = viewable ? "viewable" : "notViewable";	
+	}
 
     return results;
   }

@@ -25,8 +25,8 @@ package org.openvv
 
   public class OVVAsset extends EventDispatcher
   {
-    [Embed(source = "/../js/beacon.js", mimeType = "application/octet-stream")]
-    public static const BeaconJS:Class;
+    [Embed(source = "/../js/ovv.js", mimeType = "application/octet-stream")]
+    public static const OpenVVJS:Class;
 	
     private static const VIEWABLE_IMPRESSION_THRESHOLD:Number = 20;
     private static const DISCERNIBLE_IMPRESSION_THRESHOLD:Number = 4;
@@ -50,8 +50,8 @@ package org.openvv
       _id = generateId();
       _viewabilityCheck = new OVVCheck(_id);
 	  
-	  var source:String = new BeaconJS().toString();
-	  source = source.replace(/OVVID/g, _id).replace("BEACON_SWF_URL", beaconSwfUrl);
+	  var source:String = new OpenVVJS().toString();
+	  source = source.replace(/OVVID/g, _id).replace(/BEACON_SWF_URL/g, beaconSwfUrl);
   	  ExternalInterface.call("eval", source);
 	  
       _intervalsInView = 0;

@@ -25,6 +25,7 @@ window.OpenVV_OVVID = (function() {
     }
 
     function addSWFs(url) {
+
         if (url === '' || url === ('BEACON' + '_SWF_' + 'URL')) {
             return;
         }
@@ -36,7 +37,7 @@ window.OpenVV_OVVID = (function() {
         }
 
         var playerLocation = player.getClientRects()[0];
-        var BEACON_SIZE = 20; //TODO
+        var BEACON_SIZE = 1;
 
         for (var index = 1; index <= 5; index++) {
             var left, top;
@@ -99,10 +100,15 @@ window.OpenVV_OVVID = (function() {
     }
 
     function isPlayerVisible() {
+
+        if (!isReady()) {
+            return false;
+        }
+
         var visible = 0;
 
         for (var index = 1; index <= 5; index++) {
-            if (document.getElementById('OVVBeacon_' + index + '_' + id).isVisible()) {
+            if (isOnScreen(getBeacon(index)) && getBeacon(index).isVisible()) {
                 visible += 1;
             }
         }
@@ -110,15 +116,43 @@ window.OpenVV_OVVID = (function() {
         return visible >= 3;
     }
 
+    function isReady() {
+        var ready = 0;
+
+        for (beacon in beaconsStarted) {
+            ready += 1;
+        }
+
+        return ready === 5;
+    }
+
+    function isOnScreen(element) {
+        if (element === null) {
+            return false;
+        }
+
+        var screenWidth = Math.min(document.body.clientWidth, window.innerWidth);
+        var screenHeight = Math.min(document.body.clientHeight, window.innerHeight);
+
+        var objRect = element.getClientRects()[0];
+        return (objRect.top < screenHeight && objRect.bottom > 0 && objRect.left < screenWidth && objRect.right > 0);
+    }
+
+    function getBeacon(index) {
+        return document.getElementById('OVVBeacon_' + index + '_' + id);
+    }
+
     function beaconStarted(index) {
         beaconsStarted[index] = true;
     }
 
-    addSWFs('BEACON_SWF_URL'); // 'BEACON_SWF_URL' is string substituted from AS
+    // 'BEACON_SWF_URL' is string substituted from ActionScript
+    addSWFs('BEACON_SWF_URL');
 
     return {
         isPlayerVisible: isPlayerVisible,
-        beaconStarted: beaconStarted
+        beaconStarted: beaconStarted,
+        isReady: isReady
     };
 
 })();

@@ -1,6 +1,5 @@
 package org.openvv
 {
-	import flash.display.Graphics;
 	import flash.display.Sprite;
 	import flash.events.Event;
 	import flash.external.ExternalInterface;
@@ -9,8 +8,6 @@ package org.openvv
 	[SWF(height="1", width="1", frameRate="24")]
 	public final class OVVBeacon extends Sprite
 	{
-		public var throttleCallback:String;
-
 		private var _throttleState:String;
 		private var _renderMeter:OVVRenderMeter;
 		private var _index:int;
@@ -22,8 +19,8 @@ package org.openvv
 
 			Security.allowDomain("*");
 
-			_id=loaderInfo.parameters.id;
-			_index=loaderInfo.parameters.index;
+			_id = loaderInfo.parameters.id;
+			_index = loaderInfo.parameters.index;
 
 			addEventListener(Event.ADDED_TO_STAGE, onAddedToStage);
 			addEventListener("throttle", onThrottle);
@@ -31,7 +28,7 @@ package org.openvv
 
 		protected function onAddedToStage(event:Event):void
 		{
-			_renderMeter=new OVVRenderMeter(this);
+			_renderMeter = new OVVRenderMeter(this);
 
 			ExternalInterface.addCallback("isVisible", isVisible);
 			ExternalInterface.addCallback("getThrottleState", getThrottleState);
@@ -41,18 +38,9 @@ package org.openvv
 			{
 				ExternalInterface.call("OpenVV_" + _id + ".beaconStarted", _index);
 			}
-
-			var bg:Sprite=new Sprite();
-			var g:Graphics=bg.graphics;
-
-			g.beginFill(0xFF0000, 1.0);
-			g.drawRect(0, 0, stage.stageWidth, stage.stageHeight);
-			g.endFill();
-
-			addChild(bg);
 		}
 
-		public function isVisible(data:*=null):Boolean
+		public function isVisible(data:* = null):Boolean
 		{
 			if (_throttleState != null)
 			{
@@ -64,8 +52,7 @@ package org.openvv
 
 		protected function onThrottle(event:Event):void
 		{
-			_throttleState=event['state'];
-			ExternalInterface.call(throttleCallback, event['state'], event['targetFrameRate']);
+			_throttleState = event['state'];
 		}
 
 		public function getThrottleState():String
