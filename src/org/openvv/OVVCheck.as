@@ -191,7 +191,7 @@ public class OVVCheck {
 	var isReady:Boolean = ExternalInterface.call("OpenVV_" + _id + ".isReady");
 	if (isReady)
 	{
-		var viewable:Boolean = ExternalInterface.call("OpenVV_" + _id + ".isPlayerVisible");
+		var viewable:Boolean = ExternalInterface.call("OpenVV_" + _id + ".isPlayerViewable");
 		results['viewabilityState'] = viewable ? "viewable" : "notViewable";	
 	}
 

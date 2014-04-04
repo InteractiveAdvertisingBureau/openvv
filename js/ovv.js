@@ -3,8 +3,11 @@ window.OpenVV_OVVID = (function() {
     // 'OVVID' is string substituted from AS
     var id = 'OVVID';
     var beaconsStarted = {};
+    var BEACON_SIZE = 1;
+    var lastPlayerLocation;
 
     function findPlayer() {
+
         var embeds = document.getElementsByTagName('embed');
 
         for (var i = 0; i < embeds.length; i++) {
@@ -24,11 +27,45 @@ window.OpenVV_OVVID = (function() {
         return null;
     }
 
-    function addSWFs(url) {
+    function createSWFs(url) {
 
         if (url === '' || url === ('BEACON' + '_SWF_' + 'URL')) {
             return;
         }
+
+        for (var index = 1; index <= 5; index++) {
+
+            var swfContainer = document.createElement('DIV');
+            swfContainer.id = 'OVVBeaconContainer_' + index + '_' + id;
+            swfContainer.style.position = 'absolute';
+            swfContainer.style.zIndex = 99999;
+
+            var html =
+                '<object classid="clsid:D27CDB6E-AE6D-11cf-96B8-444553540000" width="' + BEACON_SIZE + '" height="' + BEACON_SIZE + '">' +
+                '<param name="movie" value="' + url + '?id=' + id + '&index=' + index + '" />' +
+                '<param name="quality" value="low" />' +
+                '<param name="bgcolor" value="#ffffff" />' +
+                '<param name="wmode" value="transparent" />' +
+                '<param name="allowScriptAccess" value="always" />' +
+                '<param name="allowFullScreen" value="false" />' +
+                '<!--[if !IE]>-->' +
+                '<object id="OVVBeacon_' + index + '_' + id + '" type="application/x-shockwave-flash" data="' + url + '?id=' + id + '&index=' + index + '" width="' + BEACON_SIZE + '" height="' + BEACON_SIZE + '">' +
+                '<param name="quality" value="low" />' +
+                '<param name="bgcolor" value="#ff0000" />' +
+                '<param name="wmode" value="transparent" />' +
+                '<param name="allowScriptAccess" value="always" />' +
+                '<param name="allowFullScreen" value="false" />' +
+                '<!--<![endif]-->' +
+                '</object>';
+
+            swfContainer.innerHTML = html;
+            document.body.insertBefore(swfContainer, document.body.firstChild);
+        }
+
+        positionSWFs();
+    }
+
+    function positionSWFs() {
 
         var player = findPlayer();
 
@@ -37,7 +74,15 @@ window.OpenVV_OVVID = (function() {
         }
 
         var playerLocation = player.getClientRects()[0];
-        var BEACON_SIZE = 1;
+
+        // when we don't have an initial position, or the position hasn't changed 
+        if (lastPlayerLocation && (lastPlayerLocation.left === playerLocation.left && lastPlayerLocation.right === playerLocation.right && lastPlayerLocation.top === playerLocation.top && lastPlayerLocation.bottom === playerLocation.bottom)) {
+            // no need to update positions
+            return;
+        }
+
+        // save for next time
+        lastPlayerLocation = playerLocation;
 
         for (var index = 1; index <= 5; index++) {
             var left, top;
@@ -69,41 +114,19 @@ window.OpenVV_OVVID = (function() {
                     break;
             }
 
-            var swfContainer = document.createElement('DIV');
-            swfContainer.id = 'OVVBeaconContainer_' + index + '_' + id;
-            swfContainer.style.position = 'absolute';
-            swfContainer.style.zIndex = 99999;
+            var swfContainer = getBeaconContainer(index)
             swfContainer.style.left = left + 'px';
             swfContainer.style.top = top + 'px';
-
-            var html =
-                '<object classid="clsid:D27CDB6E-AE6D-11cf-96B8-444553540000" width="' + BEACON_SIZE + '" height="' + BEACON_SIZE + '">' +
-                '<param name="movie" value="' + url + '?id=' + id + '&index=' + index + '" />' +
-                '<param name="quality" value="low" />' +
-                '<param name="bgcolor" value="#ffffff" />' +
-                '<param name="wmode" value="transparent" />' +
-                '<param name="allowScriptAccess" value="always" />' +
-                '<param name="allowFullScreen" value="false" />' +
-                '<!--[if !IE]>-->' +
-                '<object id="OVVBeacon_' + index + '_' + id + '" type="application/x-shockwave-flash" data="' + url + '?id=' + id + '&index=' + index + '" width="' + BEACON_SIZE + '" height="' + BEACON_SIZE + '">' +
-                '<param name="quality" value="low" />' +
-                '<param name="bgcolor" value="#ff0000" />' +
-                '<param name="wmode" value="transparent" />' +
-                '<param name="allowScriptAccess" value="always" />' +
-                '<param name="allowFullScreen" value="false" />' +
-                '<!--<![endif]-->' +
-                '</object>';
-
-            swfContainer.innerHTML = html;
-            document.body.insertBefore(swfContainer, document.body.firstChild);
         }
     }
 
-    function isPlayerVisible() {
+    function isPlayerViewable() {
 
-        if (!isReady()) {
+        if (!isReady() || !findPlayer()) {
             return false;
         }
+
+        positionSWFs();
 
         var visible = 0;
 
@@ -142,15 +165,19 @@ window.OpenVV_OVVID = (function() {
         return document.getElementById('OVVBeacon_' + index + '_' + id);
     }
 
+    function getBeaconContainer(index) {
+        return document.getElementById('OVVBeaconContainer_' + index + '_' + id);
+    }
+
     function beaconStarted(index) {
         beaconsStarted[index] = true;
     }
 
     // 'BEACON_SWF_URL' is string substituted from ActionScript
-    addSWFs('BEACON_SWF_URL');
+    createSWFs('BEACON_SWF_URL');
 
     return {
-        isPlayerVisible: isPlayerVisible,
+        isPlayerViewable: isPlayerViewable,
         beaconStarted: beaconStarted,
         isReady: isReady
     };
