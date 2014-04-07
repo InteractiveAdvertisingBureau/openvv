@@ -3,7 +3,7 @@ window.OpenVV_OVVID = (function() {
     // 'OVVID' is string substituted from AS
     var id = 'OVVID';
     var beaconsStarted = {};
-    var BEACON_SIZE = 1;
+    var BEACON_SIZE = 20;
     var lastPlayerLocation;
 
     function findPlayer() {
@@ -131,6 +131,7 @@ window.OpenVV_OVVID = (function() {
         var visible = 0;
 
         for (var index = 1; index <= 5; index++) {
+            console.error('isOnScreen(' + index + ') ' + isOnScreen(getBeacon(index)));
             if (isOnScreen(getBeacon(index)) && getBeacon(index).isVisible()) {
                 visible += 1;
             }
@@ -151,13 +152,14 @@ window.OpenVV_OVVID = (function() {
 
     function isOnScreen(element) {
         if (element === null) {
+            console.error('element === null');
             return false;
         }
 
-        var screenWidth = Math.min(document.body.clientWidth, window.innerWidth);
-        var screenHeight = Math.min(document.body.clientHeight, window.innerHeight);
-
+        var screenWidth = Math.max(document.body.clientWidth, window.innerWidth);
+        var screenHeight = Math.max(document.body.clientHeight, window.innerHeight);
         var objRect = element.getClientRects()[0];
+
         return (objRect.top < screenHeight && objRect.bottom > 0 && objRect.left < screenWidth && objRect.right > 0);
     }
 
