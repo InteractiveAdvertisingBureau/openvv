@@ -123,6 +123,7 @@ window.OpenVV_OVVID = (function() {
     function isPlayerViewable() {
 
         if (!isReady() || !findPlayer()) {
+            console.error("isPlayerViewable(): false");
             return false;
         }
 
@@ -136,6 +137,8 @@ window.OpenVV_OVVID = (function() {
                 visible += 1;
             }
         }
+
+        console.error("isPlayerViewable(): " + (visible >= 3));
 
         return visible >= 3;
     }

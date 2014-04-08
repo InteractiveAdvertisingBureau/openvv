@@ -25,7 +25,7 @@ package org.openvv
 
   public class OVVAsset extends EventDispatcher
   {
-    [Embed(source = "/../js/ovv.js", mimeType = "application/octet-stream")]
+    [Embed(source = "/../js/OVVAsset.js", mimeType = "application/octet-stream")]
     public static const OpenVVJS:Class;
 	
     private static const VIEWABLE_IMPRESSION_THRESHOLD:Number = 20;
