@@ -20,6 +20,7 @@ package org.openvv
   import flash.events.TimerEvent;
   import flash.external.ExternalInterface;
   import flash.utils.Timer;
+  import flash.utils.setTimeout;
   
   import org.openvv.events.OVVEvent;
 
@@ -58,7 +59,14 @@ package org.openvv
       _impressionTimer = new Timer(IMPRESSION_DELAY);
       _impressionTimer.addEventListener(TimerEvent.TIMER, timerHandler);
       _impressionTimer.start();
+	  
+	  setTimeout(dispose, 5 * 1000);
     }
+	
+	public function dispose():void
+	{
+		ExternalInterface.call("OpenVV_" + _id + ".dispose");
+	}
 
     public function checkViewability():Object
     {

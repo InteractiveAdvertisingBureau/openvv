@@ -3,7 +3,7 @@ window.OpenVV_OVVID = (function() {
     // 'OVVID' is string substituted from AS
     var id = 'OVVID';
     var beaconsStarted = {};
-    var BEACON_SIZE = 20;
+    var BEACON_SIZE = 1;
     var lastPlayerLocation;
 
     function findPlayer() {
@@ -123,7 +123,6 @@ window.OpenVV_OVVID = (function() {
     function isPlayerViewable() {
 
         if (!isReady() || !findPlayer()) {
-            console.error("isPlayerViewable(): false");
             return false;
         }
 
@@ -132,14 +131,10 @@ window.OpenVV_OVVID = (function() {
         var visible = 0;
 
         for (var index = 1; index <= 5; index++) {
-            console.error('isOnScreen(' + index + ') ' + isOnScreen(getBeacon(index)));
             if (isOnScreen(getBeacon(index)) && getBeacon(index).isVisible()) {
                 visible += 1;
             }
         }
-
-        console.error("isPlayerViewable(): " + (visible >= 3));
-
         return visible >= 3;
     }
 
@@ -153,9 +148,18 @@ window.OpenVV_OVVID = (function() {
         return ready === 5;
     }
 
+    function dispose() {
+        for (var index = 1; index <= 5; index++) {
+            var container = getBeaconContainer(index);
+            if (container) {
+                delete beaconsStarted[index];
+                container.parentElement.removeChild(container);
+            }
+        }
+    }
+
     function isOnScreen(element) {
         if (element === null) {
-            console.error('element === null');
             return false;
         }
 
@@ -184,7 +188,8 @@ window.OpenVV_OVVID = (function() {
     return {
         isPlayerViewable: isPlayerViewable,
         beaconStarted: beaconStarted,
-        isReady: isReady
+        isReady: isReady,
+        dispose: dispose
     };
 
 })();
