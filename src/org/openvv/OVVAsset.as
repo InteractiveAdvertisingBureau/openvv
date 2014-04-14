@@ -59,8 +59,6 @@ package org.openvv
       _impressionTimer = new Timer(IMPRESSION_DELAY);
       _impressionTimer.addEventListener(TimerEvent.TIMER, timerHandler);
       _impressionTimer.start();
-	  
-	  setTimeout(dispose, 5 * 1000);
     }
 	
 	public function dispose():void
