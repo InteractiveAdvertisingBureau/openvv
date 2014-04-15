@@ -37,7 +37,7 @@ package org.openvv
 
 			if (_id && _index)
 			{
-				ExternalInterface.call("$ovv.ovvAsset.beaconStarted", _index);
+				ExternalInterface.call("$ovv.getAdById('" + _id + "')" + ".beaconStarted", _index);
 			}
 			
 //			if (true)

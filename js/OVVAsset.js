@@ -1,3 +1,31 @@
+function OVV() {
+    var ads = {};
+
+    this.addAd = function(ovvAsset) {
+        if (!ads.hasOwnProperty(ovvAsset.getId())) {
+            ads[ovvAsset.getId()] = ovvAsset;
+        }
+    }
+
+    this.removeAd = function(ovvAsset) {
+        delete ads[ovvAsset.getId()];
+    }
+
+    this.getAdById = function(id) {
+        return ads[id];
+    }
+
+    this.getAds = function() {
+        var copy = {};
+        for (var id in ads) {
+            if (ads.hasOwnProperty(id)) {
+                copy[id] = ads[id];
+            }
+        }
+        return copy;
+    }
+}
+
 /**
  * Represents an Asset which OVV is going to determine the viewability of
  * @constructor
@@ -78,7 +106,7 @@ function OVVAsset(uid) {
         }
 
         positionSWFs();
-    }
+    };
 
     this.isPlayerViewable = function() {
 
@@ -96,11 +124,11 @@ function OVVAsset(uid) {
             }
         }
         return visible >= 3;
-    }
+    };
 
     this.beaconStarted = function(index) {
         beaconsStarted[index] = true;
-    }
+    };
 
     this.isReady = function() {
         var ready = 0;
@@ -110,7 +138,7 @@ function OVVAsset(uid) {
         }
 
         return ready === 5;
-    }
+    };
 
     this.dispose = function() {
         for (var index = 1; index <= 5; index++) {
@@ -120,6 +148,12 @@ function OVVAsset(uid) {
                 container.parentElement.removeChild(container);
             }
         }
+
+        window.$ovv.removeAd(this);
+    };
+
+    this.getId = function() {
+        return id;
     }
 
     // PRIVATE FUNCTIONS
@@ -143,7 +177,7 @@ function OVVAsset(uid) {
         }
 
         return null;
-    }
+    };
 
     var positionSWFs = function() {
 
@@ -198,7 +232,7 @@ function OVVAsset(uid) {
             swfContainer.style.left = left + 'px';
             swfContainer.style.top = top + 'px';
         }
-    }
+    };
 
     var isOnScreen = function(element) {
         if (element === null) {
@@ -210,26 +244,22 @@ function OVVAsset(uid) {
         var objRect = element.getClientRects()[0];
 
         return (objRect.top < screenHeight && objRect.bottom > 0 && objRect.left < screenWidth && objRect.right > 0);
-    }
+    };
 
     var getBeacon = function(index) {
         return document.getElementById('OVVBeacon_' + index + '_' + id);
-    }
+    };
 
     var getBeaconContainer = function(index) {
         return document.getElementById('OVVBeaconContainer_' + index + '_' + id);
-    }
+    };
 
     // 'BEACON_SWF_URL' is string substituted from ActionScript
     createSWFs('BEACON_SWF_URL');
 }
 
 // initialize the OVV object if it doesn't exist
-window.$ovv = window.$ovv || {};
+window.$ovv = window.$ovv || new OVV();
 
 // 'OVVID' is string substituted from AS
-//TODO: Only allows for 1 ovvAsset per page
-window.$ovv.ovvAsset = window.$ovv.ovvAsset || new OVVAsset('OVVID');
-
-// 'BEACON_SWF_URL' is string substituted from ActionScript
-// window.$ovv.ovvAsset.createSWFs('BEACON_SWF_URL');
+window.$ovv.addAd(new OVVAsset('OVVID'));
