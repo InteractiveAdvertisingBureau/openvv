@@ -1,5 +1,6 @@
 package org.openvv
 {
+	import flash.display.Graphics;
 	import flash.display.Sprite;
 	import flash.events.Event;
 	import flash.external.ExternalInterface;
@@ -36,7 +37,19 @@ package org.openvv
 
 			if (_id && _index)
 			{
-				ExternalInterface.call("OpenVV_" + _id + ".beaconStarted", _index);
+				ExternalInterface.call("$ovv.ovvAsset.beaconStarted", _index);
+			}
+			
+			if (true)
+			{
+				var bg:Sprite = new Sprite();
+				var g:Graphics = bg.graphics;
+				
+				g.beginFill(0xFF0000, 1.0);
+				g.drawRect(0, 0, stage.stageWidth, stage.stageHeight);
+				g.endFill();
+				
+				addChild(bg);	
 			}
 		}
 

@@ -1,33 +1,49 @@
-window.OpenVV_OVVID = (function() {
+/**
+ * Represents an Asset which OVV is going to determine the viewability of
+ * @constructor
+ * @param {string} uid - The unique identifier of this asset
+ */
+function OVVAsset(uid) {
 
-    // 'OVVID' is string substituted from AS
-    var id = 'OVVID';
+    //
+    // PRIVATE ATTRIBUTES
+    //
+
+    /**
+     * the id of the ad that this asset is associatied with
+     * @type {!string}
+     */
+    var id = uid;
+
+    /**
+     * Stores the indices of the beacons that are on the page as the key, each associated with a value of true
+     * @type {!Object.<number, boolean>}
+     */
     var beaconsStarted = {};
-    var BEACON_SIZE = 1;
+
+    /**
+     * The height and width of the beacons on the page (1 for prod, greater for visibilty/testing)
+     * @type {!number}
+     */
+    var BEACON_SIZE = 20;
+
+    /**
+     * The last known location of the player on the page
+     * @type {ClientRect}
+     */
     var lastPlayerLocation;
 
-    function findPlayer() {
+    //
+    // PUBLIC FUNCTIONS
+    //
 
-        var embeds = document.getElementsByTagName('embed');
+    /**
+     * Creates the 5 SWFs and adds them to the DOM
+     * @see {@link positionSWFs}
+     */
+    var createSWFs = function(url) {
 
-        for (var i = 0; i < embeds.length; i++) {
-            if (embeds[i][id]) {
-                return embeds[i];
-            }
-        }
-
-        var objs = document.getElementsByTagName('object');
-
-        for (var i = 0; i < objs.length; i++) {
-            if (objs[i][id]) {
-                return objs[i];
-            }
-        }
-
-        return null;
-    }
-
-    function createSWFs(url) {
+        console.error('createSWFS(' + url + ')');
 
         if (url === '' || url === ('BEACON' + '_SWF_' + 'URL')) {
             return;
@@ -37,6 +53,9 @@ window.OpenVV_OVVID = (function() {
 
             var swfContainer = document.createElement('DIV');
             swfContainer.id = 'OVVBeaconContainer_' + index + '_' + id;
+
+            console.error('swfContainer.id ' + swfContainer.id);
+
             swfContainer.style.position = 'absolute';
             swfContainer.style.zIndex = 99999;
 
@@ -65,7 +84,73 @@ window.OpenVV_OVVID = (function() {
         positionSWFs();
     }
 
-    function positionSWFs() {
+    this.isPlayerViewable = function() {
+
+        if (!this.isReady() || !findPlayer()) {
+            return false;
+        }
+
+        positionSWFs();
+
+        var visible = 0;
+
+        for (var index = 1; index <= 5; index++) {
+            if (isOnScreen(getBeacon(index)) && getBeacon(index).isVisible()) {
+                visible += 1;
+            }
+        }
+        return visible >= 3;
+    }
+
+    this.beaconStarted = function(index) {
+        console.error('beaconStarted(' + index + ')');
+        beaconsStarted[index] = true;
+    }
+
+    this.isReady = function() {
+        var ready = 0;
+
+        for (beacon in beaconsStarted) {
+            ready += 1;
+        }
+
+        return ready === 5;
+    }
+
+    this.dispose = function() {
+        for (var index = 1; index <= 5; index++) {
+            var container = getBeaconContainer(index);
+            if (container) {
+                delete beaconsStarted[index];
+                container.parentElement.removeChild(container);
+            }
+        }
+    }
+
+    // PRIVATE FUNCTIONS
+
+    var findPlayer = function() {
+
+        var embeds = document.getElementsByTagName('embed');
+
+        for (var i = 0; i < embeds.length; i++) {
+            if (embeds[i][id]) {
+                return embeds[i];
+            }
+        }
+
+        var objs = document.getElementsByTagName('object');
+
+        for (var i = 0; i < objs.length; i++) {
+            if (objs[i][id]) {
+                return objs[i];
+            }
+        }
+
+        return null;
+    }
+
+    var positionSWFs = function() {
 
         var player = findPlayer();
 
@@ -120,45 +205,7 @@ window.OpenVV_OVVID = (function() {
         }
     }
 
-    function isPlayerViewable() {
-
-        if (!isReady() || !findPlayer()) {
-            return false;
-        }
-
-        positionSWFs();
-
-        var visible = 0;
-
-        for (var index = 1; index <= 5; index++) {
-            if (isOnScreen(getBeacon(index)) && getBeacon(index).isVisible()) {
-                visible += 1;
-            }
-        }
-        return visible >= 3;
-    }
-
-    function isReady() {
-        var ready = 0;
-
-        for (beacon in beaconsStarted) {
-            ready += 1;
-        }
-
-        return ready === 5;
-    }
-
-    function dispose() {
-        for (var index = 1; index <= 5; index++) {
-            var container = getBeaconContainer(index);
-            if (container) {
-                delete beaconsStarted[index];
-                container.parentElement.removeChild(container);
-            }
-        }
-    }
-
-    function isOnScreen(element) {
+    var isOnScreen = function(element) {
         if (element === null) {
             return false;
         }
@@ -170,26 +217,24 @@ window.OpenVV_OVVID = (function() {
         return (objRect.top < screenHeight && objRect.bottom > 0 && objRect.left < screenWidth && objRect.right > 0);
     }
 
-    function getBeacon(index) {
+    var getBeacon = function(index) {
         return document.getElementById('OVVBeacon_' + index + '_' + id);
     }
 
-    function getBeaconContainer(index) {
+    var getBeaconContainer = function(index) {
         return document.getElementById('OVVBeaconContainer_' + index + '_' + id);
-    }
-
-    function beaconStarted(index) {
-        beaconsStarted[index] = true;
     }
 
     // 'BEACON_SWF_URL' is string substituted from ActionScript
     createSWFs('BEACON_SWF_URL');
+}
 
-    return {
-        isPlayerViewable: isPlayerViewable,
-        beaconStarted: beaconStarted,
-        isReady: isReady,
-        dispose: dispose
-    };
+// initialize the OVV object if it doesn't exist
+window.$ovv = window.$ovv || {};
 
-})();
+// 'OVVID' is string substituted from AS
+//TODO: Only allows for 1 ovvAsset per page
+window.$ovv.ovvAsset = window.$ovv.ovvAsset || new OVVAsset('OVVID');
+
+// 'BEACON_SWF_URL' is string substituted from ActionScript
+// window.$ovv.ovvAsset.createSWFs('BEACON_SWF_URL');

@@ -100,10 +100,10 @@ public class OVVCheck {
 		results['focus'] = _renderMeter.fps > 8;
 	}
 
-	var isReady:Boolean = ExternalInterface.call("OpenVV_" + _id + ".isReady");
+	var isReady:Boolean = ExternalInterface.call("$ovv.ovvAsset.isReady", _id);
 	if (isReady)
 	{
-		var viewable:Boolean = ExternalInterface.call("OpenVV_" + _id + ".isPlayerViewable");
+		var viewable:Boolean = ExternalInterface.call("$ovv.ovvAsset.isPlayerViewable");
 		results['viewabilityState'] = viewable ? "viewable" : "notViewable";	
 	}
 

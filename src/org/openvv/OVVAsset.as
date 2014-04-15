@@ -63,7 +63,7 @@ package org.openvv
 	
 	public function dispose():void
 	{
-		ExternalInterface.call("OpenVV_" + _id + ".dispose");
+		ExternalInterface.call("$ovv.ovvAsset.dispose");
 	}
 
     public function checkViewability():Object
