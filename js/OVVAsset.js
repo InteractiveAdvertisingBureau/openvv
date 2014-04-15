@@ -43,8 +43,6 @@ function OVVAsset(uid) {
      */
     var createSWFs = function(url) {
 
-        console.error('createSWFS(' + url + ')');
-
         if (url === '' || url === ('BEACON' + '_SWF_' + 'URL')) {
             return;
         }
@@ -53,8 +51,6 @@ function OVVAsset(uid) {
 
             var swfContainer = document.createElement('DIV');
             swfContainer.id = 'OVVBeaconContainer_' + index + '_' + id;
-
-            console.error('swfContainer.id ' + swfContainer.id);
 
             swfContainer.style.position = 'absolute';
             swfContainer.style.zIndex = 99999;
@@ -103,7 +99,6 @@ function OVVAsset(uid) {
     }
 
     this.beaconStarted = function(index) {
-        console.error('beaconStarted(' + index + ')');
         beaconsStarted[index] = true;
     }
 
