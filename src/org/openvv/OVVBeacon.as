@@ -40,17 +40,17 @@ package org.openvv
 				ExternalInterface.call("$ovv.ovvAsset.beaconStarted", _index);
 			}
 			
-			if (true)
-			{
-				var bg:Sprite = new Sprite();
-				var g:Graphics = bg.graphics;
-				
-				g.beginFill(0xFF0000, 1.0);
-				g.drawRect(0, 0, stage.stageWidth, stage.stageHeight);
-				g.endFill();
-				
-				addChild(bg);	
-			}
+//			if (true)
+//			{
+//				var bg:Sprite = new Sprite();
+//				var g:Graphics = bg.graphics;
+//				
+//				g.beginFill(0xFF0000, 1.0);
+//				g.drawRect(0, 0, stage.stageWidth, stage.stageHeight);
+//				g.endFill();
+//				
+//				addChild(bg);	
+//			}
 		}
 
 		public function isVisible(data:* = null):Boolean

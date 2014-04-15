@@ -25,7 +25,7 @@ function OVVAsset(uid) {
      * The height and width of the beacons on the page (1 for prod, greater for visibilty/testing)
      * @type {!number}
      */
-    var BEACON_SIZE = 20;
+    var BEACON_SIZE = 1;
 
     /**
      * The last known location of the player on the page
