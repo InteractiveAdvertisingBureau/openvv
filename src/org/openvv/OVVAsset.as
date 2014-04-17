@@ -16,18 +16,19 @@
  */
 package org.openvv
 {
+  import flash.display.Sprite;
+  import flash.events.Event;
   import flash.events.EventDispatcher;
   import flash.events.TimerEvent;
   import flash.external.ExternalInterface;
   import flash.utils.Timer;
-  import flash.utils.setTimeout;
   
   import org.openvv.events.OVVEvent;
 
   public class OVVAsset extends EventDispatcher
   {
-    [Embed(source = "/../js/OVVAsset.js", mimeType = "application/octet-stream")]
-    public static const OpenVVJS:Class;
+	[Embed(source = "/../js/OVVAsset.js", mimeType = "application/octet-stream")]
+    public static const OVVAssetJSSource:Class;
 	
     private static const VIEWABLE_IMPRESSION_THRESHOLD:Number = 20;
     private static const DISCERNIBLE_IMPRESSION_THRESHOLD:Number = 4;
@@ -35,46 +36,119 @@ package org.openvv
     private static const VIEWABLE_AREA_THRESHOLD:Number = 50;
 
     private var _id:String;
-    private var _viewabilityCheck:OVVCheck;
     private var _impressionTimer:Timer;
     private var _intervalsInView:Number;
     private var _hasDispatchedDImp:Boolean = false;
+	private var _renderMeter:OVVRenderMeter;
+	private var _throttleState:String;
 
+	private var _sprite:Sprite;
+	
     public function OVVAsset(beaconSwfUrl:String)
     {
-      if (!ExternalInterface.available)
-      {
-        raiseError("ExternalInterface unavailable");
-        return;
-      }
-
-      _id = generateId();
-      _viewabilityCheck = new OVVCheck(_id);
+	  if (!externalInterfaceIsAvailable())
+	  {
+		  dispatchEvent(new OVVEvent(OVVEvent.OVVError, {"message":"ExternalInterface unavailable"}));
+		  return;
+	  }
 	  
-	  var source:String = new OpenVVJS().toString();
-	  source = source.replace(/OVVID/g, _id).replace(/BEACON_SWF_URL/g, beaconSwfUrl);
-  	  ExternalInterface.call("eval", source);
+	  _id = "ovv" + Math.floor(Math.random() * 1000000000).toString();
+		  
+	  ExternalInterface.addCallback(_id, flashProbe);
+	  ExternalInterface.addCallback("ready", ready);
+		  
+	  _sprite = new Sprite();
+	  _renderMeter = new OVVRenderMeter(_sprite);
+	  _sprite.addEventListener("throttle", throttleHandler);
 	  
-      _intervalsInView = 0;
-      _impressionTimer = new Timer(IMPRESSION_DELAY);
-      _impressionTimer.addEventListener(TimerEvent.TIMER, timerHandler);
-      _impressionTimer.start();
+	  var ovvAssetSource:String = new OVVAssetJSSource().toString();
+	  ovvAssetSource = ovvAssetSource.replace(/OVVID/g, _id).replace(/BEACON_SWF_URL/g, beaconSwfUrl);
+	  ExternalInterface.call("eval", ovvAssetSource);
     }
+	
+	public function ready():void
+	{
+		if (!_impressionTimer)
+		{
+			_intervalsInView = 0;
+			
+			_impressionTimer = new Timer(IMPRESSION_DELAY);
+			_impressionTimer.addEventListener(TimerEvent.TIMER, timerHandler);
+			_impressionTimer.start();	
+		}
+	}
+	
+	//Callback function attached to HTML Object to identify it:
+	public function flashProbe( someData:* ):void 
+	{
+		return;
+	}
+	
+	public function checkViewability():Object 
+	{
+		if (!externalInterfaceIsAvailable())
+		{	
+			return { "error": "ExternalInterface unavailable" };
+		}
+		
+		var results:Object = ExternalInterface.call("$ovv.getAdById('" + _id + "')" + ".checkViewability");
+		
+		// error? all done
+		if (results['error'])
+		{
+			return results;
+		}
+		
+		if (_throttleState != null)
+		{
+			results['focus'] =  _throttleState = OVVThrottleType.RESUME; 
+		}
+		else
+		{
+			results['focus'] = _renderMeter.fps > 8;
+		}
+		
+		return results;
+	}
+	
+	public static function externalInterfaceIsAvailable():Boolean
+	{
+		var isEIAvailable:Boolean = false;
+		
+		try
+		{
+			isEIAvailable = !!ExternalInterface.call("function() { return 1; }");
+		}
+		catch (e:SecurityError) 
+		{
+			// ignore
+		}
+		
+		return isEIAvailable;
+	}
 	
 	public function dispose():void
 	{
 		ExternalInterface.call("$ovv.getAdById('" + _id + "')" + ".dispose");
+		
+		if(_impressionTimer)
+		{
+			_impressionTimer.stop();
+			_impressionTimer.removeEventListener(TimerEvent.TIMER, timerHandler);
+			_impressionTimer = null;
+		}
+
+		if(_sprite)
+		{
+			_sprite.removeEventListener("throttle", throttleHandler);
+			_sprite = null;	
+		}
+		
+		if(_renderMeter)
+		{
+			_renderMeter = null; 
+		}
 	}
-
-    public function checkViewability():Object
-    {
-		var results:Object = _viewabilityCheck.checkViewability(_id);
-
-      	if (!!results.error)
-        	raiseError(results.error);
-
-      	return results;
-    }
 
     // Every 250ms, check to see if asset is visible
     // Count consecutive viewable results.  If asset not visible, reset count
@@ -83,43 +157,26 @@ package org.openvv
     {
 		var results:Object = checkViewability();
 		
-      if (results['viewabilityState'] == "viewable")
-        _intervalsInView++;
-      else
-        _intervalsInView = 0;
+		_intervalsInView = (results['viewabilityState'] == "viewable") ? _intervalsInView + 1 : 0;
 
-      if(_intervalsInView >= DISCERNIBLE_IMPRESSION_THRESHOLD && !_hasDispatchedDImp)
-      {
-        _hasDispatchedDImp = true;
-        dispatchEvent(new OVVEvent(OVVEvent.OVVDiscernibleImpression));
-      }
-      else if (_intervalsInView >= VIEWABLE_IMPRESSION_THRESHOLD)
-      {
-        raiseImpression();
-        _impressionTimer.stop();
-      }
+  		if(_intervalsInView >= DISCERNIBLE_IMPRESSION_THRESHOLD && !_hasDispatchedDImp)
+  		{
+			_hasDispatchedDImp = true;
+			dispatchEvent(new OVVEvent(OVVEvent.OVVDiscernibleImpression));
+  		}
+  		else if (_intervalsInView >= VIEWABLE_IMPRESSION_THRESHOLD)
+  		{
+  			dispatchEvent(new OVVEvent(OVVEvent.OVVImpression));
+			_impressionTimer.stop();
+		}
     }
-
-    private function generateId():String
-    {
-      return "ovv" + Math.floor(Math.random()*1000000000).toString();
-    }
-
-    private function raiseImpression():void
-    {
-      dispatchEvent(new OVVEvent(OVVEvent.OVVImpression));
-    }
-
-    private function raiseLog(msg:String):void
-    {
-      var d:* = {"message":msg};
-      dispatchEvent(new OVVEvent(OVVEvent.OVVLog, d));
-    }
-
-    private function raiseError(msg:String):void
-    {
-      var d:* = {"message":msg};
-      dispatchEvent(new OVVEvent(OVVEvent.OVVError, d));
-    }
+	
+	protected function throttleHandler(event:Event):void
+	{
+		if(event.hasOwnProperty('state'))
+		{
+			_throttleState = event['state'];
+		}
+	}
   }
 }
