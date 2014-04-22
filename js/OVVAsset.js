@@ -1,4 +1,21 @@
 /**
+ * Copyright (c) 2013 Open VideoView
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated
+ * documentation files (the "Software"), to deal in the Software without restriction, including without limitation
+ * the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and
+ * to permit persons to whom the Software is furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all copies or substantial portions of
+ * the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO
+ * THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
+ * TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+ */
+
+/**
  * A container for all OpenVV instances running on the page
  * @constructor
  */
@@ -349,32 +366,30 @@ function OVVAsset(uid) {
         lastPlayerLocation = playerLocation;
 
         for (var index = 1; index <= 5; index++) {
-            var left, top;
+            var left = playerLocation.left + document.body.scrollLeft;
+            var top = playerLocation.top + document.body.scrollTop;
 
             switch (index) {
                 case 1: // TOP LEFT
-                    left = playerLocation.left;
-                    top = playerLocation.top;
+                    // nothing to do, already at default position
                     break;
 
                 case 2: // TOP RIGHT
-                    left = playerLocation.left + playerLocation.width - BEACON_SIZE;
-                    top = playerLocation.top;
+                    left += playerLocation.width - BEACON_SIZE;
                     break;
 
                 case 3: // CENTER
-                    left = playerLocation.left + ((playerLocation.width - BEACON_SIZE) / 2);
-                    top = playerLocation.top + ((playerLocation.height - BEACON_SIZE) / 2);
+                    left += (playerLocation.width - BEACON_SIZE) / 2;
+                    top += (playerLocation.height - BEACON_SIZE) / 2;
                     break;
 
                 case 4: // BOTTOM LEFT
-                    left = playerLocation.left;
-                    top = playerLocation.top + playerLocation.height - BEACON_SIZE;
+                    top += playerLocation.height - BEACON_SIZE;
                     break;
 
                 case 5: // BOTTOM RIGHT
-                    left = playerLocation.left + playerLocation.width - BEACON_SIZE;
-                    top = playerLocation.top + playerLocation.height - BEACON_SIZE;
+                    left += playerLocation.width - BEACON_SIZE;
+                    top += playerLocation.height - BEACON_SIZE;
                     break;
             }
 
