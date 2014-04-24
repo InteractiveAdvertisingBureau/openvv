@@ -84,28 +84,36 @@ package org.openvv
 		return;
 	}
 	
-	public function checkViewability():Object 
+	public function checkViewability():OVVCheck 
 	{
 		if (!externalInterfaceIsAvailable())
 		{	
-			return { "error": "ExternalInterface unavailable" };
+			return new OVVCheck({ "error": "ExternalInterface unavailable" });
 		}
 		
-		var results:Object = ExternalInterface.call("$ovv.getAdById('" + _id + "')" + ".checkViewability");
+		var jsResults:Object = ExternalInterface.call("$ovv.getAdById('" + _id + "')" + ".checkViewability");
+		var results:OVVCheck = new OVVCheck(jsResults);
+		
+		var visibles:Object = {};
+		for (var index:int = 1; index <= 9; index++)
+		{
+			var js:String = "document.getElementById('OVVBeacon_" + index + "_" + _id + "').isVisible";
+			visibles[String(index)] = ExternalInterface.call(js); 	
+		}
 		
 		// error? all done
-		if (results['error'])
+		if (results.error)
 		{
 			return results;
 		}
 		
 		if (_throttleState != null)
 		{
-			results['focus'] =  _throttleState = OVVThrottleType.RESUME; 
+			results.focus =  _throttleState = OVVThrottleType.RESUME; 
 		}
 		else
 		{
-			results['focus'] = _renderMeter.fps > 8;
+			results.focus = _renderMeter.fps > 8;
 		}
 		
 		return results;

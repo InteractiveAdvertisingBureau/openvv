@@ -109,6 +109,13 @@ function OVVAsset(uid) {
      */
     var player;
 
+
+    /**
+     * The total number of beacons being used
+     * @type {number}
+     */
+    const TOTAL_BEACONS = 9;
+
     //
     // PUBLIC FUNCTIONS
     //
@@ -134,12 +141,13 @@ function OVVAsset(uid) {
 
         var visible = 0;
 
-        for (var index = 1; index <= 5; index++) {
+        for (var index = 1; index <= TOTAL_BEACONS; index++) {
             if (isOnScreen(getBeacon(index)) && getBeacon(index).isVisible()) {
                 visible += 1;
             }
         }
-        return visible >= 3;
+
+        return visible >= Math.floor(TOTAL_BEACONS / 2);
     };
 
     this.checkViewability = function() {
@@ -246,7 +254,7 @@ function OVVAsset(uid) {
             ready += 1;
         }
 
-        return ready === 5;
+        return ready === TOTAL_BEACONS;
     };
 
     /**
@@ -254,7 +262,7 @@ function OVVAsset(uid) {
      */
     this.dispose = function() {
 
-        for (var index = 1; index <= 5; index++) {
+        for (var index = 1; index <= TOTAL_BEACONS; index++) {
             var container = getBeaconContainer(index);
             if (container) {
                 delete beaconsStarted[index];
@@ -275,7 +283,7 @@ function OVVAsset(uid) {
     // PRIVATE FUNCTIONS
 
     /**
-     * Creates the 5 SWFs and adds them to the DOM
+     * Creates the SWFs and adds them to the DOM
      * @param {string} The URL of the beacon SWFs
      * @see {@link positionSWFs}
      */
@@ -285,7 +293,7 @@ function OVVAsset(uid) {
             return;
         }
 
-        for (var index = 1; index <= 5; index++) {
+        for (var index = 1; index <= TOTAL_BEACONS; index++) {
 
             var swfContainer = document.createElement('DIV');
             swfContainer.id = 'OVVBeaconContainer_' + index + '_' + id;
@@ -365,7 +373,7 @@ function OVVAsset(uid) {
         // save for next time
         lastPlayerLocation = playerLocation;
 
-        for (var index = 1; index <= 5; index++) {
+        for (var index = 1; index <= TOTAL_BEACONS; index++) {
             var left = playerLocation.left + document.body.scrollLeft;
             var top = playerLocation.top + document.body.scrollTop;
 
@@ -390,6 +398,26 @@ function OVVAsset(uid) {
                 case 5: // BOTTOM RIGHT
                     left += playerLocation.width - BEACON_SIZE;
                     top += playerLocation.height - BEACON_SIZE;
+                    break;
+
+                case 6: // INNER TOP LEFT 
+                    left += (playerLocation.width * .25) - (BEACON_SIZE / 2);
+                    top += (playerLocation.height * .25) - (BEACON_SIZE / 2);
+                    break;
+
+                case 7: // INNER TOP RIGHT
+                    left += (playerLocation.width * .75) - (BEACON_SIZE / 2);
+                    top += (playerLocation.height * .25) - (BEACON_SIZE / 2);
+                    break;
+
+                case 8: // INNER BOTTOM LEFT
+                    left += (playerLocation.width * .25) - (BEACON_SIZE / 2);
+                    top += (playerLocation.height * .75) - (BEACON_SIZE / 2);
+                    break;
+
+                case 9: // INNER BOTTOM RIGHT
+                    left += (playerLocation.width * .75) - (BEACON_SIZE / 2);
+                    top += (playerLocation.height * .75) - (BEACON_SIZE / 2);
                     break;
             }
 

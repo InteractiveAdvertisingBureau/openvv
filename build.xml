@@ -19,7 +19,7 @@
 
 	<target name="swc">
 		<compc output="bin/openvv.swc"
-			   include-classes="org.openvv.OVVAsset org.openvv.OVVRenderMeter org.openvv.OVVThrottleType org.openvv.events.OVVEvent">
+			   include-classes="org.openvv.OVVAsset org.openvv.OVVCheck org.openvv.OVVRenderMeter org.openvv.OVVThrottleType org.openvv.events.OVVEvent">
 			<source-path path-element="src"/>
 		</compc>
 	</target>
