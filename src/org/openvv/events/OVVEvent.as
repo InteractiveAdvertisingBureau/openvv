@@ -19,17 +19,48 @@ package org.openvv.events
   import flash.events.Event;
   public class OVVEvent extends Event
   {
+	/**
+	 * Events of this type represent 1 second of continuous viewability has occurred
+	 */	  
     public static const OVVDiscernibleImpression:String = "OVVDiscernibleImpression";
-    public static const OVVImpression:String = "OVVImpression";
+	
+	/**
+	 * Events of this type represent 5 seconds of continuous viewability have occurred
+	 */    
+	public static const OVVImpression:String = "OVVImpression";
+	
+	/**
+	 * Events of this type represent informational logging messages
+	 */	
     public static const OVVLog:String = "OVVLog";
+	
+	/**
+	 * Events of this type represent an error that has occurred  
+	 */	
     public static const OVVError:String = "OVVError";
 
+	/**
+	 * An optional object containing additional information
+	 */	
     private var _data:Object;
 
+	/**
+	 * Constructor.
+	 *  
+	 * @param type What this event represents 
+	 * @param data Optional, additional data
+	 * @param bubbles Whether to bubble up the display list or not
+	 * @param cancelable Whether the event can be cancelled or not
+	 * 
+	 */	
     public function OVVEvent(type:String, data:Object=null, bubbles:Boolean=false, cancelable:Boolean=false) {
       super(type, bubbles, cancelable);
       _data = data;
     }
+	
+	/**
+	 * @return A generic object, or null   
+	 */	
     public function get data():Object {
       return _data;
     }

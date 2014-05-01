@@ -55,7 +55,7 @@ package org.openvv
 	  _id = "ovv" + Math.floor(Math.random() * 1000000000).toString();
 		  
 	  ExternalInterface.addCallback(_id, flashProbe);
-	  ExternalInterface.addCallback("ready", ready);
+	  ExternalInterface.addCallback("ready", startImpressionTimer);
 		  
 	  _sprite = new Sprite();
 	  _renderMeter = new OVVRenderMeter(_sprite);
@@ -66,7 +66,7 @@ package org.openvv
 	  ExternalInterface.call("eval", ovvAssetSource);
     }
 	
-	public function ready():void
+	public function startImpressionTimer():void
 	{
 		if (!_impressionTimer)
 		{
@@ -91,7 +91,7 @@ package org.openvv
 			return new OVVCheck({ "error": "ExternalInterface unavailable" });
 		}
 		
-		var jsResults:Object = ExternalInterface.call("$ovv.getAdById('" + _id + "')" + ".checkViewability");
+		var jsResults:Object = ExternalInterface.call("$ovv.getAssetById('" + _id + "')" + ".checkViewability");
 		var results:OVVCheck = new OVVCheck(jsResults);
 		
 		var visibles:Object = {};
@@ -137,7 +137,7 @@ package org.openvv
 	
 	public function dispose():void
 	{
-		ExternalInterface.call("$ovv.getAdById('" + _id + "')" + ".dispose");
+		ExternalInterface.call("$ovv.getAssetById('" + _id + "')" + ".dispose");
 		
 		if(_impressionTimer)
 		{
