@@ -31,9 +31,9 @@ function OVV() {
      * status. OVVCheck.beaconViewabilityState and
      * OVVCheck.geometryViewabilityState are also populated in debug mode.
      * @type {boolean}
-     * @see OVVCheck.geometryViewabilityState
-     * @see OVVCheck.beaconViewabilityState
-     * @see OVVAsset.BEACON_SIZE
+     * @see {@link OVVCheck.geometryViewabilityState}
+     * @see {@link OVVCheck.beaconViewabilityState}
+     * @see {@link OVVAsset.BEACON_SIZE}
      */
     this.DEBUG = false;
 
@@ -172,8 +172,8 @@ function OVVCheck() {
      * The viewability state measured by the geometry technique. Only populated
      * when OVV.DEBUG is true.
      * @type {string}
-     * @see OVVAsset.checkGeometry
-     * @see OVV.DEBUG
+     * @see {@link OVVAsset.checkGeometry}
+     * @see {@link OVV.DEBUG}
      */
     this.geometryViewabilityState = '';
 
@@ -181,8 +181,8 @@ function OVVCheck() {
      * The viewability state measured by the beacon technique. Only populated
      * when OVV.DEBUG is true.
      * @type {string}
-     * @see OVVAsset.checkBeacons
-     * @see OVV.DEBUG
+     * @see {@link OVVAsset.checkBeacons}
+     * @see {@link OVV.DEBUG}
      */
     this.beaconViewabilityState = '';
 
@@ -191,8 +191,8 @@ function OVVCheck() {
      * OVV.GEOMETRY when OVV is run in the root page, or OVV.BEACON when OVV is
      * run in an iframe. When in debug mode, will always remain blank.
      * @type {string}
-     * @see OVV.GEOMETRY
-     * @see OVV.BEACON
+     * @see {@link OVV.GEOMETRY}
+     * @see {@link OVV.BEACON}
      */
     this.technique = '';
 
@@ -202,29 +202,29 @@ function OVVCheck() {
      * True means the beacon was viewable and false means the beacon was
      * unviewable. Beacon 0 is the "control beacon" and should always be false.
      * @type {array<boolean>|null}
-     * @see OVVAsset.CONTROL
-     * @see OVVAsset.CONTROL
-     * @see OVVAsset.CENTER
-     * @see OVVAsset.OUTER_TOP_LEFT
-     * @see OVVAsset.OUTER_TOP_RIGHT
-     * @see OVVAsset.OUTER_BOTTOM_LEFT
-     * @see OVVAsset.OUTER_BOTTOM_RIGHT
-     * @see OVVAsset.MIDDLE_TOP_LEFT
-     * @see OVVAsset.MIDDLE_TOP_RIGHT
-     * @see OVVAsset.MIDDLE_BOTTOM_LEFT
-     * @see OVVAsset.MIDDLE_BOTTOM_RIGHT
-     * @see OVVAsset.INNER_TOP_LEFT
-     * @see OVVAsset.INNER_TOP_RIGHT
-     * @see OVVAsset.INNER_BOTTOM_LEFT
-     * @see OVVAsset.INNER_BOTTOM_RIGHT
+     * @see {@link OVVAsset.CONTROL}
+     * @see {@link OVVAsset.CONTROL}
+     * @see {@link OVVAsset.CENTER}
+     * @see {@link OVVAsset.OUTER_TOP_LEFT}
+     * @see {@link OVVAsset.OUTER_TOP_RIGHT}
+     * @see {@link OVVAsset.OUTER_BOTTOM_LEFT}
+     * @see {@link OVVAsset.OUTER_BOTTOM_RIGHT}
+     * @see {@link OVVAsset.MIDDLE_TOP_LEFT}
+     * @see {@link OVVAsset.MIDDLE_TOP_RIGHT}
+     * @see {@link OVVAsset.MIDDLE_BOTTOM_LEFT}
+     * @see {@link OVVAsset.MIDDLE_BOTTOM_RIGHT}
+     * @see {@link OVVAsset.INNER_TOP_LEFT}
+     * @see {@link OVVAsset.INNER_TOP_RIGHT}
+     * @see {@link OVVAsset.INNER_BOTTOM_LEFT}
+     * @see {@link OVVAsset.INNER_BOTTOM_RIGHT}
      */
     this.beacons = new Array();
 
     /**
      * Whether this asset is in an iframe.
      * @type {boolean}
-     * @see OVV.IN_IFRAME
-     * @see OVV.DEBUG
+     * @see {@link OVV.IN_IFRAME}
+     * @see {@link OVV.DEBUG}
      */
     this.inIframe = null;
 
@@ -267,9 +267,9 @@ function OVVCheck() {
      * viewable. Set to OVVCheck when the player was less than 50% viewable.
      * Set to OVVCheck.UNMEASURABLE when a determination could not be made.
      * @type {string}
-     * @see OVVCheck.UNMEASURABLE
-     * @see OVVCheck.VIEWABLE
-     * @see OVVCheck.UNVIEWABLE
+     * @see {@link OVVCheck.UNMEASURABLE}
+     * @see {@link OVVCheck.VIEWABLE}
+     * @see {@link OVVCheck.UNVIEWABLE}
      */
     this.viewabilityState = '';
 }
@@ -304,23 +304,110 @@ function OVVAsset(uid) {
      */
     const SQRT_2 = Math.sqrt(2);
 
+    /**
+     * The index/identifier of the control beacon, which is placed off screen to
+     * test that throttling occurs.
+     * @type {number}
+     */
     const CONTROL = 0;
 
+    /**
+     * The index/identifier of the center beacon, which is placed in the center
+     * of the player.
+     * @type {number}
+     */
     const CENTER = 1;
 
+    /**
+     * The index/identifier of the beacon placed at the top left corner of the
+     * player.
+     * @type {number}
+     */
     const OUTER_TOP_LEFT = 2;
+
+    /**
+     * The index/identifier of the beacon placed at the top right corner of the
+     * player.
+     * @type {number}
+     */
     const OUTER_TOP_RIGHT = 3;
+
+    /**
+     * The index/identifier of the beacon placed at the bottom left corner of
+     * the player.
+     * @type {number}
+     */
     const OUTER_BOTTOM_LEFT = 4;
+
+    /**
+     * The index/identifier of the beacon placed at the bottom right corner of
+     * the player.
+     * @type {number}
+     */
     const OUTER_BOTTOM_RIGHT = 5;
 
+    /**
+     * The index/identifier of the beacon placed at the top left corner of the
+     * middle area. The middle area defines a region which is 50% of the total
+     * area of the player.
+     * @type {number}
+     */
     const MIDDLE_TOP_LEFT = 6;
+
+    /**
+     * The index/identifier of the beacon placed at the top right corner of the
+     * middle area. The middle area defines a region which is 50% of the total
+     * area of the player.
+     * @type {number}
+     */
     const MIDDLE_TOP_RIGHT = 7;
-    const MIDDLE_BOTTOM_LEFT = 8
+
+    /**
+     * The index/identifier of the beacon placed at the bottom left corner of
+     * the middle area. The middle area defines a region which is 50% of the total
+     * area of the player.
+     * @type {number}
+     */
+    const MIDDLE_BOTTOM_LEFT = 8;
+
+    /**
+     * The index/identifier of the beacon placed at the bottom right corner of
+     * the middle area. The middle area defines a region which is 50% of the total
+     * area of the player.
+     * @type {number}
+     */
     const MIDDLE_BOTTOM_RIGHT = 9;
 
+    /**
+     * The index/identifier of the beacon placed at the top left corner of
+     * the inner area. The inner area defines a region such that the area
+     * outside 2 sides of it are 50% of the player's total area.
+     * @type {number}
+     */
     const INNER_TOP_LEFT = 10;
+
+    /**
+     * The index/identifier of the beacon placed at the top right corner of
+     * the inner area. The inner area defines a region such that the area
+     * outside 2 sides of it are 50% of the player's total area.
+     * @type {number}
+     */
     const INNER_TOP_RIGHT = 11;
-    const INNER_BOTTOM_LEFT = 12
+
+    /**
+     * The index/identifier of the beacon placed at the bottom left corner of
+     * the inner area. The inner area defines a region such that the area
+     * outside 2 sides of it are 50% of the player's total area.
+     * @type {number}
+     */
+    const INNER_BOTTOM_LEFT = 12;
+
+    /**
+     * The index/identifier of the beacon placed at the bottom right corner of
+     * the inner area. The inner area defines a region such that the area
+     * outside 2 sides of it are 50% of the player's total area.
+     * @type {number}
+     */
     const INNER_BOTTOM_RIGHT = 13;
 
     ///////////////////////////////////////////////////////////////////////////
@@ -361,6 +448,25 @@ function OVVAsset(uid) {
     // PUBLIC FUNCTIONS
     ///////////////////////////////////////////////////////////////////////////
 
+    /**
+     * Returns an OVVCheck object populated with information gathered from the
+     * browser. The viewabilityState attribute is populated with either
+     * OVVCheck.VIEWABLE, OVVCheck.UNVIEWABLE, or OVVCheck.UNMEASURABLE as
+     * determined by either the geometry technique or beacon technique when in
+     * an iframe.
+     *
+     * The geometry technique compares the bounds of the viewport, taking
+     * scrolling into account, and the bounds of the player.
+     *
+     * The beacon technique places a single beacon offscreen and several
+     * on top of the player. It then queries the state of the beacons on top
+     * of the player to determine how much of the player is viewable.
+     *
+     * @returns {OVVCheck}
+     * @see {@link OVVCheck}
+     * @see {@link checkGeometry}
+     * @see {@link checkBeacons}
+     */
     this.checkViewability = function() {
 
         var check = new OVVCheck();
@@ -443,7 +549,7 @@ function OVVAsset(uid) {
     };
 
     /**
-     * Called by each beacon on startup to signify that it's ready to measure
+     * Called by each beacon to signify that it's ready to measure
      * @param {number} The index identifier of the beacon
      */
     this.beaconStarted = function(index) {
@@ -464,7 +570,7 @@ function OVVAsset(uid) {
     };
 
     /**
-     * Tears down the asset
+     * Frees up resources created and used by the asset.
      */
     this.dispose = function() {
 
@@ -490,6 +596,14 @@ function OVVAsset(uid) {
     // PRIVATE FUNCTIONS
     ///////////////////////////////////////////////////////////////////////////
 
+    /**
+     * Performs the geometry technique to determin viewability. First gathers
+     * information on the viewport and on the player. The compares the two to
+     * determine what percentage, if any, of the player is within the bounds
+     * of the viewport.
+     * @param {OVVCheck} check The OVVCheck object to populate
+     * @param {Element} player The DOM element to measure
+     */
     var checkGeometry = function(check, player) {
         //Avoid including scrollbars in viewport size by taking the smallest dimensions (also
         //ensures ad object is not obscured)
@@ -554,8 +668,10 @@ function OVVAsset(uid) {
     }
 
     /**
-     * @returns {boolean} Whether the player is viewable, as reported by
-     * the set of beacon SWFs
+     * Performs the beacon technique. Queries the state of each beacon and
+     * attempts to make a determination of whether at least 50% of the player
+     * is within the viewport.
+     * @param {OVVCheck} check The OVVCheck object to populate
      */
     var checkBeacons = function(check) {
 
@@ -577,8 +693,8 @@ function OVVAsset(uid) {
 
             check.beacons[index] = isViewable && isOnScreen;
 
-            // the control beacon isn't involved in determining viewability,
-            // only in determining if the browser supports beacon measurement
+            // the control beacon is only involved in determining if the 
+            // browser supports beacon measurement, so move on
             if (index === 0) {
                 continue;
             }
@@ -725,7 +841,7 @@ function OVVAsset(uid) {
     };
 
     /**
-     * Repositions the beacon SWFs on top of the video player
+     * Repositions the beacon SWFs on top of the player
      */
     var positionBeacons = function() {
 
@@ -811,8 +927,8 @@ function OVVAsset(uid) {
                     break;
             }
 
-            // center the inner beacons on their intended point
-            if (index >= INNER_TOP_LEFT) {
+            // center the middle and inner beacons on their intended point
+            if (index >= MIDDLE_TOP_LEFT) {
                 left -= (BEACON_SIZE / 2);
                 top -= (BEACON_SIZE / 2);
             }
@@ -824,8 +940,10 @@ function OVVAsset(uid) {
     };
 
     /**
-     * @param {Element} An HTML DOM Element
-     * @returns {boolean} Whether the parameter is at least partially within the browser's viewport
+     * Determines whether a DOM element is within the bounds of the viewport
+     * @param {Element} A DOM Element
+     * @returns {boolean} Whether the parameter is at least partially within
+     * the browser's viewport
      */
     var isOnScreen = function(element) {
 
