@@ -21,15 +21,48 @@
  */
 function OVV() {
 
-    this.DEBUG = true;
+    ///////////////////////////////////////////////////////////////////////////
+    // PUBLIC ATTRIBUTES
+    ///////////////////////////////////////////////////////////////////////////
 
     /**
-     * The container for the assets
+     * Determines whether OpenVV should run in debug mode. Debug mode always
+     * adds beacon SWFs to the page, which are color-coded based on their
+     * status. OVVCheck.beaconViewabilityState and
+     * OVVCheck.geometryViewabilityState are also populated in debug mode.
+     * @type {boolean}
+     * @see OVVCheck.geometryViewabilityState
+     * @see OVVCheck.beaconViewabilityState
+     * @see OVVAsset.BEACON_SIZE
+     */
+    this.DEBUG = false;
+
+    /**
+     * Whether OpenVV is running within an iframe or not.
+     * @type {boolean}
+     */
+    this.IN_IFRAME = (parent !== window);
+
+    /**
+     * The last asset added to OVV. Useful for easy access from the
+     * JavaScript console.
+     * @type {OVVAsset}
+     */
+    this.asset = null;
+
+    ///////////////////////////////////////////////////////////////////////////
+    // PRIVATE ATTRIBUTES
+    ///////////////////////////////////////////////////////////////////////////
+
+    /**
+     * An object for storing assets by their id.
      * @type {object}
      */
     var assets = {};
 
-    this.asset = null;
+    ///////////////////////////////////////////////////////////////////////////
+    // PUBLIC FUNCTIONS
+    ///////////////////////////////////////////////////////////////////////////
 
     /**
      * Stores an Element
@@ -74,43 +107,171 @@ function OVV() {
     }
 }
 
+/**
+ * A container for all the values that OpenVV collects.
+ * @constructor
+ */
 function OVVCheck() {
 
+    ///////////////////////////////////////////////////////////////////////////
+    // PUBLIC ATTRIBUTES
+    ///////////////////////////////////////////////////////////////////////////
+
+    /**
+     * The height of the viewport
+     * @type {number}
+     */
     this.clientHeight = -1;
 
+    /**
+     * The width of the viewport
+     * @type {number}
+     */
     this.clientWidth = -1;
 
+    /**
+     * A description of any error that occured
+     * @type {string}
+     */
     this.error = '';
 
+    /**
+     * Whether the tab is focused or not (populated by ActionScript)
+     * @type {boolean}
+     */
     this.focus = null;
 
+    /**
+     * The framerate of the asset (populated by ActionScript)
+     * @type {number}
+     */
     this.fps = -1;
 
+    /**
+     * A unique identifier of the asset measured
+     * @type {string}
+     */
     this.id = '';
 
+    /**
+     * Whether beacon checking is supported. Beacon support is defined by
+     * placing a "control beacon" SWF off screen, and verifying that it is
+     * throttled as expected.
+     * @type {boolean}
+     */
     this.beaconsSupported = null;
 
+    /**
+     * Whether geometry checking is supported. Geometry support requires
+     * that the asset is not within an iframe.
+     * @type {boolean}
+     */
     this.geometrySupported = null;
 
+    /**
+     * The viewability state measured by the geometry technique. Only populated
+     * when OVV.DEBUG is true.
+     * @type {string}
+     * @see OVVAsset.checkGeometry
+     * @see OVV.DEBUG
+     */
+    this.geometryViewabilityState = '';
+
+    /**
+     * The viewability state measured by the beacon technique. Only populated
+     * when OVV.DEBUG is true.
+     * @type {string}
+     * @see OVVAsset.checkBeacons
+     * @see OVV.DEBUG
+     */
+    this.beaconViewabilityState = '';
+
+    /**
+     * The technique used to populate OVVCheck.viewabilityState. Will be either
+     * OVV.GEOMETRY when OVV is run in the root page, or OVV.BEACON when OVV is
+     * run in an iframe. When in debug mode, will always remain blank.
+     * @type {string}
+     * @see OVV.GEOMETRY
+     * @see OVV.BEACON
+     */
     this.technique = '';
 
+    /**
+     * When OVV is run in an iframe and the beacon technique is used, this array
+     * is populated with the states of each beacon, identified by their index.
+     * True means the beacon was viewable and false means the beacon was
+     * unviewable. Beacon 0 is the "control beacon" and should always be false.
+     * @type {array<boolean>|null}
+     * @see OVVAsset.CONTROL
+     * @see OVVAsset.CONTROL
+     * @see OVVAsset.CENTER
+     * @see OVVAsset.OUTER_TOP_LEFT
+     * @see OVVAsset.OUTER_TOP_RIGHT
+     * @see OVVAsset.OUTER_BOTTOM_LEFT
+     * @see OVVAsset.OUTER_BOTTOM_RIGHT
+     * @see OVVAsset.MIDDLE_TOP_LEFT
+     * @see OVVAsset.MIDDLE_TOP_RIGHT
+     * @see OVVAsset.MIDDLE_BOTTOM_LEFT
+     * @see OVVAsset.MIDDLE_BOTTOM_RIGHT
+     * @see OVVAsset.INNER_TOP_LEFT
+     * @see OVVAsset.INNER_TOP_RIGHT
+     * @see OVVAsset.INNER_BOTTOM_LEFT
+     * @see OVVAsset.INNER_BOTTOM_RIGHT
+     */
     this.beacons = new Array();
 
+    /**
+     * Whether this asset is in an iframe.
+     * @type {boolean}
+     * @see OVV.IN_IFRAME
+     * @see OVV.DEBUG
+     */
     this.inIframe = null;
 
+    /**
+     * The distance, in pixels, from the bottom of the asset to the bottom of
+     * the viewport
+     * @type {number}
+     */
     this.objBottom = -1;
 
+    /**
+     * The distance, in pixels, from the left of the asset to the left of
+     * the viewport
+     * @type {number}
+     */
     this.objLeft = -1;
 
+    /**
+     * The distance, in pixels, from the right of the asset to the right of
+     * the viewport
+     * @type {number}
+     */
     this.objRight = -1;
 
+    /**
+     * The distance, in pixels, from the top of the asset to the top of
+     * the viewport
+     * @type {number}
+     */
     this.objTop = -1;
 
+    /**
+     * The percentage of the player that is viewable within the viewport
+     * @type {number}
+     */
     this.percentViewable = -1;
 
+    /**
+     * Set to OVVCheck.VIEWABLE when the player was at least 50%
+     * viewable. Set to OVVCheck when the player was less than 50% viewable.
+     * Set to OVVCheck.UNMEASURABLE when a determination could not be made.
+     * @type {string}
+     * @see OVVCheck.UNMEASURABLE
+     * @see OVVCheck.VIEWABLE
+     * @see OVVCheck.UNVIEWABLE
+     */
     this.viewabilityState = '';
-
-    this.viewable = null;
 }
 
 OVVCheck.UNMEASURABLE = 'unmeasurable';
@@ -126,6 +287,9 @@ OVVCheck.GEOMETRY = 'geometry';
  */
 function OVVAsset(uid) {
 
+    ///////////////////////////////////////////////////////////////////////////
+    // CONSTANTS
+    ///////////////////////////////////////////////////////////////////////////
 
     /**
      * The total number of beacons being used
@@ -133,15 +297,19 @@ function OVVAsset(uid) {
      */
     const TOTAL_BEACONS = 13;
 
+    /**
+     * The value of the square root of 2. Computed here and saved for reuse
+     * later. Approximately 1.41.
+     * @type {number}
+     */
     const SQRT_2 = Math.sqrt(2);
 
     const CONTROL = 0;
 
-    const OUTER_TOP_LEFT = 1;
-    const OUTER_TOP_RIGHT = 2;
+    const CENTER = 1;
 
-    const CENTER = 3;
-
+    const OUTER_TOP_LEFT = 2;
+    const OUTER_TOP_RIGHT = 3;
     const OUTER_BOTTOM_LEFT = 4;
     const OUTER_BOTTOM_RIGHT = 5;
 
@@ -150,14 +318,14 @@ function OVVAsset(uid) {
     const MIDDLE_BOTTOM_LEFT = 8
     const MIDDLE_BOTTOM_RIGHT = 9;
 
-    const INNER_OUTER_TOP_LEFT = 10;
-    const INNER_OUTER_TOP_RIGHT = 11;
-    const INNER_OUTER_BOTTOM_LEFT = 12
-    const INNER_OUTER_BOTTOM_RIGHT = 13;
+    const INNER_TOP_LEFT = 10;
+    const INNER_TOP_RIGHT = 11;
+    const INNER_BOTTOM_LEFT = 12
+    const INNER_BOTTOM_RIGHT = 13;
 
-    //
+    ///////////////////////////////////////////////////////////////////////////
     // PRIVATE ATTRIBUTES
-    //
+    ///////////////////////////////////////////////////////////////////////////
 
     /**
      * the id of the ad that this asset is associatied with
@@ -189,169 +357,138 @@ function OVVAsset(uid) {
      */
     var player;
 
-    //
+    ///////////////////////////////////////////////////////////////////////////
     // PUBLIC FUNCTIONS
-    //
-
-    /**
-     * @returns {Element} The video player that is being measured
-     */
-    this.getPlayer = function() {
-
-        if (!player) {
-            player = findPlayer();
-        }
-
-        return player;
-    };
-
-    /**
-     * @returns {boolean} Whether the player is viewable, as reported by at least 3 of the Beacon SWFs
-     */
-    var isPlayerViewable = function(check) {
-
-        if (!this.beaconsReady()) {
-            return null;
-        }
-
-        var beaconsVisible = 0;
-        var innerCornersVisible = 0;
-        var outerCornersVisible = 0;
-        var middleCornersVisible = 0;
-        check.beacons = new Array(TOTAL_BEACONS);
-
-        for (var index = 0; index <= TOTAL_BEACONS; index++) {
-
-            var beacon = getBeacon(index);
-            var isVisible = beacon.isVisible();
-            var onScreen = isOnScreen(beacon);
-
-            check.beacons[index] = isVisible && isOnScreen;
-
-            if (index === 0) {
-                continue;
-            }
-
-            if (isVisible) {
-
-                beaconsVisible++;
-
-                switch (index) {
-                    case OUTER_TOP_LEFT:
-                    case OUTER_TOP_RIGHT:
-                    case OUTER_BOTTOM_LEFT:
-                    case OUTER_BOTTOM_RIGHT:
-                        outerCornersVisible++;
-                        break;
-
-                    case MIDDLE_TOP_LEFT = 6:
-                    case MIDDLE_TOP_RIGHT = 7:
-                    case MIDDLE_BOTTOM_LEFT = 8:
-                    case MIDDLE_BOTTOM_RIGHT = 9:
-                        middleCornersVisible++;
-                        break;
-
-                    case INNER_OUTER_TOP_LEFT:
-                    case INNER_OUTER_TOP_RIGHT:
-                    case INNER_OUTER_BOTTOM_LEFT:
-                    case INNER_OUTER_BOTTOM_RIGHT:
-                        innerCornersVisible++;
-                        break;
-                }
-            }
-        }
-
-        // when all points are visible
-        if (beaconsVisible === TOTAL_BEACONS) {
-            return true;
-        }
-
-        var beacons = check.beacons;
-
-        // when the center of the player is visible
-        if ((beacons[CENTER] === true) &&
-            // and 2 adjacent outside corners are visible
-            (beacons[OUTER_TOP_LEFT] === true && beacons[OUTER_TOP_RIGHT] == true) ||
-            (beacons[OUTER_TOP_LEFT] === true && beacons[OUTER_BOTTOM_LEFT] == true) ||
-            (beacons[OUTER_TOP_RIGHT] === true && beacons[OUTER_BOTTOM_RIGHT] == true) ||
-            (beacons[OUTER_BOTTOM_LEFT] === true && beacons[OUTER_BOTTOM_RIGHT] == true)
-        ) {
-            return true;
-        }
-
-        // when any 3 of the inner corners are visible
-        if (beacons[CENTER] === false && innerCornersVisible >= 3) {
-            return true;
-        }
-
-        // when the center and all of the middle corners are visible
-        if (beacons[CENTER] === true && middleCornersVisible == 4) {
-            return true;
-        }
-
-        // // when top left and bottom right match
-        // if (beacons[OUTER_TOP_LEFT] === beacons[OUTER_BOTTOM_RIGHT] &&
-        //     // and the beacons between them don't match their status
-        //     (beacons[INNER_OUTER_TOP_LEFT] && beacons[CENTER] && beacons[INNER_OUTER_BOTTOM_RIGHT]) !== (beacons[OUTER_TOP_LEFT] && beacons[OUTER_BOTTOM_RIGHT])
-        // ) {
-        //     return null;
-        // }
-
-        // // when top bottom left and top right match
-        // if (beacons[OUTER_BOTTOM_LEFT] === beaconse[OUTER_TOP_RIGHT]
-        //     // and the beacons between them don't match their status
-        //     (beacons[INNER_OUTER_BOTTOM_LEFT] && beacons[CENTER] && beacons[INNER_OUTER_TOP_RIGHT]) !== (beacons[OUTER_BOTTOM_LEFT] && beaconse[OUTER_TOP_RIGHT])
-        // ) {
-        //     return null;
-        // }
-
-        return false;
-    };
+    ///////////////////////////////////////////////////////////////////////////
 
     this.checkViewability = function() {
 
         var check = new OVVCheck();
         check.id = id;
-        check.inIframe = (parent !== window);
-        check.geometrySupported = !check.inIframe;
+        check.inIframe = $ovv.IN_IFRAME;
+        check.geometrySupported = !$ovv.IN_IFRAME;
 
         if (!player) {
             check.error = 'Player not found!';
             return check;
         }
 
+        // if we can use the geometry method, use it over the beacon method
         if (check.geometrySupported) {
+            check.technique = OVVCheck.GEOMETRY;
             checkGeometry.bind(this)(check, player);
+            check.viewabilityState = (check.percentViewable >= 50) ? OVVCheck.VIEWABLE : OVVCheck.UNVIEWABLE;
+
+            if ($ovv.DEBUG) {
+                // add an additonal field when debugging
+                check.geometryViewabilityState = check.viewabilityState;
+            } else {
+                return check;
+            }
         }
 
         var controlBeacon = getBeacon(0);
-        if (controlBeacon && controlBeacon.isVisible) {
-            var controlBeaconVisible = isOnScreen(controlBeacon) && controlBeacon.isVisible();
+
+        // check to make sure the control beacon is found and its 
+        // callback has been setup
+        if (controlBeacon && controlBeacon.isViewable) {
+            // the control beacon should always be off screen and not viewable,
+            // if that's not true, it can't be used
+            var controlBeaconVisible = isOnScreen(controlBeacon) && controlBeacon.isViewable();
             check.beaconsSupported = !controlBeaconVisible;
         } else {
+            // if the control beacon wasn't found or it isn't ready yet,
+            // then beacons can't be used for this check
             check.beaconsSupported = false;
         }
 
-        var useBeacons = check.beaconsSupported && this.beaconsReady();
-        var useGeometry = check.geometrySupported;
-
-        if (useGeometry) {
-            check.technique = OVVCheck.GEOMETRY;
-            check.viewabilityState = (check.percentViewable >= 50) ? OVVCheck.VIEWABLE : OVVCheck.UNVIEWABLE;
-        } else if (useBeacons) {
+        // if the control beacon checked out, and all the beacons are ready
+        // proceed
+        if (check.beaconsSupported && beaconsReady()) {
             check.technique = OVVCheck.BEACON;
-            var viewable = isPlayerViewable.bind(this)(check);
+            var viewable = checkBeacons.bind(this)(check);
+            // certain scenarios return null when the beacons can't guarantee
+            // that the player is > 50% viewable, so it's deemed unmeasurable
             if (viewable === null) {
                 check.viewabilityState = OVVCheck.UNMEASURABLE;
+                // add this informational field when debugging
+                if ($ovv.DEBUG) {
+                    check.beaconViewabilityState = OVVCheck.UNMEASURABLE;
+                }
             } else {
                 check.viewabilityState = viewable ? OVVCheck.VIEWABLE : OVVCheck.UNVIEWABLE;
+                // add this informational field when debugging
+                if ($ovv.DEBUG) {
+                    check.beaconViewabilityState = viewable ? OVVCheck.VIEWABLE : OVVCheck.UNVIEWABLE;
+                }
             }
         } else {
             check.viewabilityState = OVVCheck.UNMEASURABLE;
         }
 
+        // in debug mode, reconcile the viewability states from both techniques
+        if ($ovv.DEBUG) {
+            // revert the technique to blank during debug, since both were used
+            check.technique = '';
+            if (check.geometryViewabilityState === null && check.beaconViewabilityState === null) {
+                check.viewabilityState = OVVCheck.UNMEASURABLE;
+            } else {
+                var beaconViewable = (check.beaconViewabilityState === OVVCheck.VIEWABLE);
+                var geometryViewable = (check.geometryViewabilityState === OVVCheck.VIEWABLE);
+                check.viewabilityState = (beaconViewable || geometryViewable) ? OVVCheck.VIEWABLE : OVVCheck.UNVIEWABLE;
+            }
+        }
+
         return check;
     };
+
+    /**
+     * Called by each beacon on startup to signify that it's ready to measure
+     * @param {number} The index identifier of the beacon
+     */
+    this.beaconStarted = function(index) {
+
+        if ($ovv.DEBUG) {
+            getBeacon(index).debug();
+        }
+
+        if (index == 0) {
+            return;
+        }
+
+        beaconsStarted++;
+
+        if (beaconsReady()) {
+            player.startImpressionTimer();
+        }
+    };
+
+    /**
+     * Tears down the asset
+     */
+    this.dispose = function() {
+
+        for (var index = 1; index <= TOTAL_BEACONS; index++) {
+            var container = getBeaconContainer(index);
+            if (container) {
+                delete beaconsStarted[index];
+                container.parentElement.removeChild(container);
+            }
+        }
+
+        window.$ovv.removeAsset(this);
+    };
+
+    /**
+     * @returns {string} The randomly generated ID of this asset
+     */
+    this.getId = function() {
+        return id;
+    };
+
+    ///////////////////////////////////////////////////////////////////////////
+    // PRIVATE FUNCTIONS
+    ///////////////////////////////////////////////////////////////////////////
 
     var checkGeometry = function(check, player) {
         //Avoid including scrollbars in viewport size by taking the smallest dimensions (also
@@ -381,7 +518,6 @@ function OVVAsset(uid) {
         if ( !! window.innerWidth && !isNaN(window.innerWidth)) {
             check.clientWidth = Math.min(check.clientWidth,
                 window.innerWidth);
-
         }
         //.innerHeight
         if ( !! window.innerHeight && !isNaN(window.innerHeight)) {
@@ -418,32 +554,117 @@ function OVVAsset(uid) {
     }
 
     /**
-     * Called by each beacon on startup to signify that it's ready to measure
-     * @param {number} The index identifier of the beacon
+     * @returns {boolean} Whether the player is viewable, as reported by
+     * the set of beacon SWFs
      */
-    this.beaconStarted = function(index) {
+    var checkBeacons = function(check) {
 
-        if ($ovv.DEBUG) {
-            getBeacon(index).debug();
+        if (!beaconsReady()) {
+            return null;
         }
 
-        if (index == 0) {
-            return;
+        var beaconsVisible = 0;
+        var outerCornersVisible = 0;
+        var middleCornersVisible = 0;
+        var innerCornersVisible = 0;
+        check.beacons = new Array(TOTAL_BEACONS);
+
+        for (var index = 0; index <= TOTAL_BEACONS; index++) {
+
+            var beacon = getBeacon(index);
+            var isViewable = beacon.isViewable();
+            var onScreen = isOnScreen(beacon);
+
+            check.beacons[index] = isViewable && isOnScreen;
+
+            // the control beacon isn't involved in determining viewability,
+            // only in determining if the browser supports beacon measurement
+            if (index === 0) {
+                continue;
+            }
+
+            if (isViewable) {
+
+                beaconsVisible++;
+
+                switch (index) {
+                    case OUTER_TOP_LEFT:
+                    case OUTER_TOP_RIGHT:
+                    case OUTER_BOTTOM_LEFT:
+                    case OUTER_BOTTOM_RIGHT:
+                        outerCornersVisible++;
+                        break;
+
+                    case MIDDLE_TOP_LEFT = 6:
+                    case MIDDLE_TOP_RIGHT = 7:
+                    case MIDDLE_BOTTOM_LEFT = 8:
+                    case MIDDLE_BOTTOM_RIGHT = 9:
+                        middleCornersVisible++;
+                        break;
+
+                    case INNER_TOP_LEFT:
+                    case INNER_TOP_RIGHT:
+                    case INNER_BOTTOM_LEFT:
+                    case INNER_BOTTOM_RIGHT:
+                        innerCornersVisible++;
+                        break;
+                }
+            }
         }
 
-        beaconsStarted++;
-
-        if (this.beaconsReady()) {
-            player.startImpressionTimer();
+        // when all points are visible
+        if (beaconsVisible === TOTAL_BEACONS) {
+            return true;
         }
+
+        var beacons = check.beacons;
+
+        // when the center of the player is visible
+        if ((beacons[CENTER] === true) &&
+            // and 2 adjacent outside corners are visible
+            (beacons[OUTER_TOP_LEFT] === true && beacons[OUTER_TOP_RIGHT] == true) ||
+            (beacons[OUTER_TOP_LEFT] === true && beacons[OUTER_BOTTOM_LEFT] == true) ||
+            (beacons[OUTER_TOP_RIGHT] === true && beacons[OUTER_BOTTOM_RIGHT] == true) ||
+            (beacons[OUTER_BOTTOM_LEFT] === true && beacons[OUTER_BOTTOM_RIGHT] == true)
+        ) {
+            return true;
+        }
+
+        // when any 3 of the inner corners are visible
+        if (beacons[CENTER] === false && innerCornersVisible >= 3) {
+            return true;
+        }
+
+        // when the center and all of the middle corners are visible
+        if (beacons[CENTER] === true && middleCornersVisible == 4) {
+            return true;
+        }
+
+        // // when top left and bottom right corners are visible
+        if ((beacons[OUTER_TOP_LEFT] && beacons[OUTER_BOTTOM_RIGHT]) &&
+            // and any of their diagonals are covered
+            (!beacons[MIDDLE_TOP_LEFT] || ![INNER_TOP_LEFT] || !beacons[CENTER] || beacons[INNER_BOTTOM_RIGHT] || beacons[MIDDLE_BOTTOM_RIGHT])
+        ) {
+            return null;
+        }
+
+        // when bottom left and top right corners are visible
+        if ((beacons[OUTER_BOTTOM_LEFT] && beacons[OUTER_TOP_RIGHT]) &&
+            // and any of their diagonals are covered
+            (!beacons[MIDDLE_BOTTOM_LEFT] || !beacons[INNER_BOTTOM_LEFT] || !beacons[CENTER] || !beacons[INNER_TOP_RIGHT] || !beacons[MIDDLE_TOP_RIGHT])
+        ) {
+            return null;
+        }
+
+        return false;
     };
 
     /**
      * @returns {boolean} Whether all beacons have checked in
      */
-    this.beaconsReady = function() {
+    var beaconsReady = function() {
 
-        if (!this.getPlayer()) {
+        if (!player) {
             return false;
         }
 
@@ -451,44 +672,18 @@ function OVVAsset(uid) {
     };
 
     /**
-     * Tears down the asset
-     */
-    this.dispose = function() {
-
-        for (var index = 1; index <= TOTAL_BEACONS; index++) {
-            var container = getBeaconContainer(index);
-            if (container) {
-                delete beaconsStarted[index];
-                container.parentElement.removeChild(container);
-            }
-        }
-
-        window.$ovv.removeAsset(this);
-    };
-
-    /**
-     * @returns {string} The randomly generated ID of this asset
-     */
-    this.getId = function() {
-        return id;
-    };
-
-    // PRIVATE FUNCTIONS
-
-    /**
      * Creates the beacon SWFs and adds them to the DOM
      * @param {string} The URL of the beacon SWFs
-     * @see {@link positionSWFs}
+     * @see {@link positionBeacons}
      */
     var createBeacons = function(url) {
 
         // double checking that our URL was actually set to something
-        // obfuscating BEACON _SWF_ URL so it doesn't get string replaced 
-        // by ActionScript
+        // (BEACON_SWF_URL is obfuscated here to prevent it from being
+        // string substituted by ActionScript)
         if (url === '' || url === ('BEACON' + '_SWF_' + 'URL')) {
             return;
         }
-
 
         for (var index = 0; index <= TOTAL_BEACONS; index++) {
 
@@ -520,51 +715,25 @@ function OVVAsset(uid) {
             document.body.insertBefore(swfContainer, document.body.firstChild);
         }
 
-        positionSWFs.bind(this)();
+        // move the beacons to their initial position
+        positionBeacons.bind(this)();
 
         // it takes ~500ms for beacons to know if they've been moved off 
-        // screen, so we reposition them at this interval so they'll be
+        // screen, so they're repositioned at this interval so they'll be
         // ready for the next check
-        setInterval(positionSWFs.bind(this), 500);
-    };
-
-    /**
-     * Finds the video player associated with this asset by searching through
-     * each EMBED and OBJECT element on the page, testing to see if it has the
-     * randomly generated callback signature.
-     * @returns {Element|null} The video player being measured
-     */
-    var findPlayer = function() {
-
-        var embeds = document.getElementsByTagName('embed');
-
-        for (var i = 0; i < embeds.length; i++) {
-            if (embeds[i][id]) {
-                return embeds[i];
-            }
-        }
-
-        var objs = document.getElementsByTagName('object');
-
-        for (var i = 0; i < objs.length; i++) {
-            if (objs[i][id]) {
-                return objs[i];
-            }
-        }
-
-        return null;
+        setInterval(positionBeacons.bind(this), 500);
     };
 
     /**
      * Repositions the beacon SWFs on top of the video player
      */
-    var positionSWFs = function() {
+    var positionBeacons = function() {
 
-        if (!this.beaconsReady()) {
+        if (!beaconsReady()) {
             return;
         }
 
-        var playerLocation = this.getPlayer().getClientRects()[0];
+        var playerLocation = player.getClientRects()[0];
 
         // when we don't have an initial position, or the position hasn't changed 
         if (lastPlayerLocation && (lastPlayerLocation.left === playerLocation.left && lastPlayerLocation.right === playerLocation.right && lastPlayerLocation.top === playerLocation.top && lastPlayerLocation.bottom === playerLocation.bottom)) {
@@ -591,72 +760,59 @@ function OVVAsset(uid) {
                     left = -100000;
                     top = -100000;
                     break;
-
-                case OUTER_TOP_LEFT:
-                    // nothing to do, already at default position
-                    break;
-
-                case OUTER_TOP_RIGHT:
-                    left += playerLocation.width - BEACON_SIZE;
-                    break;
-
                 case CENTER:
                     left += (playerLocation.width - BEACON_SIZE) / 2;
                     top += (playerLocation.height - BEACON_SIZE) / 2;
                     break;
-
+                case OUTER_TOP_LEFT:
+                    // nothing to do, already at default position
+                    break;
+                case OUTER_TOP_RIGHT:
+                    left += playerLocation.width - BEACON_SIZE;
+                    break;
                 case OUTER_BOTTOM_LEFT:
                     top += playerLocation.height - BEACON_SIZE;
                     break;
-
                 case OUTER_BOTTOM_RIGHT:
                     left += playerLocation.width - BEACON_SIZE;
                     top += playerLocation.height - BEACON_SIZE;
                     break;
-
                 case MIDDLE_TOP_LEFT:
                     left += (playerLocation.width - middleWidth) / 2;
                     top += (playerLocation.height - middleHeight) / 2;
                     break;
-
                 case MIDDLE_TOP_RIGHT:
                     left += ((playerLocation.width - middleWidth) / 2) + middleWidth;
                     top += (playerLocation.height - middleHeight) / 2;
                     break;
-
                 case MIDDLE_BOTTOM_LEFT:
                     left += (playerLocation.width - middleWidth) / 2;
                     top += ((playerLocation.height - middleHeight) / 2) + middleHeight;
                     break;
-
                 case MIDDLE_BOTTOM_RIGHT:
                     left += ((playerLocation.width - middleWidth) / 2) + middleWidth;
                     top += ((playerLocation.height - middleHeight) / 2) + middleHeight;
                     break;
-
-                case INNER_OUTER_TOP_LEFT:
+                case INNER_TOP_LEFT:
                     left += (playerLocation.width - innerWidth) / 2;
                     top += (playerLocation.height - innerHeight) / 2;
                     break;
-
-                case INNER_OUTER_TOP_RIGHT:
+                case INNER_TOP_RIGHT:
                     left += ((playerLocation.width - innerWidth) / 2) + innerWidth;
                     top += (playerLocation.height - innerHeight) / 2;
                     break;
-
-                case INNER_OUTER_BOTTOM_LEFT:
+                case INNER_BOTTOM_LEFT:
                     left += (playerLocation.width - innerWidth) / 2;
                     top += ((playerLocation.height - innerHeight) / 2) + innerHeight;
                     break;
-
-                case INNER_OUTER_BOTTOM_RIGHT:
+                case INNER_BOTTOM_RIGHT:
                     left += ((playerLocation.width - innerWidth) / 2) + innerWidth;
                     top += ((playerLocation.height - innerHeight) / 2) + innerHeight;
                     break;
             }
 
             // center the inner beacons on their intended point
-            if (index >= INNER_OUTER_TOP_LEFT) {
+            if (index >= INNER_TOP_LEFT) {
                 left -= (BEACON_SIZE / 2);
                 top -= (BEACON_SIZE / 2);
             }
@@ -698,8 +854,41 @@ function OVVAsset(uid) {
         return document.getElementById('OVVBeaconContainer_' + index + '_' + id);
     };
 
-    // 'BEACON_SWF_URL' is string substituted from ActionScript
-    createBeacons.bind(this)('BEACON_SWF_URL');
+    /**
+     * Finds the video player associated with this asset by searching through
+     * each EMBED and OBJECT element on the page, testing to see if it has the
+     * randomly generated callback signature.
+     * @returns {Element|null} The video player being measured
+     */
+    var findPlayer = function() {
+
+        var embeds = document.getElementsByTagName('embed');
+
+        for (var i = 0; i < embeds.length; i++) {
+            if (embeds[i][id]) {
+                return embeds[i];
+            }
+        }
+
+        var objs = document.getElementsByTagName('object');
+
+        for (var i = 0; i < objs.length; i++) {
+            if (objs[i][id]) {
+                return objs[i];
+            }
+        }
+
+        return null;
+    };
+
+    player = findPlayer();
+
+    // only use the beacons if we're in an iframe, but go ahead and add them
+    // during debug mode
+    if ($ovv.IN_IFRAME || $ovv.DEBUG) {
+        // 'BEACON_SWF_URL' is string substituted from ActionScript
+        createBeacons.bind(this)('BEACON_SWF_URL');
+    }
 }
 
 // initialize the OVV object if it doesn't exist

@@ -65,6 +65,10 @@ package org.openvv
 		 */		
 		public var focus:Boolean;
 		
+		public var geometryViewabilityState:String;
+		
+		public var beaconViewabilityState:String;
+		
 		/**
 		 * An array of beacon statuses. True = viewable. False = unviewable. 
 		 */		
@@ -121,7 +125,7 @@ package org.openvv
 		public var percentViewable:int = -1;
 		
 		/**
-		 * Represents whether the asset was viewable, unviewable, or if OpenVV
+		 * Represents whether the asset was at least 50% viewable or if OpenVV
 		 * couldn't make a determination.
 		 * 
 		 * @see VIEWABLE

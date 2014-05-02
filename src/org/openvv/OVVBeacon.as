@@ -35,12 +35,6 @@ package org.openvv
 		public static const GREEN:uint = 0x00FF00;
 		
 		/**
-		 * The background color when the beacon's status hasn't been 
-		 * determined yet 
-		 */		
-		public static const GREY:uint = 0x333333;
-		
-		/**
 		 * The state of the last ThrottleEvent received by the beacon 
 		 */		
 		private var _throttleState:String;
@@ -67,17 +61,6 @@ package org.openvv
 		 */		
 		private var _debug:Boolean = false;
 		
-		/**
-		 * The visibility status of the beacon 
-		 */		
-		private var _viewable:Boolean;
-		
-		/**
-		 * Whether the beacon has been able to determine it's viewability 
-		 * status or not 
-		 */		
-		private var _viewabilityDetermined:Boolean = false;
-
 		/**
 		 * Constructor. Saves values from FlashVars and sets up event listeners
 		 */
@@ -115,7 +98,7 @@ package org.openvv
 		{
 			removeEventListener(Event.ENTER_FRAME, onFirstFrame);
 			
-			ExternalInterface.addCallback("isVisible", isVisible);
+			ExternalInterface.addCallback("isViewable", isViewable);
 			ExternalInterface.addCallback("debug", debug);
 			ExternalInterface.addCallback("getThrottleState", getThrottleState);
 			ExternalInterface.addCallback("getFrameRate", getFrameRate);
@@ -145,30 +128,18 @@ package org.openvv
 		{
 			_debug = true;
 			addEventListener(Event.ENTER_FRAME, onEnterFrame);
-			drawBackground();
 		}
 		
 		/**
 		 * When debug is enabled, colors the background of the beacon 
 		 * according to it's last known status
 		 * 
-		 * @see GREY
 		 * @see RED   
 		 * @see GREEN
 		 */		
 		private function drawBackground():void
 		{
-			var color:uint;
-			
-			if(!_viewabilityDetermined)
-			{
-				color = GREY;
-			}
-			else
-			{
-				color = _viewable ? GREEN : RED;	
-			}
-			
+			var color:uint = isViewable() ? GREEN : RED;
 			graphics.clear();
 			graphics.beginFill(color, 1.0);
 			graphics.drawRect(0, 0, stage.stageWidth, stage.stageHeight);
@@ -178,25 +149,20 @@ package org.openvv
 		/**
 		 * @return whether the beacon is viewable or not
 		 */		
-		public function isVisible():Boolean
+		public function isViewable():Boolean
 		{
+			var viewable:Boolean;
+			
 			if (_throttleState != null)
 			{
-				_viewable = (_throttleState == OVVThrottleType.RESUME);
+				viewable = (_throttleState == OVVThrottleType.RESUME);
 			}
 			else
 			{
-				_viewable = _renderMeter.fps > 8
+				viewable = _renderMeter.fps > 8
 			}
 			
-			_viewabilityDetermined = true;
-			
-			if (_debug)
-			{
-				drawBackground();
-			}
-			
-			return _viewable;
+			return viewable;
 		}
 
 		/**
@@ -207,11 +173,6 @@ package org.openvv
 		protected function onThrottle(event:Event):void
 		{
 			_throttleState = event['state'];
-			
-			if(_debug)
-			{
-				drawBackground();
-			}
 		}
 
 		/**
