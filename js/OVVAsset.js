@@ -1006,6 +1006,10 @@ function OVVAsset(uid) {
     if ($ovv.IN_IFRAME || $ovv.DEBUG) {
         // 'BEACON_SWF_URL' is string substituted from ActionScript
         createBeacons.bind(this)('BEACON_SWF_URL');
+    } else {
+        // since we don't have to wait for beacons to be ready, we start the 
+        // impression timer now
+        player.startImpressionTimer();
     }
 }
 

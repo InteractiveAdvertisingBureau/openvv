@@ -16,54 +16,82 @@
  */
 package org.openvv.events
 {
-  import flash.events.Event;
-  public class OVVEvent extends Event
-  {
-	/**
-	 * Events of this type represent 1 second of continuous viewability has occurred
-	 */	  
-    public static const OVVDiscernibleImpression:String = "OVVDiscernibleImpression";
-	
-	/**
-	 * Events of this type represent 5 seconds of continuous viewability have occurred
-	 */    
-	public static const OVVImpression:String = "OVVImpression";
-	
-	/**
-	 * Events of this type represent informational logging messages
-	 */	
-    public static const OVVLog:String = "OVVLog";
-	
-	/**
-	 * Events of this type represent an error that has occurred  
-	 */	
-    public static const OVVError:String = "OVVError";
+
+	import flash.events.Event;
 
 	/**
-	 * An optional object containing additional information
-	 */	
-    private var _data:Object;
+	 * An Event dispatched from OVVAsset.
+	 *
+	 * @see org.openvv.OVVAsset
+	 */
+	public class OVVEvent extends Event
+	{
 
-	/**
-	 * Constructor.
-	 *  
-	 * @param type What this event represents 
-	 * @param data Optional, additional data
-	 * @param bubbles Whether to bubble up the display list or not
-	 * @param cancelable Whether the event can be cancelled or not
-	 * 
-	 */	
-    public function OVVEvent(type:String, data:Object=null, bubbles:Boolean=false, cancelable:Boolean=false) {
-      super(type, bubbles, cancelable);
-      _data = data;
-    }
-	
-	/**
-	 * @return A generic object, or null   
-	 */	
-    public function get data():Object {
-      return _data;
-    }
-  }
+		////////////////////////////////////////////////////////////
+		//   CONSTANTS 
+		////////////////////////////////////////////////////////////
+
+		/**
+		 * Events of this type represent 1 second of contiguous viewability has occurred
+		 */
+		public static const OVVDiscernibleImpression:String = "OVVDiscernibleImpression";
+
+		/**
+		 * Events of this type represent an error that has occurred
+		 */
+		public static const OVVError:String = "OVVError";
+
+		/**
+		 * Events of this type represent 5 seconds of contiguous viewability have occurred
+		 */
+		public static const OVVImpression:String = "OVVImpression";
+
+		/**
+		 * Events of this type represent informational logging messages
+		 */
+		public static const OVVLog:String = "OVVLog";
+
+		////////////////////////////////////////////////////////////
+		//   ATTRIBUTES 
+		////////////////////////////////////////////////////////////
+
+		/**
+		 * An optional object containing additional information
+		 */
+		private var _data:Object;
+
+		////////////////////////////////////////////////////////////
+		//   CONSTRUCTOR 
+		////////////////////////////////////////////////////////////
+
+		/**
+		 * Creates an OVVEvent.
+		 *
+		 * @param type What this event represents
+		 * @param data Optional, additional data
+		 * @param bubbles Whether to bubble up the display list or not
+		 * @param cancelable Whether the event can be cancelled or not
+		 *
+		 */
+		public function OVVEvent(type:String, data:Object = null, bubbles:Boolean = false, cancelable:Boolean = false)
+		{
+			super(type, bubbles, cancelable);
+			_data = data;
+		}
+
+		////////////////////////////////////////////////////////////
+		//   GETTERS / SETTERS 
+		////////////////////////////////////////////////////////////
+
+		/**
+		 * An optional object containing additional information
+		 *
+		 * @return A generic object, or null
+		 */
+		public function get data():Object
+		{
+			return _data;
+		}
+	}
 }
 

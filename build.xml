@@ -3,8 +3,10 @@
 		 basedir="."
 		 default="compileBeacon">
 
-	<property name="FLEX_HOME"
-			  value="/Applications/Adobe Flash Builder 4.7/sdks/4.6.0/"/>
+	<property name="FLEX_HOME" value="/Applications/Adobe Flash Builder 4.7/sdks/4.6.0/"/>
+
+	<property name="SRC_DIR" value="src" />
+	<property name="ASDOC_DIR" value="asdoc" />
 
 	<taskdef resource="flexTasks.tasks"
 			 classpath="${FLEX_HOME}/ant/lib/flexTasks.jar"/>
@@ -13,25 +15,32 @@
 		<mxmlc file="src/org/openvv/OVVBeacon.as"
 			   output="bin-debug/OVVBeacon.swf"
 			   static-rsls="true">
-			<source-path path-element="src"/>
+			<source-path path-element="${SRC_DIR}"/>
 		</mxmlc>
 	</target>
 
 	<target name="swc">
 		<compc output="bin/openvv.swc"
 			   include-classes="org.openvv.OVVAsset org.openvv.OVVCheck org.openvv.OVVRenderMeter org.openvv.OVVThrottleType org.openvv.events.OVVEvent">
-			<source-path path-element="src"/>
+			<source-path path-element="${SRC_DIR}"/>
 		</compc>
 	</target>
 
+	<target name="asdoc">
+		<asdoc output="${ASDOC_DIR}" lenient="true" failonerror="true"> 
+			<doc-sources path-element="${SRC_DIR}" />
+		</asdoc>
+	</target>
+
+
 	<target name="clean">
-		<delete>
+		<delete failonerror="false">
 			<fileset dir="bin-debug"
-					 includes="**/*.swf"
 					 defaultexcludes="false"/>
 			<fileset dir="bin"
-					 includes="**/*"
-					 defaultexcludes="false"/>
+					 defaultexcludes="false" />
+			<fileset dir="${ASDOC_DIR}"
+					 defaultexcludes="false"/>		
 		</delete>
 	</target>
 

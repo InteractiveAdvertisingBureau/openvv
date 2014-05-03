@@ -16,29 +16,36 @@
  */
 package org.openvv
 {
+
 	/**
 	 * This class mirrors ThrottleEvent's constants. In scenarios where
 	 * OpenVV is loaded in SWFs compiled for less than Flash Player 11,
 	 * using ThrottleEvent throws a VerifyError. However, we can still
 	 * use these constants regardless of player environment.
 	 *
-	 * @see flash.events.ThrottleType
-	 */	
+	 * @see http://help.adobe.com/en_US/FlashPlatform/reference/actionscript/3/flash/events/ThrottleEvent.html flash.events.ThrottleEvent
+	 */
 	public final class OVVThrottleType
 	{
+
+		////////////////////////////////////////////////////////////
+		//   CONSTANTS 
+		////////////////////////////////////////////////////////////
+
 		/**
-		 * Events of this type represent the SWF being throttled due to being off screen
-		 */		
+		 * Events of this type represent the SWF being throttled due to being
+		 * off screen
+		 */
 		public static const PAUSE:String = "pause";
-		
+
 		/**
 		 * Events of this type represent the SWF being revealed
-		 */		
+		 */
 		public static const RESUME:String = "resume";
-		
+
 		/**
 		 * Events of this type represent the SWF being throttled due to being off screen
-		 */		
+		 */
 		public static const THROTTLE:String = "throttle";
 	}
 }

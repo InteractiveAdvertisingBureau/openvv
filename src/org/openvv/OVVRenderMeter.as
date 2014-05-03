@@ -16,48 +16,104 @@
  */
 package org.openvv
 {
-  import flash.display.DisplayObject;
-  import flash.events.Event;
-  import flash.utils.getTimer;
 
-  public class OVVRenderMeter
-  {
-    private static const MIN_FPS_THRESHOLD:Number = 12;
+	import flash.display.DisplayObject;
+	import flash.events.Event;
+	import flash.utils.getTimer;
 
-    private var _displayedObject:DisplayObject;
-    private var _startTime:Number = -1;
-    private var _fps:Number = 0;
-    private var _visibility:Boolean = false;
+	/**
+	 * OVVRenderMeter measures the difference between ENTER_FRAME events to
+	 * determine the frame rate of the asset being measured.
+	 */
+	public class OVVRenderMeter
+	{
 
-    public function OVVRenderMeter(displayedObject:DisplayObject)
-    {
-      _displayedObject = displayedObject;
-      _displayedObject.addEventListener(Event.ENTER_FRAME, handleFrame);
-    }
+		////////////////////////////////////////////////////////////
+		//   ATTRIBUTES 
+		////////////////////////////////////////////////////////////
 
-    public function get isVisible():Boolean
-    {
-      return _visibility;
-    }
+		/**
+		 * A DisplayObject to listen for ENTER_FRAME events on
+		 */
+		private var _displayObject:DisplayObject;
 
-    public function get fps():Number
-    {
-      return _fps;
-    }
+		/**
+		 * The most recent frame rate of the asset
+		 */
+		private var _fps:Number = 0;
 
-    private function handleFrame(event:Event):void
-    {
-      if (_startTime == -1)
-      {
-        _startTime = getTimer();
-        return;
-      }
+		/**
+		 * The time that the last ENTER_FRAME event occurred
+		 * @see flash.utils.getTimer() [http://help.adobe.com/en_US/FlashPlatform/reference/actionscript/3/flash/utils/package.html#getTimer()]
+		 */
+		private var _lastFrameTime:Number = -1;
 
-      var elapsedTime:Number = getTimer() - _startTime;
-      _fps = (1/(elapsedTime/1000));
-      _startTime = getTimer();
+		////////////////////////////////////////////////////////////
+		//   CONSTRUCTOR 
+		////////////////////////////////////////////////////////////
 
-      _visibility = _fps > MIN_FPS_THRESHOLD;
-    }
-  }
+		/**
+		 * Sets up the ENTER_FRAME event listener on the DisplayObject passed
+		 * in.
+		 *
+		 * @param displayObject A DisplayObject to listen for ENTER_FRAME
+		 * events on
+		 */
+		public function OVVRenderMeter(displayObject:DisplayObject)
+		{
+			_displayObject = displayObject;
+			_displayObject.addEventListener(Event.ENTER_FRAME, onEnterFrame);
+		}
+
+		////////////////////////////////////////////////////////////
+		//   PUBLIC API 
+		////////////////////////////////////////////////////////////
+
+		/**
+		 * Frees resources used by this class
+		 */
+		public function dispose():void
+		{
+			if (_displayObject)
+			{
+				_displayObject.removeEventListener(Event.ENTER_FRAME, onEnterFrame);
+				_displayObject = null;
+			}
+		}
+
+		////////////////////////////////////////////////////////////
+		//   EVENT HANDLERS 
+		////////////////////////////////////////////////////////////
+
+		/**
+		 * Measures the time between the last two ENTER_FRAME events to
+		 * determine a frame rate
+		 *
+		 * @param event The latest ENTER_FRAME event
+		 */
+		private function onEnterFrame(event:Event):void
+		{
+			if (_lastFrameTime == -1)
+			{
+				_lastFrameTime = getTimer();
+				return;
+			}
+
+			var elapsedTime:Number = getTimer() - _lastFrameTime;
+			_fps = (1 / (elapsedTime / 1000));
+			_lastFrameTime = getTimer();
+		}
+
+		////////////////////////////////////////////////////////////
+		//   GETTERS / SETTERS 
+		////////////////////////////////////////////////////////////
+
+		/**
+		 * The most recent frame rate of the asset
+		 */
+		public function get fps():Number
+		{
+			return _fps;
+		}
+	}
 }
