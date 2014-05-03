@@ -5,6 +5,7 @@
 
 	<property name="FLEX_HOME" value="/Applications/Adobe Flash Builder 4.7/sdks/4.6.0/"/>
 
+	<property name="BIN_DIR" value="bin" />
 	<property name="SRC_DIR" value="src" />
 	<property name="ASDOC_DIR" value="asdoc" />
 
@@ -13,14 +14,14 @@
 
 	<target name="compileBeacon">
 		<mxmlc file="src/org/openvv/OVVBeacon.as"
-			   output="bin-debug/OVVBeacon.swf"
+			   output="${BIN_DIR}/OVVBeacon.swf"
 			   static-rsls="true">
 			<source-path path-element="${SRC_DIR}"/>
 		</mxmlc>
 	</target>
 
 	<target name="swc">
-		<compc output="bin/openvv.swc"
+		<compc output="${BIN_DIR}/openvv.swc"
 			   include-classes="org.openvv.OVVAsset org.openvv.OVVCheck org.openvv.OVVRenderMeter org.openvv.OVVThrottleType org.openvv.events.OVVEvent">
 			<source-path path-element="${SRC_DIR}"/>
 		</compc>
@@ -34,14 +35,8 @@
 
 
 	<target name="clean">
-		<delete failonerror="false">
-			<fileset dir="bin-debug"
-					 defaultexcludes="false"/>
-			<fileset dir="bin"
-					 defaultexcludes="false" />
-			<fileset dir="${ASDOC_DIR}"
-					 defaultexcludes="false"/>		
-		</delete>
+		<delete dir="${BIN_DIR}" failonerror="false" />
+		<delete dir="${ASDOC_DIR}" failonerror="false" />	
 	</target>
 
 </project>
