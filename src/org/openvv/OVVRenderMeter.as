@@ -14,106 +14,105 @@
  * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
  * TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
-package org.openvv
-{
+package org.openvv {
 
-	import flash.display.DisplayObject;
-	import flash.events.Event;
-	import flash.utils.getTimer;
+    import flash.display.DisplayObject;
+    import flash.events.Event;
+    import flash.utils.getTimer;
 
-	/**
-	 * OVVRenderMeter measures the difference between ENTER_FRAME events to
-	 * determine the frame rate of the asset being measured.
-	 */
-	public class OVVRenderMeter
-	{
+    /**
+     * OVVRenderMeter measures the difference between ENTER_FRAME events to
+     * determine the frame rate of the asset being measured.
+     */
+    public class OVVRenderMeter {
 
-		////////////////////////////////////////////////////////////
-		//   ATTRIBUTES 
-		////////////////////////////////////////////////////////////
+        ////////////////////////////////////////////////////////////
+        //   ATTRIBUTES 
+        ////////////////////////////////////////////////////////////
 
-		/**
-		 * A DisplayObject to listen for ENTER_FRAME events on
-		 */
-		private var _displayObject:DisplayObject;
+        /**
+         * A DisplayObject to listen for ENTER_FRAME events on
+         */
+        private
+        var _displayObject: DisplayObject;
 
-		/**
-		 * The most recent frame rate of the asset
-		 */
-		private var _fps:Number = 0;
+        /**
+         * The most recent frame rate of the asset
+         */
+        private
+        var _fps: Number = 0;
 
-		/**
-		 * The time that the last ENTER_FRAME event occurred
-		 * @see flash.utils.getTimer() [http://help.adobe.com/en_US/FlashPlatform/reference/actionscript/3/flash/utils/package.html#getTimer()]
-		 */
-		private var _lastFrameTime:Number = -1;
+        /**
+         * The time that the last ENTER_FRAME event occurred
+         * @see flash.utils.getTimer() [http://help.adobe.com/en_US/FlashPlatform/reference/actionscript/3/flash/utils/package.html#getTimer()]
+         */
+        private
+        var _lastFrameTime: Number = -1;
 
-		////////////////////////////////////////////////////////////
-		//   CONSTRUCTOR 
-		////////////////////////////////////////////////////////////
+        ////////////////////////////////////////////////////////////
+        //   CONSTRUCTOR 
+        ////////////////////////////////////////////////////////////
 
-		/**
-		 * Sets up the ENTER_FRAME event listener on the DisplayObject passed
-		 * in.
-		 *
-		 * @param displayObject A DisplayObject to listen for ENTER_FRAME
-		 * events on
-		 */
-		public function OVVRenderMeter(displayObject:DisplayObject)
-		{
-			_displayObject = displayObject;
-			_displayObject.addEventListener(Event.ENTER_FRAME, onEnterFrame);
-		}
+        /**
+         * Sets up the ENTER_FRAME event listener on the DisplayObject passed
+         * in.
+         *
+         * @param displayObject A DisplayObject to listen for ENTER_FRAME
+         * events on
+         */
+        public
+        function OVVRenderMeter(displayObject: DisplayObject) {
+            _displayObject = displayObject;
+            _displayObject.addEventListener(Event.ENTER_FRAME, onEnterFrame);
+        }
 
-		////////////////////////////////////////////////////////////
-		//   PUBLIC API 
-		////////////////////////////////////////////////////////////
+        ////////////////////////////////////////////////////////////
+        //   PUBLIC API 
+        ////////////////////////////////////////////////////////////
 
-		/**
-		 * Frees resources used by this class
-		 */
-		public function dispose():void
-		{
-			if (_displayObject)
-			{
-				_displayObject.removeEventListener(Event.ENTER_FRAME, onEnterFrame);
-				_displayObject = null;
-			}
-		}
+        /**
+         * Frees resources used by this class
+         */
+        public
+        function dispose(): void {
+            if (_displayObject) {
+                _displayObject.removeEventListener(Event.ENTER_FRAME, onEnterFrame);
+                _displayObject = null;
+            }
+        }
 
-		////////////////////////////////////////////////////////////
-		//   EVENT HANDLERS 
-		////////////////////////////////////////////////////////////
+        ////////////////////////////////////////////////////////////
+        //   EVENT HANDLERS 
+        ////////////////////////////////////////////////////////////
 
-		/**
-		 * Measures the time between the last two ENTER_FRAME events to
-		 * determine a frame rate
-		 *
-		 * @param event The latest ENTER_FRAME event
-		 */
-		private function onEnterFrame(event:Event):void
-		{
-			if (_lastFrameTime == -1)
-			{
-				_lastFrameTime = getTimer();
-				return;
-			}
+        /**
+         * Measures the time between the last two ENTER_FRAME events to
+         * determine a frame rate
+         *
+         * @param event The latest ENTER_FRAME event
+         */
+        private
+        function onEnterFrame(event: Event): void {
+            if (_lastFrameTime == -1) {
+                _lastFrameTime = getTimer();
+                return;
+            }
 
-			var elapsedTime:Number = getTimer() - _lastFrameTime;
-			_fps = (1 / (elapsedTime / 1000));
-			_lastFrameTime = getTimer();
-		}
+            var elapsedTime: Number = getTimer() - _lastFrameTime;
+            _fps = (1 / (elapsedTime / 1000));
+            _lastFrameTime = getTimer();
+        }
 
-		////////////////////////////////////////////////////////////
-		//   GETTERS / SETTERS 
-		////////////////////////////////////////////////////////////
+        ////////////////////////////////////////////////////////////
+        //   GETTERS / SETTERS 
+        ////////////////////////////////////////////////////////////
 
-		/**
-		 * The most recent frame rate of the asset
-		 */
-		public function get fps():Number
-		{
-			return _fps;
-		}
-	}
+        /**
+         * The most recent frame rate of the asset
+         */
+        public
+        function get fps(): Number {
+            return _fps;
+        }
+    }
 }

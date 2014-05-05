@@ -17,6 +17,7 @@
 
 /**
  * A container for all OpenVV instances running on the page
+ * @class
  * @constructor
  */
 function OVV() {
@@ -30,16 +31,16 @@ function OVV() {
      * adds beacon SWFs to the page, which are color-coded based on their
      * status. OVVCheck.beaconViewabilityState and
      * OVVCheck.geometryViewabilityState are also populated in debug mode.
-     * @type {boolean}
-     * @see {@link OVVCheck.geometryViewabilityState}
-     * @see {@link OVVCheck.beaconViewabilityState}
-     * @see {@link OVVAsset.BEACON_SIZE}
+     * @type {Boolean}
+     * @see {@link OVVCheck#geometryViewabilityState}
+     * @see {@link OVVCheck#beaconViewabilityState}
+     * @see {@link OVVAsset#BEACON_SIZE}
      */
     this.DEBUG = false;
 
     /**
      * Whether OpenVV is running within an iframe or not.
-     * @type {boolean}
+     * @type {Boolean}
      */
     this.IN_IFRAME = (parent !== window);
 
@@ -55,8 +56,9 @@ function OVV() {
     ///////////////////////////////////////////////////////////////////////////
 
     /**
-     * An object for storing assets by their id.
-     * @type {object}
+     * An object for storing OVVAssets. {@link OVVAsset}s are stored with their
+     * id as the key and the OVVAsset as the value.
+     * @type {Object}
      */
     var assets = {};
 
@@ -65,8 +67,10 @@ function OVV() {
     ///////////////////////////////////////////////////////////////////////////
 
     /**
-     * Stores an Element
-     * @param {Element} An element to observe
+     * Stores an asset which can be retrieved later using
+     * {@link OVV#getAssetById}. The latest asset added to OVV can also be
+     * retrieved via the {@link OVV#asset} property.
+     * @param {OVVAsset} ovvAsset An asset to observe
      */
     this.addAsset = function(ovvAsset) {
         if (!assets.hasOwnProperty(ovvAsset.getId())) {
@@ -77,24 +81,25 @@ function OVV() {
     }
 
     /**
-     * Removes an Element from storage
-     * @param {Element} The element to remove
+     * Removes an {@link OVVAsset} from OVV.
+     * @param {OVVAsset} ovvAsset An {@link OVVAsset} to remove
      */
     this.removeAsset = function(ovvAsset) {
         delete assets[ovvAsset.getId()];
     }
 
     /**
-     * Retreives an Element based on its ID
-     * @param {string} The id of the element to retreive
-     * @returns {Element|null} The element matching the given ID
+     * Retreives an {@link OVVAsset} based on its ID
+     * @param {String} The id of the element to retreive
+     * @returns {OVVAsset|null} The element matching the given ID, or null if
+     * one could not be found
      */
     this.getAssetById = function(id) {
         return assets[id];
     }
 
     /**
-     * @returns {object} an object containing all of the OVVAssets being tracked
+     * @returns {Object} Object an object containing all of the OVVAssets being tracked
      */
     this.getAds = function() {
         var copy = {};
@@ -109,6 +114,7 @@ function OVV() {
 
 /**
  * A container for all the values that OpenVV collects.
+ * @class
  * @constructor
  */
 function OVVCheck() {
@@ -119,37 +125,37 @@ function OVVCheck() {
 
     /**
      * The height of the viewport
-     * @type {number}
+     * @type {Number}
      */
     this.clientHeight = -1;
 
     /**
      * The width of the viewport
-     * @type {number}
+     * @type {Number}
      */
     this.clientWidth = -1;
 
     /**
      * A description of any error that occured
-     * @type {string}
+     * @type {String}
      */
     this.error = '';
 
     /**
      * Whether the tab is focused or not (populated by ActionScript)
-     * @type {boolean}
+     * @type {Boolean}
      */
     this.focus = null;
 
     /**
      * The framerate of the asset (populated by ActionScript)
-     * @type {number}
+     * @type {Number}
      */
     this.fps = -1;
 
     /**
-     * A unique identifier of the asset measured
-     * @type {string}
+     * A unique identifier of the asset
+     * @type {String}
      */
     this.id = '';
 
@@ -157,32 +163,32 @@ function OVVCheck() {
      * Whether beacon checking is supported. Beacon support is defined by
      * placing a "control beacon" SWF off screen, and verifying that it is
      * throttled as expected.
-     * @type {boolean}
+     * @type {Boolean}
      */
     this.beaconsSupported = null;
 
     /**
      * Whether geometry checking is supported. Geometry support requires
      * that the asset is not within an iframe.
-     * @type {boolean}
+     * @type {Boolean}
      */
     this.geometrySupported = null;
 
     /**
      * The viewability state measured by the geometry technique. Only populated
      * when OVV.DEBUG is true.
-     * @type {string}
-     * @see {@link OVVAsset.checkGeometry}
-     * @see {@link OVV.DEBUG}
+     * @type {String}
+     * @see {@link checkGeometry}
+     * @see {@link OVV#DEBUG}
      */
     this.geometryViewabilityState = '';
 
     /**
      * The viewability state measured by the beacon technique. Only populated
      * when OVV.DEBUG is true.
-     * @type {string}
-     * @see {@link OVVAsset.checkBeacons}
-     * @see {@link OVV.DEBUG}
+     * @type {String}
+     * @see {@link OVVAsset#checkBeacons}
+     * @see {@link OVV#DEBUG}
      */
     this.beaconViewabilityState = '';
 
@@ -190,9 +196,9 @@ function OVVCheck() {
      * The technique used to populate OVVCheck.viewabilityState. Will be either
      * OVV.GEOMETRY when OVV is run in the root page, or OVV.BEACON when OVV is
      * run in an iframe. When in debug mode, will always remain blank.
-     * @type {string}
-     * @see {@link OVV.GEOMETRY}
-     * @see {@link OVV.BEACON}
+     * @type {String}
+     * @see {@link OVV#GEOMETRY}
+     * @see {@link OVV#BEACON}
      */
     this.technique = '';
 
@@ -201,8 +207,7 @@ function OVVCheck() {
      * is populated with the states of each beacon, identified by their index.
      * True means the beacon was viewable and false means the beacon was
      * unviewable. Beacon 0 is the "control beacon" and should always be false.
-     * @type {array<boolean>|null}
-     * @see {@link OVVAsset.CONTROL}
+     * @type {Array.<Boolean>|null}
      * @see {@link OVVAsset.CONTROL}
      * @see {@link OVVAsset.CENTER}
      * @see {@link OVVAsset.OUTER_TOP_LEFT}
@@ -222,51 +227,51 @@ function OVVCheck() {
 
     /**
      * Whether this asset is in an iframe.
-     * @type {boolean}
-     * @see {@link OVV.IN_IFRAME}
-     * @see {@link OVV.DEBUG}
+     * @type {Boolean}
+     * @see {@link OVV#IN_IFRAME}
+     * @see {@link OVV#DEBUG}
      */
     this.inIframe = null;
 
     /**
      * The distance, in pixels, from the bottom of the asset to the bottom of
      * the viewport
-     * @type {number}
+     * @type {Number}
      */
     this.objBottom = -1;
 
     /**
      * The distance, in pixels, from the left of the asset to the left of
      * the viewport
-     * @type {number}
+     * @type {Number}
      */
     this.objLeft = -1;
 
     /**
      * The distance, in pixels, from the right of the asset to the right of
      * the viewport
-     * @type {number}
+     * @type {Number}
      */
     this.objRight = -1;
 
     /**
      * The distance, in pixels, from the top of the asset to the top of
      * the viewport
-     * @type {number}
+     * @type {Number}
      */
     this.objTop = -1;
 
     /**
      * The percentage of the player that is viewable within the viewport
-     * @type {number}
+     * @type {Number}
      */
     this.percentViewable = -1;
 
     /**
-     * Set to OVVCheck.VIEWABLE when the player was at least 50%
+     * Set to {@link OVVCheck#VIEWABLE} when the player was at least 50%
      * viewable. Set to OVVCheck when the player was less than 50% viewable.
-     * Set to OVVCheck.UNMEASURABLE when a determination could not be made.
-     * @type {string}
+     * Set to {@link OVVCheck#UNMEASURABLE} when a determination could not be made.
+     * @type {String}
      * @see {@link OVVCheck.UNMEASURABLE}
      * @see {@link OVVCheck.VIEWABLE}
      * @see {@link OVVCheck.UNVIEWABLE}
@@ -274,16 +279,40 @@ function OVVCheck() {
     this.viewabilityState = '';
 }
 
+/**
+ * The value that {@link OVVCheck#viewabilityState} will be set to if OVV cannot
+ * determine whether the asset is at least 50% viewable.
+ */
 OVVCheck.UNMEASURABLE = 'unmeasurable';
+
+/**
+ * The value that {@link OVVCheck#viewabilityState} will be set to if OVV
+ * determines that the asset is at least 50% viewable.
+ */
 OVVCheck.VIEWABLE = 'viewable';
+
+/**
+ * The value that {@link OVVCheck#viewabilityState} will be set to if OVV
+ * determines that the asset is less than 50% viewable.
+ */
 OVVCheck.UNVIEWABLE = 'unviewable';
+
+/**
+ * The value that {@link OVVCheck#technique} will be set to if OVV
+ * uses the beacon technique to determine {@link OVVCheck#viewabilityState}
+ */
 OVVCheck.BEACON = 'beacon';
+
+/**
+ * The value that {@link OVVCheck#technique} will be set to if OVV
+ * uses the geometry technique to determine {@link OVVCheck#viewabilityState}
+ */
 OVVCheck.GEOMETRY = 'geometry';
 
 /**
  * Represents an Asset which OVV is going to determine the viewability of
  * @constructor
- * @param {string} uid - The unique identifier of this asset
+ * @param {String} uid - The unique identifier of this asset
  */
 function OVVAsset(uid) {
 
@@ -293,56 +322,56 @@ function OVVAsset(uid) {
 
     /**
      * The total number of beacons being used
-     * @type {number}
+     * @type {Number}
      */
     const TOTAL_BEACONS = 13;
 
     /**
      * The value of the square root of 2. Computed here and saved for reuse
      * later. Approximately 1.41.
-     * @type {number}
+     * @type {Number}
      */
     const SQRT_2 = Math.sqrt(2);
 
     /**
      * The index/identifier of the control beacon, which is placed off screen to
      * test that throttling occurs.
-     * @type {number}
+     * @type {Number}
      */
     const CONTROL = 0;
 
     /**
      * The index/identifier of the center beacon, which is placed in the center
      * of the player.
-     * @type {number}
+     * @type {Number}
      */
     const CENTER = 1;
 
     /**
      * The index/identifier of the beacon placed at the top left corner of the
      * player.
-     * @type {number}
+     * @type {Number}
      */
     const OUTER_TOP_LEFT = 2;
 
     /**
      * The index/identifier of the beacon placed at the top right corner of the
      * player.
-     * @type {number}
+     * @type {Number}
      */
     const OUTER_TOP_RIGHT = 3;
 
     /**
      * The index/identifier of the beacon placed at the bottom left corner of
      * the player.
-     * @type {number}
+     * @type {Number}
      */
     const OUTER_BOTTOM_LEFT = 4;
 
     /**
      * The index/identifier of the beacon placed at the bottom right corner of
      * the player.
-     * @type {number}
+     * @type {Number}
      */
     const OUTER_BOTTOM_RIGHT = 5;
 
@@ -350,7 +379,7 @@ function OVVAsset(uid) {
      * The index/identifier of the beacon placed at the top left corner of the
      * middle area. The middle area defines a region which is 50% of the total
      * area of the player.
-     * @type {number}
+     * @type {Number}
      */
     const MIDDLE_TOP_LEFT = 6;
 
@@ -358,7 +387,7 @@ function OVVAsset(uid) {
      * The index/identifier of the beacon placed at the top right corner of the
      * middle area. The middle area defines a region which is 50% of the total
      * area of the player.
-     * @type {number}
+     * @type {Number}
      */
     const MIDDLE_TOP_RIGHT = 7;
 
@@ -366,7 +395,7 @@ function OVVAsset(uid) {
      * The index/identifier of the beacon placed at the bottom left corner of
      * the middle area. The middle area defines a region which is 50% of the total
      * area of the player.
-     * @type {number}
+     * @type {Number}
      */
     const MIDDLE_BOTTOM_LEFT = 8;
 
@@ -374,7 +403,7 @@ function OVVAsset(uid) {
      * The index/identifier of the beacon placed at the bottom right corner of
      * the middle area. The middle area defines a region which is 50% of the total
      * area of the player.
-     * @type {number}
+     * @type {Number}
      */
     const MIDDLE_BOTTOM_RIGHT = 9;
 
@@ -382,7 +411,7 @@ function OVVAsset(uid) {
      * The index/identifier of the beacon placed at the top left corner of
      * the inner area. The inner area defines a region such that the area
      * outside 2 sides of it are 50% of the player's total area.
-     * @type {number}
+     * @type {Number}
      */
     const INNER_TOP_LEFT = 10;
 
@@ -390,7 +419,7 @@ function OVVAsset(uid) {
      * The index/identifier of the beacon placed at the top right corner of
      * the inner area. The inner area defines a region such that the area
      * outside 2 sides of it are 50% of the player's total area.
-     * @type {number}
+     * @type {Number}
      */
     const INNER_TOP_RIGHT = 11;
 
@@ -398,7 +427,7 @@ function OVVAsset(uid) {
      * The index/identifier of the beacon placed at the bottom left corner of
      * the inner area. The inner area defines a region such that the area
      * outside 2 sides of it are 50% of the player's total area.
-     * @type {number}
+     * @type {Number}
      */
     const INNER_BOTTOM_LEFT = 12;
 
@@ -406,7 +435,7 @@ function OVVAsset(uid) {
      * The index/identifier of the beacon placed at the bottom right corner of
      * the inner area. The inner area defines a region such that the area
      * outside 2 sides of it are 50% of the player's total area.
-     * @type {number}
+     * @type {Number}
      */
     const INNER_BOTTOM_RIGHT = 13;
 
@@ -416,19 +445,20 @@ function OVVAsset(uid) {
 
     /**
      * the id of the ad that this asset is associatied with
-     * @type {!string}
+     * @type {!String}
      */
     var id = uid;
 
     /**
      * The numer of beacons that have checked in as being ready
-     * @type {number}
+     * @type {Number}
      */
     var beaconsStarted = 0;
 
     /**
-     * The height and width of the beacons on the page (1 for prod, greater for visibilty/testing)
-     * @type {!number}
+     * The height and width of the beacons on the page. 1 for production, 20
+     * for {@link OVV#DEBUG} mode.
+     * @type {Number}
      */
     var BEACON_SIZE = $ovv.DEBUG ? 20 : 1;
 
@@ -449,19 +479,20 @@ function OVVAsset(uid) {
     ///////////////////////////////////////////////////////////////////////////
 
     /**
-     * Returns an OVVCheck object populated with information gathered from the
-     * browser. The viewabilityState attribute is populated with either
-     * OVVCheck.VIEWABLE, OVVCheck.UNVIEWABLE, or OVVCheck.UNMEASURABLE as
-     * determined by either the geometry technique or beacon technique when in
-     * an iframe.
-     *
+     * <p>
+     * Returns an {@link OVVCheck} object populated with information gathered
+     * from the browser. The viewabilityState attribute is populated with
+     * either {@link OVVCheck.VIEWABLE}, {@link OVVCheck.UNVIEWABLE}, or {@link OVVCheck.UNMEASURABLE}
+     * as determined by either xbeacon technique when in an iframe, or the
+     * geometry technique otherwise.
+     * </p><p>
      * The geometry technique compares the bounds of the viewport, taking
      * scrolling into account, and the bounds of the player.
-     *
+     * </p><p>
      * The beacon technique places a single beacon offscreen and several
      * on top of the player. It then queries the state of the beacons on top
      * of the player to determine how much of the player is viewable.
-     *
+     * </p>
      * @returns {OVVCheck}
      * @see {@link OVVCheck}
      * @see {@link checkGeometry}
@@ -550,7 +581,7 @@ function OVVAsset(uid) {
 
     /**
      * Called by each beacon to signify that it's ready to measure
-     * @param {number} The index identifier of the beacon
+     * @param {Number} index The index identifier of the beacon
      */
     this.beaconStarted = function(index) {
 
@@ -586,7 +617,7 @@ function OVVAsset(uid) {
     };
 
     /**
-     * @returns {string} The randomly generated ID of this asset
+     * @returns {String} The randomly generated ID of this asset
      */
     this.getId = function() {
         return id;
@@ -602,7 +633,7 @@ function OVVAsset(uid) {
      * determine what percentage, if any, of the player is within the bounds
      * of the viewport.
      * @param {OVVCheck} check The OVVCheck object to populate
-     * @param {Element} player The DOM element to measure
+     * @param {Element} player The HTML Element to measure
      */
     var checkGeometry = function(check, player) {
         //Avoid including scrollbars in viewport size by taking the smallest dimensions (also
@@ -776,7 +807,7 @@ function OVVAsset(uid) {
     };
 
     /**
-     * @returns {boolean} Whether all beacons have checked in
+     * @returns {Boolean} Whether all beacons have checked in
      */
     var beaconsReady = function() {
 
@@ -789,14 +820,14 @@ function OVVAsset(uid) {
 
     /**
      * Creates the beacon SWFs and adds them to the DOM
-     * @param {string} The URL of the beacon SWFs
+     * @param {String} url The URL of the beacon SWFs
      * @see {@link positionBeacons}
      */
     var createBeacons = function(url) {
 
         // double checking that our URL was actually set to something
         // (BEACON_SWF_URL is obfuscated here to prevent it from being
-        // string substituted by ActionScript)
+        // String substituted by ActionScript)
         if (url === '' || url === ('BEACON' + '_SWF_' + 'URL')) {
             return;
         }
@@ -941,8 +972,8 @@ function OVVAsset(uid) {
 
     /**
      * Determines whether a DOM element is within the bounds of the viewport
-     * @param {Element} A DOM Element
-     * @returns {boolean} Whether the parameter is at least partially within
+     * @param {Element} element An HTML Element
+     * @returns {Boolean} Whether the parameter is at least partially within
      * the browser's viewport
      */
     var isOnScreen = function(element) {
@@ -1004,7 +1035,7 @@ function OVVAsset(uid) {
     // only use the beacons if we're in an iframe, but go ahead and add them
     // during debug mode
     if ($ovv.IN_IFRAME || $ovv.DEBUG) {
-        // 'BEACON_SWF_URL' is string substituted from ActionScript
+        // 'BEACON_SWF_URL' is String substituted from ActionScript
         createBeacons.bind(this)('BEACON_SWF_URL');
     } else {
         // since we don't have to wait for beacons to be ready, we start the 
@@ -1016,5 +1047,5 @@ function OVVAsset(uid) {
 // initialize the OVV object if it doesn't exist
 window.$ovv = window.$ovv || new OVV();
 
-// 'OVVID' is string substituted from AS
+// 'OVVID' is String substituted from AS
 window.$ovv.addAsset(new OVVAsset('OVVID'));

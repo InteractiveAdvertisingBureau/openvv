@@ -14,38 +14,36 @@
  * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
  * TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
-package org.openvv
-{
+package org.openvv {
 
-	/**
-	 * This class mirrors ThrottleEvent's constants. In scenarios where
-	 * OpenVV is loaded in SWFs compiled for less than Flash Player 11,
-	 * using ThrottleEvent throws a VerifyError. However, we can still
-	 * use these constants regardless of player environment.
-	 *
-	 * @see http://help.adobe.com/en_US/FlashPlatform/reference/actionscript/3/flash/events/ThrottleEvent.html flash.events.ThrottleEvent
-	 */
-	public final class OVVThrottleType
-	{
+    /**
+     * This class mirrors ThrottleEvent's constants. In scenarios where
+     * OpenVV is loaded in SWFs compiled for less than Flash Player 11,
+     * using ThrottleEvent throws a VerifyError. However, we can still
+     * use these constants regardless of player environment.
+     *
+     * @see http://help.adobe.com/en_US/FlashPlatform/reference/actionscript/3/flash/events/ThrottleEvent.html flash.events.ThrottleEvent
+     */
+    public final class OVVThrottleType {
 
-		////////////////////////////////////////////////////////////
-		//   CONSTANTS 
-		////////////////////////////////////////////////////////////
+        ////////////////////////////////////////////////////////////
+        //   CONSTANTS 
+        ////////////////////////////////////////////////////////////
 
-		/**
-		 * Events of this type represent the SWF being throttled due to being
-		 * off screen
-		 */
-		public static const PAUSE:String = "pause";
+        /**
+         * Events of this type represent the SWF being throttled due to being
+         * off screen
+         */
+        public static const PAUSE: String = "pause";
 
-		/**
-		 * Events of this type represent the SWF being revealed
-		 */
-		public static const RESUME:String = "resume";
+        /**
+         * Events of this type represent the SWF being revealed
+         */
+        public static const RESUME: String = "resume";
 
-		/**
-		 * Events of this type represent the SWF being throttled due to being off screen
-		 */
-		public static const THROTTLE:String = "throttle";
-	}
+        /**
+         * Events of this type represent the SWF being throttled due to being off screen
+         */
+        public static const THROTTLE: String = "throttle";
+    }
 }

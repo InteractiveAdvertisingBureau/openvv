@@ -14,84 +14,82 @@
  * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
  * TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
-package org.openvv.events
-{
+package org.openvv.events {
 
-	import flash.events.Event;
+    import flash.events.Event;
 
-	/**
-	 * An Event dispatched from OVVAsset.
-	 *
-	 * @see org.openvv.OVVAsset
-	 */
-	public class OVVEvent extends Event
-	{
+    /**
+     * An Event dispatched from OVVAsset.
+     *
+     * @see org.openvv.OVVAsset
+     */
+    public class OVVEvent extends Event {
 
-		////////////////////////////////////////////////////////////
-		//   CONSTANTS 
-		////////////////////////////////////////////////////////////
+        ////////////////////////////////////////////////////////////
+        //   CONSTANTS 
+        ////////////////////////////////////////////////////////////
 
-		/**
-		 * Events of this type represent 1 second of contiguous viewability has occurred
-		 */
-		public static const OVVDiscernibleImpression:String = "OVVDiscernibleImpression";
+        /**
+         * Events of this type represent 1 second of contiguous viewability has occurred
+         */
+        public static const OVVDiscernibleImpression: String = "OVVDiscernibleImpression";
 
-		/**
-		 * Events of this type represent an error that has occurred
-		 */
-		public static const OVVError:String = "OVVError";
+        /**
+         * Events of this type represent an error that has occurred
+         */
+        public static const OVVError: String = "OVVError";
 
-		/**
-		 * Events of this type represent 5 seconds of contiguous viewability have occurred
-		 */
-		public static const OVVImpression:String = "OVVImpression";
+        /**
+         * Events of this type represent 5 seconds of contiguous viewability have occurred
+         */
+        public static const OVVImpression: String = "OVVImpression";
 
-		/**
-		 * Events of this type represent informational logging messages
-		 */
-		public static const OVVLog:String = "OVVLog";
+        /**
+         * Events of this type represent informational logging messages
+         */
+        public static const OVVLog: String = "OVVLog";
 
-		////////////////////////////////////////////////////////////
-		//   ATTRIBUTES 
-		////////////////////////////////////////////////////////////
+        ////////////////////////////////////////////////////////////
+        //   ATTRIBUTES 
+        ////////////////////////////////////////////////////////////
 
-		/**
-		 * An optional object containing additional information
-		 */
-		private var _data:Object;
+        /**
+         * An optional object containing additional information
+         */
+        private
+        var _data: Object;
 
-		////////////////////////////////////////////////////////////
-		//   CONSTRUCTOR 
-		////////////////////////////////////////////////////////////
+        ////////////////////////////////////////////////////////////
+        //   CONSTRUCTOR 
+        ////////////////////////////////////////////////////////////
 
-		/**
-		 * Creates an OVVEvent.
-		 *
-		 * @param type What this event represents
-		 * @param data Optional, additional data
-		 * @param bubbles Whether to bubble up the display list or not
-		 * @param cancelable Whether the event can be cancelled or not
-		 *
-		 */
-		public function OVVEvent(type:String, data:Object = null, bubbles:Boolean = false, cancelable:Boolean = false)
-		{
-			super(type, bubbles, cancelable);
-			_data = data;
-		}
+        /**
+         * Creates an OVVEvent.
+         *
+         * @param type What this event represents
+         * @param data Optional, additional data
+         * @param bubbles Whether to bubble up the display list or not
+         * @param cancelable Whether the event can be cancelled or not
+         *
+         */
+        public
+        function OVVEvent(type: String, data: Object = null, bubbles: Boolean = false, cancelable: Boolean = false) {
+            super(type, bubbles, cancelable);
+            _data = data;
+        }
 
-		////////////////////////////////////////////////////////////
-		//   GETTERS / SETTERS 
-		////////////////////////////////////////////////////////////
+        ////////////////////////////////////////////////////////////
+        //   GETTERS / SETTERS 
+        ////////////////////////////////////////////////////////////
 
-		/**
-		 * An optional object containing additional information
-		 *
-		 * @return A generic object, or null
-		 */
-		public function get data():Object
-		{
-			return _data;
-		}
-	}
+        /**
+         * An optional object containing additional information
+         *
+         * @return A generic object, or null
+         */
+        public
+        function get data(): Object {
+            return _data;
+        }
+    }
 }
-

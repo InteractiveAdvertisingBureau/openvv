@@ -3,40 +3,45 @@
 		 basedir="."
 		 default="compileBeacon">
 
-	<property name="FLEX_HOME" value="/Applications/Adobe Flash Builder 4.7/sdks/4.6.0/"/>
+	<property name="FLEX_HOME" value=""/>
 
-	<property name="BIN_DIR" value="bin" />
-	<property name="SRC_DIR" value="src" />
-	<property name="ASDOC_DIR" value="asdoc" />
-
-	<taskdef resource="flexTasks.tasks"
-			 classpath="${FLEX_HOME}/ant/lib/flexTasks.jar"/>
-
+	<property name="src.dir" value="src" />
+	<property name="bin.dir" value="bin" />
+	<property name="asdoc.dir" value="asdoc" />
+	
+	<taskdef resource="flexTasks.tasks" classpath="${FLEX_HOME}/ant/lib/flexTasks.jar"/>
+	
 	<target name="compileBeacon">
-		<mxmlc file="src/org/openvv/OVVBeacon.as"
-			   output="${BIN_DIR}/OVVBeacon.swf"
+		<fail message="You must set FLEX_HOME to your SDK's home directory">
+			<condition>
+				<equals arg1="${FLEX_HOME}" arg2="" />
+			</condition>
+		</fail>
+		<mxmlc file="${src.dir}/org/openvv/OVVBeacon.as"
+			   output="${bin.dir}/OVVBeacon.swf"
 			   static-rsls="true">
-			<source-path path-element="${SRC_DIR}"/>
+			<source-path path-element="${src.dir}"/>
 		</mxmlc>
 	</target>
 
 	<target name="swc">
-		<compc output="${BIN_DIR}/openvv.swc"
+		<compc output="${bin.dir}/openvv.swc"
 			   include-classes="org.openvv.OVVAsset org.openvv.OVVCheck org.openvv.OVVRenderMeter org.openvv.OVVThrottleType org.openvv.events.OVVEvent">
-			<source-path path-element="${SRC_DIR}"/>
+			<source-path path-element="${src.dir}"/>
 		</compc>
 	</target>
 
-	<target name="asdoc">
-		<asdoc output="${ASDOC_DIR}" lenient="true" failonerror="true"> 
-			<doc-sources path-element="${SRC_DIR}" />
+	<target name="doc">
+		<asdoc output="${asdoc.dir}" lenient="true" failonerror="true"> 
+			<doc-sources path-element="${src.dir}" />
 		</asdoc>
 	</target>
 
 
 	<target name="clean">
-		<delete dir="${BIN_DIR}" failonerror="false" />
-		<delete dir="${ASDOC_DIR}" failonerror="false" />	
+		<delete dir="${bin.dir}" failonerror="false" />
+		<delete dir="${asdoc.dir}" failonerror="false" />
+		<delete dir="${JSDOC_DIR}" failonerror="false" />	
 	</target>
 
 </project>
