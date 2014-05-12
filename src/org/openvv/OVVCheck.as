@@ -15,143 +15,177 @@
  * TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 package org.openvv {
-import flash.external.ExternalInterface;
 
-public class OVVCheck {
-	public var results:Object;
-	public function OVVCheck( uniqueId:String ) {
-    if (OVVCheck.externalInterfaceIsAvailable)
-    {
-		  ExternalInterface.addCallback( uniqueId, flashProbe );
-		  results = checkViewability( uniqueId );
+    /**
+     * OVVCheck is a container for properties about the current viewability
+     * state of an OVVAsset. The fps and focus properties are determined by
+     * ActionScript, and will be their default values in the Object
+     * returned from JavaScript.
+     */
+    public class OVVCheck {
+
+        ////////////////////////////////////////////////////////////
+        //   CONSTANTS 
+        ////////////////////////////////////////////////////////////
+
+        /**
+         * When OVVCheck.technique is set to BEACON, the beacon technique
+         * was used to determine the viewabilityState
+         */
+        public static const BEACON: String = "beacon";
+
+        /**
+         * When OVVCheck.technique is set to GEOMETRY, the geometry technique
+         * was used to determine the viewabilityState
+         */
+        public static const GEOMETRY: String = "geometry";
+
+        /**
+         * OpenVV was unable to determine whether the asset was viewable or not
+         */
+        public static const UNMEASURABLE: String = 'unmeasurable';
+
+        /**
+         * Less than 50% of the asset is viewable within the viewport
+         */
+        public static const UNVIEWABLE: String = 'unviewable';
+
+        /**
+         * At least 50% of the asset is viewable within the viewport
+         */
+        public static const VIEWABLE: String = 'viewable';
+
+        ////////////////////////////////////////////////////////////
+        //   ATTRIBUTES 
+        ////////////////////////////////////////////////////////////
+
+        /**
+         * During debug mode, beaconViewabilityState is populated with the viewabilityState
+         * determined by the beacon technique
+         */
+        public var beaconViewabilityState: String;
+
+        /**
+         * When using the beacon technique, this array will be populatd with
+         * Booleans describing the viewability status of each beacon by its
+         * index. True = viewable. False = unviewable. See the JavaScript
+         * documentation for a description of the indices.
+         */
+        public var beacons: Array;
+
+        /**
+         * Whether OpenVV can use beacons to determine viewability
+         */
+        public var beaconsSupported: Boolean;
+
+        /**
+         * The height of the viewport currently being displayed
+         */
+        public var clientHeight: int = -1;
+
+        /**
+         * The width of the viewport currently being displayed
+         */
+        public var clientWidth: int = -1;
+
+        /**
+         * A description of an error that may have occurred
+         */
+        public var error: String;
+
+        /**
+         * If the tab is focused or not
+         */
+        public var focus: Boolean;
+
+        /**
+         * The current framerate of the asset (determined by ActionScript)
+         */
+        public var fps: Number = -1;
+
+        /**
+         * Whether OpenVV can use JavaScript bounds to determine viewability
+         */
+        public var geometrySupported: Boolean;
+
+        /**
+         * During debug mode, geometryViewabilityState is populated with the viewabilityState
+         * determined by the beacon technique
+         */
+        public
+        var geometryViewabilityState: String;
+
+        /**
+         * The unique identifier of the asset
+         */
+        public var id: String;
+
+        /**
+         * Whether the asset is in an iframe or not
+         */
+        public var inIframe: Boolean = false;
+
+        /**
+         * The distance (in pixels) from the asset's bottom to the bottom of the viewport
+         */
+        public var objBottom: int = -1;
+
+        /**
+         * The distance (in pixels) from the asset's left side to the left side of the viewport
+         */
+        public var objLeft: int = -1;
+
+        /**
+         * The distance (in pixels) from the asset's right side to the right side of the viewport
+         */
+        public var objRight: int = -1;
+
+        /**
+         * The distance (in pixels) from the asset's top to the top of the viewport
+         */
+        public
+        var objTop: int = -1;
+
+        /**
+         * How much of the asset is viewable within the viewport
+         */
+        public var percentViewable: int = -1;
+
+        /**
+         * The technique used to determine viewablity
+         *
+         * @see BEACON
+         * @see GEOMETRY
+         */
+        public var technique: String;
+
+        /**
+         * Represents whether the asset was at least 50% viewable or if OpenVV
+         * couldn't make a determination.
+         *
+         * @see #VIEWABLE
+         * @see #UNVIEWABLE
+         * @see #UNMEASURABLE
+         */
+        public var viewabilityState: String;
+
+        ////////////////////////////////////////////////////////////
+        //   CONSTRUCTOR 
+        ////////////////////////////////////////////////////////////
+
+        /**
+         * Constructor. Takes in an Object created by JavaScript and assigns
+         * its field to this object.
+         *
+         * @param jsCheck The OVVCheck object created by JavaScript
+         *
+         */
+        public function OVVCheck(jsCheck: Object) {
+            for (var field: String in jsCheck) {
+                if (this.hasOwnProperty(field)) {
+                    this[field] = jsCheck[field];
+                }
+            }
+        }
     }
-    else
-    {
-      return { "error": "ExternalInterface not available" };
-    }
-	}
-	//Callback function attached to HTML Object to identify it:
-	public function flashProbe( someData:* ):void {
-		return;
-	}
-	public function checkViewability( uniqueId:String ):Object {
-    if (!OVVCheck.externalInterfaceIsAvailable)
-      return { "error": "ExternalInterface not available" };
-
-		var js:XML = <script><![CDATA[
-				function a( obfuFn ) {
-					var results = {};
-					if ( window.self === window.top ) { //Check for iFrames
-						//Find Object by looking for obfuFn (Obfuscated Function set by Flash)
-						var myObj = null;
-						//When IE is detected, some pages only use an embed:
-						var embeds = document.getElementsByTagName("embed");
-						for (var i = 0; i < embeds.length; i++) {
-							if ( !!embeds[i][ obfuFn ] ) {
-								myObj = embeds[i];
-							}
-						}
-						if ( myObj == null ) {
-							var objs = document.getElementsByTagName("object");
-							for (var i = 0; i < objs.length; i++) {
-								if ( !!objs[i][ obfuFn ] ) {
-									myObj = objs[i];
-								}
-							}
-						}
-						if ( myObj == null ) {
-							//report object not found
-							results = { "error": "Object not found" };
-						} else {
-							//Capture the player id for reporting (not necessary to check viewability):
-							results[ 'id' ] = myObj.id;
-							//Avoid including scrollbars in viewport size by taking the smallest dimensions (also
-							//ensures ad object is not obscured)
-							results[ 'clientWidth' ] = Infinity;
-							results[ 'clientHeight' ] = Infinity;
-							//document.body  - Handling case where viewport is represented by documentBody
-							//.width
-							if ( !isNaN( document.body.clientWidth ) && document.body.clientWidth > 0 ) {
-								results[ 'clientWidth' ] = document.body.clientWidth;
-							}
-							//.height
-							if ( !isNaN( document.body.clientHeight ) && document.body.clientHeight > 0 ) {
-								results[ 'clientHeight' ] = document.body.clientHeight;
-							}
-							//document.documentElement - Handling case where viewport is represented by documentElement
-							//.width
-							if ( !!document.documentElement && !!document.documentElement.clientWidth &&
-								!isNaN( document.documentElement.clientWidth ) ) {
-								results[ 'clientWidth' ] = document.documentElement.clientWidth;
-							}
-							//.height
-							if ( !!document.documentElement && !!document.documentElement.clientHeight &&
-								!isNaN( document.documentElement.clientHeight ) ) {
-								results[ 'clientHeight' ] = document.documentElement.clientHeight;
-							}
-							//window.innerWidth/Height - Handling case where viewport is represented by window.innerH/W
-							//.innerWidth
-							if ( !!window.innerWidth && !isNaN( window.innerWidth ) ) {
-								results[ 'clientWidth' ] = Math.min ( results[ 'clientWidth' ],
-									window.innerWidth );
-
-							}
-							//.innerHeight
-							if ( !!window.innerHeight && !isNaN( window.innerHeight ) ) {
-								results[ 'clientHeight' ] = Math.min( results[ 'clientHeight' ],
-									window.innerHeight );
-							}
-							if ( results[ 'clientHeight' ] == Infinity || results[ 'clientWidth' ] == Infinity ) {
-								results = { "error": "Failed to determine viewport" };
-							} else {
-								//Get player dimensions:
-								var rects = myObj.getClientRects();
-								objRect = rects[0];
-								results[ 'objTop' ] = objRect.top;
-								results[ 'objBottom' ] = objRect.bottom;
-								results[ 'objLeft' ] = objRect.left;
-								results[ 'objRight' ] = objRect.right;
-
-								if ( objRect.bottom < 0 || objRect.right < 0 ||
-									objRect.top > results.clientHeight || objRect.left > results.clientWidth ) {
-									//Entire object is out of viewport
-									results[ 'percentViewable' ] = 0;
-								} else {
-									var totalObjectArea = ( objRect.right - objRect.left ) *
-										( objRect.bottom - objRect.top );
-									var xMin = Math.ceil( Math.max( 0, objRect.left ) );
-									var xMax = Math.floor( Math.min( results.clientWidth, objRect.right ) );
-									var yMin = Math.ceil( Math.max( 0, objRect.top ) );
-									var yMax = Math.floor( Math.min( results.clientHeight, objRect.bottom ) );
-									var visibleObjectArea = ( xMax - xMin + 1 ) * ( yMax - yMin + 1 );
-									results[ 'percentViewable' ] = Math.round( visibleObjectArea / totalObjectArea * 100 );
-								}
-								//Report window focus (Is the window active?):
-								var chromeNotVisible = 	!!document.webkitVisibilityState &&
-														document.webkitVisibilityState != 'visible';
-								results[ 'focus' ] = window.document.hasFocus() && !chromeNotVisible;
-							}
-						}
-					} else {
-						results = { "error": "Ad in iFrame" };
-					}
-					return results;
-				}
-			]]></script>;
-		return ExternalInterface.call(js, uniqueId ) as Object;
-	}
-
-  public static function externalInterfaceIsAvailable():Boolean
-  {
-    var isEIAvailable:Boolean = false;
-
-    try
-    {
-      isEIAvailable = !!ExternalInterface.call("function() { return 1; }");
-    }
-    catch (e:SecurityError) { }
-
-    return isEIAvailable;
-  }
-}
 }
