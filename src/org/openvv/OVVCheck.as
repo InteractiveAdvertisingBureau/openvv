@@ -63,8 +63,7 @@ package org.openvv {
          * During debug mode, beaconViewabilityState is populated with the viewabilityState
          * determined by the beacon technique
          */
-        public
-        var beaconViewabilityState: String;
+        public var beaconViewabilityState: String;
 
         /**
          * When using the beacon technique, this array will be populatd with
@@ -72,50 +71,42 @@ package org.openvv {
          * index. True = viewable. False = unviewable. See the JavaScript
          * documentation for a description of the indices.
          */
-        public
-        var beacons: Array;
+        public var beacons: Array;
 
         /**
          * Whether OpenVV can use beacons to determine viewability
          */
-        public
-        var beaconsSupported: Boolean;
+        public var beaconsSupported: Boolean;
 
         /**
          * The height of the viewport currently being displayed
          */
-        public
-        var clientHeight: int = -1;
+        public var clientHeight: int = -1;
 
         /**
          * The width of the viewport currently being displayed
          */
-        public
-        var clientWidth: int = -1;
+        public var clientWidth: int = -1;
 
         /**
          * A description of an error that may have occurred
          */
-        public
-        var error: String;
+        public var error: String;
 
         /**
          * If the tab is focused or not
          */
-        public
-        var focus: Boolean;
+        public var focus: Boolean;
 
         /**
          * The current framerate of the asset (determined by ActionScript)
          */
-        public
-        var fps: Number = -1;
+        public var fps: Number = -1;
 
         /**
          * Whether OpenVV can use JavaScript bounds to determine viewability
          */
-        public
-        var geometrySupported: Boolean;
+        public var geometrySupported: Boolean;
 
         /**
          * During debug mode, geometryViewabilityState is populated with the viewabilityState
@@ -127,32 +118,27 @@ package org.openvv {
         /**
          * The unique identifier of the asset
          */
-        public
-        var id: String;
+        public var id: String;
 
         /**
          * Whether the asset is in an iframe or not
          */
-        public
-        var inIframe: Boolean = false;
+        public var inIframe: Boolean = false;
 
         /**
          * The distance (in pixels) from the asset's bottom to the bottom of the viewport
          */
-        public
-        var objBottom: int = -1;
+        public var objBottom: int = -1;
 
         /**
          * The distance (in pixels) from the asset's left side to the left side of the viewport
          */
-        public
-        var objLeft: int = -1;
+        public var objLeft: int = -1;
 
         /**
          * The distance (in pixels) from the asset's right side to the right side of the viewport
          */
-        public
-        var objRight: int = -1;
+        public var objRight: int = -1;
 
         /**
          * The distance (in pixels) from the asset's top to the top of the viewport
@@ -163,8 +149,7 @@ package org.openvv {
         /**
          * How much of the asset is viewable within the viewport
          */
-        public
-        var percentViewable: int = -1;
+        public var percentViewable: int = -1;
 
         /**
          * The technique used to determine viewablity
@@ -172,8 +157,7 @@ package org.openvv {
          * @see BEACON
          * @see GEOMETRY
          */
-        public
-        var technique: String;
+        public var technique: String;
 
         /**
          * Represents whether the asset was at least 50% viewable or if OpenVV
@@ -183,8 +167,7 @@ package org.openvv {
          * @see #UNVIEWABLE
          * @see #UNMEASURABLE
          */
-        public
-        var viewabilityState: String;
+        public var viewabilityState: String;
 
         ////////////////////////////////////////////////////////////
         //   CONSTRUCTOR 
@@ -197,8 +180,7 @@ package org.openvv {
          * @param jsCheck The OVVCheck object created by JavaScript
          *
          */
-        public
-        function OVVCheck(jsCheck: Object) {
+        public function OVVCheck(jsCheck: Object) {
             for (var field: String in jsCheck) {
                 if (this.hasOwnProperty(field)) {
                     this[field] = jsCheck[field];

@@ -25,10 +25,6 @@ package org.openvv {
     import org.openvv.events.OVVEvent;
 
     /**
-     * The event dispatched when the asset has been viewable for 1 contiguous second
-     */
-    [Event(name = "OVVDiscernibleImpression", type = "org.openvv.events.OVVEvent")]
-    /**
      * The event dispatched when the asset has been viewable for 5 contiguous seconds
      */
     [Event(name = "OVVImpression", type = "org.openvv.events.OVVEvent")]
@@ -90,12 +86,6 @@ package org.openvv {
         ////////////////////////////////////////////////////////////
 
         /**
-         * The number of consecutive intervals of viewability required before the
-         * DISCERNIBLE_IMPRESSION_THRESHOLD event will be fired (1 second)
-         */
-        public static const DISCERNIBLE_IMPRESSION_THRESHOLD: Number = 4;
-
-        /**
          * The number of milliseconds of an "interval" between viewability checks
          */
         public static const INTERVAL: Number = 250;
@@ -104,7 +94,7 @@ package org.openvv {
          * The number of consecutive intervals of viewability required before
          * the VIEWABLE_IMPRESSION event will be fired (5 seconds)
          */
-        public static const VIEWABLE_IMPRESSION_THRESHOLD: Number = 20;
+        public static const VIEWABLE_IMPRESSION_THRESHOLD: Number = 8;
 
         ////////////////////////////////////////////////////////////
         //   ATTRIBUTES 
@@ -113,39 +103,33 @@ package org.openvv {
         /**
          * Whether the asset has dispatched the DISCERNABLE_IMPRESSION event
          */
-        private
-        var _hasDispatchedDImp: Boolean = false;
+        private var _hasDispatchedDImp: Boolean = false;
 
         /**
          * The randomly generated unique identifier of this asset
          */
-        private
-        var _id: String;
+        private var _id: String;
 
         /**
          * The timer used to measure intervals
          */
-        private
-        var _intervalTimer: Timer;
+        private var _intervalTimer: Timer;
 
         /**
          * The number of consecutive intervals in which the asset has been
          * viewable. Reset to 0 when the asset is found to be unviewable.
          */
-        private
-        var _intervalsInView: Number;
+        private var _intervalsInView: Number;
 
         /**
          * The RenderMeter which gauges the frame rate of the asset
          */
-        private
-        var _renderMeter: OVVRenderMeter;
+        private var _renderMeter: OVVRenderMeter;
 
         /**
          * A Sprite used for measuring frame rate and receiving ThrottlEvents
          */
-        private
-        var _sprite: Sprite;
+        private var _sprite: Sprite;
 
         /**
          * The last recorded ThrottleState
@@ -153,8 +137,7 @@ package org.openvv {
          * @see org.openvv.OVVThrottleType
          * @see http://help.adobe.com/en_US/FlashPlatform/reference/actionscript/3/flash/events/ThrottleEvent.html
          */
-        private
-        var _throttleState: String;
+        private var _throttleState: String;
 
         ////////////////////////////////////////////////////////////
         //   CONSTRUCTOR 
@@ -168,9 +151,7 @@ package org.openvv {
          * @param beaconSwfUrl The fully qualified URL of OVVBeacon.swf for
          * OpenVV to use. For example, "http://localhost/OVVBeacon.swf"
          */
-        public
-
-        function OVVAsset(beaconSwfUrl: String) {
+        public function OVVAsset(beaconSwfUrl: String) {
             if (!externalInterfaceIsAvailable()) {
                 dispatchEvent(new OVVEvent(OVVEvent.OVVError, {
                     "message": "ExternalInterface unavailable"
@@ -200,9 +181,7 @@ package org.openvv {
          * @return A Boolean indicating whether JavaScript is available within
          * this container
          */
-        public static
-
-        function externalInterfaceIsAvailable(): Boolean {
+        public static function externalInterfaceIsAvailable(): Boolean {
             var isEIAvailable: Boolean = false;
 
             try {
@@ -227,9 +206,7 @@ package org.openvv {
          *
          * @see org.openvv.OVVCheck
          */
-        public
-
-        function checkViewability(): OVVCheck {
+        public function checkViewability(): OVVCheck {
             if (!externalInterfaceIsAvailable()) {
                 return new OVVCheck({
                     "error": "ExternalInterface unavailable"
@@ -252,9 +229,7 @@ package org.openvv {
          * Frees resources used by this asset. It is the responsibility of the
          * end user to call this function when they no longer need OpenVV.
          */
-        public
-
-        function dispose(): void {
+        public function dispose(): void {
             ExternalInterface.call("$ovv.getAssetById('" + _id + "')" + ".dispose");
 
             if (_intervalTimer) {
@@ -280,9 +255,7 @@ package org.openvv {
          *
          * @param someData An optional parameter which is ignored
          */
-        public
-
-        function flashProbe(someData: * ): void {
+        public function flashProbe(someData: * ): void {
             return;
         }
 
@@ -290,9 +263,7 @@ package org.openvv {
          * When the JavaScript portion of OpenVV is ready, it calls this function
          * to start the interval timer which does viewability checks every
          */
-        public
-
-        function startImpressionTimer(): void {
+        public function startImpressionTimer(): void {
             if (!_intervalTimer) {
                 _intervalsInView = 0;
 
@@ -315,17 +286,12 @@ package org.openvv {
          * @param event The TimerEvent which signals the end of this interval
          *
          */
-        private
-
-        function onIntervalCheck(event: TimerEvent): void {
+        private function onIntervalCheck(event: TimerEvent): void {
             var results: Object = checkViewability();
 
             _intervalsInView = (results.viewabilityState == OVVCheck.VIEWABLE) ? _intervalsInView + 1 : 0;
 
-            if (_intervalsInView >= DISCERNIBLE_IMPRESSION_THRESHOLD && !_hasDispatchedDImp) {
-                _hasDispatchedDImp = true;
-                dispatchEvent(new OVVEvent(OVVEvent.OVVDiscernibleImpression));
-            } else if (_intervalsInView >= VIEWABLE_IMPRESSION_THRESHOLD) {
+            if (_intervalsInView >= VIEWABLE_IMPRESSION_THRESHOLD) {
                 dispatchEvent(new OVVEvent(OVVEvent.OVVImpression));
                 _intervalTimer.stop();
             }
@@ -342,9 +308,7 @@ package org.openvv {
          * compiled for less than Flash Player 11.
          *
          */
-        private
-
-        function onThrottleEvent(event: Event): void {
+        private function onThrottleEvent(event: Event): void {
             if (event.hasOwnProperty('state')) {
                 _throttleState = event['state'];
             }
@@ -357,18 +321,14 @@ package org.openvv {
         /**
          * Whether the asset has dispatched the DISCERNABLE_IMPRESSION event
          */
-        public
-
-        function get hasDispatchedDImp(): Boolean {
+        public function get hasDispatchedDImp(): Boolean {
             return _hasDispatchedDImp;
         }
 
         /**
          * The randomly generated unique identifier of this asset
          */
-        public
-
-        function get id(): String {
+        public function get id(): String {
             return _id;
         }
 
@@ -376,10 +336,9 @@ package org.openvv {
          * The last recorded ThrottleState
          * @see OVVThrottleType
          */
-        public
-
-        function get throttleState(): String {
+        public function get throttleState(): String {
             return _throttleState;
 
         }
     }
+}

@@ -33,21 +33,18 @@ package org.openvv {
         /**
          * A DisplayObject to listen for ENTER_FRAME events on
          */
-        private
-        var _displayObject: DisplayObject;
+        private var _displayObject: DisplayObject;
 
         /**
          * The most recent frame rate of the asset
          */
-        private
-        var _fps: Number = 0;
+        private var _fps: Number = 0;
 
         /**
          * The time that the last ENTER_FRAME event occurred
          * @see flash.utils.getTimer() [http://help.adobe.com/en_US/FlashPlatform/reference/actionscript/3/flash/utils/package.html#getTimer()]
          */
-        private
-        var _lastFrameTime: Number = -1;
+        private var _lastFrameTime: Number = -1;
 
         ////////////////////////////////////////////////////////////
         //   CONSTRUCTOR 
@@ -60,8 +57,7 @@ package org.openvv {
          * @param displayObject A DisplayObject to listen for ENTER_FRAME
          * events on
          */
-        public
-        function OVVRenderMeter(displayObject: DisplayObject) {
+        public function OVVRenderMeter(displayObject: DisplayObject) {
             _displayObject = displayObject;
             _displayObject.addEventListener(Event.ENTER_FRAME, onEnterFrame);
         }
@@ -73,8 +69,7 @@ package org.openvv {
         /**
          * Frees resources used by this class
          */
-        public
-        function dispose(): void {
+        public function dispose(): void {
             if (_displayObject) {
                 _displayObject.removeEventListener(Event.ENTER_FRAME, onEnterFrame);
                 _displayObject = null;
@@ -91,8 +86,7 @@ package org.openvv {
          *
          * @param event The latest ENTER_FRAME event
          */
-        private
-        function onEnterFrame(event: Event): void {
+        private function onEnterFrame(event: Event): void {
             if (_lastFrameTime == -1) {
                 _lastFrameTime = getTimer();
                 return;
@@ -110,8 +104,7 @@ package org.openvv {
         /**
          * The most recent frame rate of the asset
          */
-        public
-        function get fps(): Number {
+        public function get fps(): Number {
             return _fps;
         }
     }

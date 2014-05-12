@@ -30,11 +30,6 @@ package org.openvv.events {
         ////////////////////////////////////////////////////////////
 
         /**
-         * Events of this type represent 1 second of contiguous viewability has occurred
-         */
-        public static const OVVDiscernibleImpression: String = "OVVDiscernibleImpression";
-
-        /**
          * Events of this type represent an error that has occurred
          */
         public static const OVVError: String = "OVVError";
@@ -56,8 +51,7 @@ package org.openvv.events {
         /**
          * An optional object containing additional information
          */
-        private
-        var _data: Object;
+        private var _data: Object;
 
         ////////////////////////////////////////////////////////////
         //   CONSTRUCTOR 
@@ -72,8 +66,7 @@ package org.openvv.events {
          * @param cancelable Whether the event can be cancelled or not
          *
          */
-        public
-        function OVVEvent(type: String, data: Object = null, bubbles: Boolean = false, cancelable: Boolean = false) {
+        public function OVVEvent(type: String, data: Object = null, bubbles: Boolean = false, cancelable: Boolean = false) {
             super(type, bubbles, cancelable);
             _data = data;
         }
@@ -87,8 +80,7 @@ package org.openvv.events {
          *
          * @return A generic object, or null
          */
-        public
-        function get data(): Object {
+        public function get data(): Object {
             return _data;
         }
     }

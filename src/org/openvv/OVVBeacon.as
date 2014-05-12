@@ -62,33 +62,28 @@ package org.openvv {
          * Set by JavaScript, determines whether to draw a colored background
          * or not
          */
-        private
-        var _debug: Boolean = false;
+        private var _debug: Boolean = false;
 
         /**
          * The unique ID of the asset that the beacon is associated with
          */
-        private
-        var _id: String;
+        private var _id: String;
 
         /**
          * The beacon's index within the set of beacons associated with
          * the beacon's asset
          */
-        private
-        var _index: int;
+        private var _index: int;
 
         /**
          * A class that measures the latest frame rate of the beacon
          */
-        private
-        var _renderMeter: OVVRenderMeter;
+        private var _renderMeter: OVVRenderMeter;
 
         /**
          * The state of the last ThrottleEvent received by the beacon
          */
-        private
-        var _throttleState: String;
+        private var _throttleState: String;
 
         ////////////////////////////////////////////////////////////
         //   CONSTRUCTOR 
@@ -97,8 +92,7 @@ package org.openvv {
         /**
          * Stores values from FlashVars and sets up event listeners.
          */
-        public
-        function OVVBeacon() {
+        public function OVVBeacon() {
             super();
 
             Security.allowDomain("*");
@@ -119,8 +113,7 @@ package org.openvv {
          * this function which enables coloring of the beacon's
          * background according to viewability status
          */
-        public
-        function debug(): void {
+        public function debug(): void {
             _debug = true;
             addEventListener(Event.ENTER_FRAME, onEnterFrame);
         }
@@ -129,8 +122,7 @@ package org.openvv {
          * Returns the frame rate of the beacon
          * @return The frame rate of the beacon
          */
-        public
-        function getFrameRate(): int {
+        public function getFrameRate(): int {
             return _renderMeter.fps;
         }
 
@@ -138,8 +130,7 @@ package org.openvv {
          * Returns the throttle state of the beacon
          * @return The throttle state of the beacon
          */
-        public
-        function getThrottleState(): String {
+        public function getThrottleState(): String {
             return _throttleState;
         }
 
@@ -147,8 +138,7 @@ package org.openvv {
          * Returns whether the beacon is viewable or not
          * @return whether the beacon is viewable or not
          */
-        public
-        function isViewable(): Boolean {
+        public function isViewable(): Boolean {
             var viewable: Boolean;
 
             if (_throttleState != null) {
@@ -170,8 +160,7 @@ package org.openvv {
          * @param event an ADDED_TO_STAGE event
          *
          */
-        protected
-        function onAddedToStage(event: Event): void {
+        protected function onAddedToStage(event: Event): void {
             addEventListener(Event.ENTER_FRAME, onFirstFrame);
             _renderMeter = new OVVRenderMeter(this);
         }
@@ -182,8 +171,7 @@ package org.openvv {
          * @param event an ENTER_FRAME event
          *
          */
-        protected
-        function onEnterFrame(event: Event): void {
+        protected function onEnterFrame(event: Event): void {
             drawBackground();
         }
 
@@ -192,8 +180,7 @@ package org.openvv {
          * know that this beacon is ready
          * @param event an ENTER_FRAME event
          */
-        protected
-        function onFirstFrame(event: Event): void {
+        protected function onFirstFrame(event: Event): void {
             removeEventListener(Event.ENTER_FRAME, onFirstFrame);
 
             ExternalInterface.addCallback("isViewable", isViewable);
@@ -212,8 +199,7 @@ package org.openvv {
          * untyped to prevent VerifyErrors when compiled into assets targeting
          * less than Flash Player 11.
          */
-        protected
-        function onThrottle(event: Event): void {
+        protected function onThrottle(event: Event): void {
             _throttleState = event['state'];
         }
 
@@ -228,8 +214,7 @@ package org.openvv {
          * @see RED
          * @see GREEN
          */
-        private
-        function drawBackground(): void {
+        private function drawBackground(): void {
             var color: uint = isViewable() ? GREEN : RED;
             graphics.clear();
             graphics.beginFill(color, 1.0);
