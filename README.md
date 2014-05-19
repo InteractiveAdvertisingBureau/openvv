@@ -8,10 +8,14 @@ openvv
 <property name="FLEX_HOME" value="/Applications/Adobe Flash Builder 4.7/sdks/4.6.0"/>
 ```
 3. Build the SWC by running:
-        ant swc
+```    
+ant swc
+```
 4. Incorporate the SWC into your project
 5. Build the Beacons by running
-        ant compileBeacon
+```
+ant compileBeacon
+```
 6. Host the newly compiled bin/Beacon.swf in a public location of your choice.
 7. Initialize OpenVV by passing the URL of your Beacon to `OVVAsset`:
 ```actionscript
