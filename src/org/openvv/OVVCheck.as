@@ -112,8 +112,7 @@ package org.openvv {
          * During debug mode, geometryViewabilityState is populated with the viewabilityState
          * determined by the beacon technique
          */
-        public
-        var geometryViewabilityState: String;
+        public var geometryViewabilityState: String;
 
         /**
          * The unique identifier of the asset
@@ -143,8 +142,7 @@ package org.openvv {
         /**
          * The distance (in pixels) from the asset's top to the top of the viewport
          */
-        public
-        var objTop: int = -1;
+        public var objTop: int = -1;
 
         /**
          * How much of the asset is viewable within the viewport
