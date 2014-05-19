@@ -20,6 +20,5 @@ var asset:OVVAsset = new OVVAsset('http://localhost/Beacon.swf');
 8. Get viewability data at any time by calling `OVVAsset.checkViewability()`.
 ```actionscript
 var check:OVVCheck = asset.checkViewability();
+```
 9. Query the properties of the `OVVCheck` object to report on your player's viewability.
-
-    
