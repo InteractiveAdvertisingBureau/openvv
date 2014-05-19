@@ -2,27 +2,34 @@ openvv
 ======
 
 # Getting Started
-1. Clone the repository and cd into the root directory of it.
-2. Modify the FLEX_HOME property of build.xml to point to the local directory of your Flex SDK. For example:
+Clone the repository and cd into the root directory of it.
+Modify the FLEX_HOME property of build.xml to point to the local directory of your Flex SDK. For example:
 ```xml
 <property name="FLEX_HOME" value="/Applications/Adobe Flash Builder 4.7/sdks/4.6.0"/>
 ```
-3. Build the SWC by running:
+You need Apache ANT to go forward. If you don't have it, you can install it from [the official website](http://ant.apache.org/)
+
+## Build the SWC
+Run this from the root directory of OpenVV:
 ```    
 ant swc
 ```
-4. Incorporate the SWC into your project
-5. Build the Beacons by running
+Incorporate the SWC into your project
+
+## Build the Beacons
+Run this from the root directory of OpenVV:
 ```
 ant compileBeacon
 ```
-6. Host the newly compiled bin/Beacon.swf in a public location of your choice.
-7. Initialize OpenVV by passing the URL of your Beacon to `OVVAsset`:
+You'll now need to move the newly created bin/Beacon.swf to a publicly accessible web location.
+
+## Initialize OpenVV 
+Instantiate `OVVAsset` and pass the URL of your Beacon in:
 ```actionscript
 var asset:OVVAsset = new OVVAsset('http://localhost/Beacon.swf');
 ```
-8. Get viewability data at any time by calling `OVVAsset.checkViewability()`.
+Get viewability data at any time by calling `OVVAsset.checkViewability()`.
 ```actionscript
 var check:OVVCheck = asset.checkViewability();
 ```
-9. Query the properties of the `OVVCheck` object to report on your player's viewability.
+Query the properties of the `OVVCheck` object to report on your player's viewability.
