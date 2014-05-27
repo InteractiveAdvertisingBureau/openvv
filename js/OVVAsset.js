@@ -324,56 +324,56 @@ function OVVAsset(uid) {
      * The total number of beacons being used
      * @type {Number}
      */
-    const TOTAL_BEACONS = 13;
+    var TOTAL_BEACONS = 13;
 
     /**
      * The value of the square root of 2. Computed here and saved for reuse
      * later. Approximately 1.41.
      * @type {Number}
      */
-    const SQRT_2 = Math.sqrt(2);
+    var SQRT_2 = Math.sqrt(2);
 
     /**
      * The index/identifier of the control beacon, which is placed off screen to
      * test that throttling occurs.
      * @type {Number}
      */
-    const CONTROL = 0;
+    var CONTROL = 0;
 
     /**
      * The index/identifier of the center beacon, which is placed in the center
      * of the player.
      * @type {Number}
      */
-    const CENTER = 1;
+    var CENTER = 1;
 
     /**
      * The index/identifier of the beacon placed at the top left corner of the
      * player.
      * @type {Number}
      */
-    const OUTER_TOP_LEFT = 2;
+    var OUTER_TOP_LEFT = 2;
 
     /**
      * The index/identifier of the beacon placed at the top right corner of the
      * player.
      * @type {Number}
      */
-    const OUTER_TOP_RIGHT = 3;
+    var OUTER_TOP_RIGHT = 3;
 
     /**
      * The index/identifier of the beacon placed at the bottom left corner of
      * the player.
      * @type {Number}
      */
-    const OUTER_BOTTOM_LEFT = 4;
+    var OUTER_BOTTOM_LEFT = 4;
 
     /**
      * The index/identifier of the beacon placed at the bottom right corner of
      * the player.
      * @type {Number}
      */
-    const OUTER_BOTTOM_RIGHT = 5;
+    var OUTER_BOTTOM_RIGHT = 5;
 
     /**
      * The index/identifier of the beacon placed at the top left corner of the
@@ -381,7 +381,7 @@ function OVVAsset(uid) {
      * area of the player.
      * @type {Number}
      */
-    const MIDDLE_TOP_LEFT = 6;
+    var MIDDLE_TOP_LEFT = 6;
 
     /**
      * The index/identifier of the beacon placed at the top right corner of the
@@ -389,7 +389,7 @@ function OVVAsset(uid) {
      * area of the player.
      * @type {Number}
      */
-    const MIDDLE_TOP_RIGHT = 7;
+    var MIDDLE_TOP_RIGHT = 7;
 
     /**
      * The index/identifier of the beacon placed at the bottom left corner of
@@ -397,7 +397,7 @@ function OVVAsset(uid) {
      * area of the player.
      * @type {Number}
      */
-    const MIDDLE_BOTTOM_LEFT = 8;
+    var MIDDLE_BOTTOM_LEFT = 8;
 
     /**
      * The index/identifier of the beacon placed at the bottom right corner of
@@ -405,7 +405,7 @@ function OVVAsset(uid) {
      * area of the player.
      * @type {Number}
      */
-    const MIDDLE_BOTTOM_RIGHT = 9;
+    var MIDDLE_BOTTOM_RIGHT = 9;
 
     /**
      * The index/identifier of the beacon placed at the top left corner of
@@ -413,7 +413,7 @@ function OVVAsset(uid) {
      * outside 2 sides of it are 50% of the player's total area.
      * @type {Number}
      */
-    const INNER_TOP_LEFT = 10;
+    var INNER_TOP_LEFT = 10;
 
     /**
      * The index/identifier of the beacon placed at the top right corner of
@@ -421,7 +421,7 @@ function OVVAsset(uid) {
      * outside 2 sides of it are 50% of the player's total area.
      * @type {Number}
      */
-    const INNER_TOP_RIGHT = 11;
+    var INNER_TOP_RIGHT = 11;
 
     /**
      * The index/identifier of the beacon placed at the bottom left corner of
@@ -429,7 +429,7 @@ function OVVAsset(uid) {
      * outside 2 sides of it are 50% of the player's total area.
      * @type {Number}
      */
-    const INNER_BOTTOM_LEFT = 12;
+    var INNER_BOTTOM_LEFT = 12;
 
     /**
      * The index/identifier of the beacon placed at the bottom right corner of
@@ -437,7 +437,7 @@ function OVVAsset(uid) {
      * outside 2 sides of it are 50% of the player's total area.
      * @type {Number}
      */
-    const INNER_BOTTOM_RIGHT = 13;
+    var INNER_BOTTOM_RIGHT = 13;
 
     ///////////////////////////////////////////////////////////////////////////
     // PRIVATE ATTRIBUTES
@@ -722,7 +722,7 @@ function OVVAsset(uid) {
             var isViewable = beacon.isViewable();
             var onScreen = isOnScreen(beacon);
 
-            check.beacons[index] = isViewable && isOnScreen;
+            check.beacons[index] = isViewable && onScreen;
 
             // the control beacon is only involved in determining if the 
             // browser supports beacon measurement, so move on
@@ -742,10 +742,10 @@ function OVVAsset(uid) {
                         outerCornersVisible++;
                         break;
 
-                    case MIDDLE_TOP_LEFT = 6:
-                    case MIDDLE_TOP_RIGHT = 7:
-                    case MIDDLE_BOTTOM_LEFT = 8:
-                    case MIDDLE_BOTTOM_RIGHT = 9:
+                    case MIDDLE_TOP_LEFT:
+                    case MIDDLE_TOP_RIGHT:
+                    case MIDDLE_BOTTOM_LEFT:
+                    case MIDDLE_BOTTOM_RIGHT:
                         middleCornersVisible++;
                         break;
 

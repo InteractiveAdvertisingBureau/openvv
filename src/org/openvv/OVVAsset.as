@@ -162,7 +162,7 @@ package org.openvv {
             _id = "ovv" + Math.floor(Math.random() * 1000000000).toString();
 
             ExternalInterface.addCallback(_id, flashProbe);
-            ExternalInterface.addCallback("ready", startImpressionTimer);
+            ExternalInterface.addCallback("startImpressionTimer", startImpressionTimer);
 
             _sprite = new Sprite();
             _renderMeter = new OVVRenderMeter(_sprite);
