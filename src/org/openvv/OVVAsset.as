@@ -22,6 +22,7 @@ package org.openvv {
     import flash.events.TimerEvent;
     import flash.external.ExternalInterface;
     import flash.utils.Timer;
+    
     import org.openvv.events.OVVEvent;
 
     /**
@@ -151,15 +152,16 @@ package org.openvv {
          * @param beaconSwfUrl The fully qualified URL of OVVBeacon.swf for
          * OpenVV to use. For example, "http://localhost/OVVBeacon.swf"
          */
-        public function OVVAsset(beaconSwfUrl: String) {
-            if (!externalInterfaceIsAvailable()) {
+        public function OVVAsset(beaconSwfUrl:String = null, id:String = null) {
+            
+			if (!externalInterfaceIsAvailable()) {
                 dispatchEvent(new OVVEvent(OVVEvent.OVVError, {
                     "message": "ExternalInterface unavailable"
                 }));
                 return;
             }
 
-            _id = "ovv" + Math.floor(Math.random() * 1000000000).toString();
+            _id = (id !== null) ? id : "ovv" + Math.floor(Math.random() * 1000000000).toString();
 
             ExternalInterface.addCallback(_id, flashProbe);
             ExternalInterface.addCallback("startImpressionTimer", startImpressionTimer);
@@ -169,7 +171,13 @@ package org.openvv {
             _sprite.addEventListener("throttle", onThrottleEvent);
 
             var ovvAssetSource: String = new OVVAssetJSSource().toString();
-            ovvAssetSource = ovvAssetSource.replace(/OVVID/g, _id).replace(/BEACON_SWF_URL/g, beaconSwfUrl);
+            ovvAssetSource = ovvAssetSource.replace(/OVVID/g, _id);
+			
+			if (beaconSwfUrl)
+			{
+				ovvAssetSource = ovvAssetSource.replace(/BEACON_SWF_URL/g, beaconSwfUrl);
+			}
+			
             ExternalInterface.call("eval", ovvAssetSource);
         }
 
