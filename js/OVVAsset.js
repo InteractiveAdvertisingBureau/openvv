@@ -51,6 +51,13 @@ function OVV() {
      */
     this.asset = null;
 
+    /**
+     * The interval in which ActionScript will poll OVV for viewability
+     * information
+     * @type {Number}
+     */
+    this.interval = INTERVAL;
+
     ///////////////////////////////////////////////////////////////////////////
     // PRIVATE ATTRIBUTES
     ///////////////////////////////////////////////////////////////////////////
