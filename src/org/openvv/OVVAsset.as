@@ -232,12 +232,6 @@ package org.openvv {
             var jsResults: Object = ExternalInterface.call("$ovv.getAssetById('" + _id + "')" + ".checkViewability");
             var results: OVVCheck = new OVVCheck(jsResults);
 
-            if (_throttleState != null) {
-                results.focus = _throttleState == OVVThrottleType.RESUME;
-            } else {
-                results.focus = _renderMeter.fps > 8;
-            }
-
             return results;
         }
 

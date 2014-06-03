@@ -512,6 +512,9 @@ function OVVAsset(uid) {
         check.inIframe = $ovv.IN_IFRAME;
         check.geometrySupported = !$ovv.IN_IFRAME;
 
+        var chromeNotVisible = !! document.webkitVisibilityState && document.webkitVisibilityState != 'visible';
+        check.focus = window.document.hasFocus() && !chromeNotVisible;
+
         if (!player) {
             check.error = 'Player not found!';
             return check;
