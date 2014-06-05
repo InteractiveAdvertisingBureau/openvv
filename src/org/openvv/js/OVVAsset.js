@@ -68,6 +68,24 @@ function OVV() {
      * @type {Object}
      */
     var assets = {};
+	
+	/**
+     * An array for storing the first PREVIOUS_EVENTS_CAPACITY events for each event type. {@see PREVIOUS_EVENTS_CAPACITY}
+     * @type {Array}
+     */
+	var previousEvents = [];
+	
+	/**
+     * Number of event to store
+     * @type {int}
+     */
+    var PREVIOUS_EVENTS_CAPACITY = 1000;
+	
+	/**
+     * An array that holds all the subscribes for a eventName+uid combination
+     * @type {Array}
+     */
+	var subscribers = [];
 
     ///////////////////////////////////////////////////////////////////////////
     // PUBLIC FUNCTIONS
@@ -117,6 +135,90 @@ function OVV() {
         }
         return copy;
     }
+	
+	/**
+     * Subscribe the {func} to the list of {events}. When getPreviousEvents is true all the stored events that were passed will be fired
+	 * in a chronological order
+     * @param {events} array with all the event names to subscribe to
+	 * @param {uid} asset identifier
+	 * @param {func} a function to execute once the assert raise the event	 
+	 * @param {getPreviousEvents} if true all buffered event will be triggered     
+     */
+    this.subscribe = function (events, uid, func, getPreviousEvents) {
+        if (getPreviousEvents) {
+            for (key in previousEvents[uid]) {
+                if (contains(previousEvents[uid][key].eventName, events)) { 
+                    runSafely(function () {
+                        func(uid, previousEvents[uid][key]); // changed in vtag.js
+                    });
+                }
+            }
+        }
+      
+        for (key in events) {
+            if (!subscribers[events[key] + uid])
+                subscribers[events[key] + uid] = [];
+            subscribers[events[key] + uid].push({ Func: func });
+        }
+    };
+
+	/**
+     * Publish {eventName} to all the subscribers. Also, storing the publish event in a buffered array is the capacity wasn't reached	 
+     * @param {eventName} name of the event to publish
+	 * @param {uid} asset identifier
+	 * @param {args} argument to send to the published function
+     */
+    this.publish = function (eventName, uid, args) {		
+		var eventArgs = { 
+					eventName: eventName, 
+					eventTime: getCurrentTime(),
+                    ovvArgs: args
+				};
+
+        if (!previousEvents[uid]) {
+            previousEvents[uid] = [];
+        }
+        if (previousEvents[uid].length < PREVIOUS_EVENTS_CAPACITY) {
+            previousEvents[uid].push(eventArgs);
+        }
+
+        if (eventName && uid && subscribers[eventName + uid] instanceof Array) {
+            for (var i = 0; i < subscribers[eventName + uid].length; i++) {
+                var funcObject = subscribers[eventName + uid][i];
+                if (funcObject && funcObject.Func && typeof funcObject.Func === "function") {
+                    runSafely(function () {
+                        funcObject.Func(uid, eventArgs);
+                    });
+                }
+            }
+        }
+    };
+
+    var getCurrentTime = function () {
+        "use strict";
+        if (Date.now) {
+            return Date.now();
+        }
+        return (new Date()).getTime();
+    }
+
+	var contains = function (item, list) {
+		for (var i = 0; i < list.length; i++) {
+			if (list[i] === item) {
+				return true;
+			}
+		}
+		return false;
+	}
+	
+	var runSafely = function (action) {
+		try {
+			var ret = action();
+			return ret !== undefined ? ret : true;
+		} catch (e) { 
+			return false; 
+		}
+	};
 }
 
 /**
@@ -725,6 +827,14 @@ function OVVAsset(uid) {
         var middleCornersVisible = 0;
         var innerCornersVisible = 0;
         check.beacons = new Array(TOTAL_BEACONS);
+		
+		//Get player dimensions:
+		var objRect = player.getClientRects()[0];
+		check.objTop = objRect.top;
+		check.objBottom = objRect.bottom;
+		check.objLeft = objRect.left;
+		check.objRight = objRect.right;
+		//console.log('adSize: ' + objRect.top + ',' + objRect.bottom + ',' + objRect.left + ',' + objRect.right);
 
         for (var index = 0; index <= TOTAL_BEACONS; index++) {
 
@@ -1059,3 +1169,4 @@ window.$ovv = window.$ovv || new OVV();
 
 // 'OVVID' is String substituted from AS
 window.$ovv.addAsset(new OVVAsset('OVVID'));
+window.$ovv.DEBUG= true;
