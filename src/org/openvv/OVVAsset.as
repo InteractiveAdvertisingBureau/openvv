@@ -93,6 +93,11 @@ package org.openvv {
          */
         public static const VIEWABLE_IMPRESSION_THRESHOLD: Number = 8;
 		
+		/**
+		 * Hold OVV version. Will passt to JavaScript as well $ovv.version
+		 */
+		public static const VERSION: Number = 1;
+		
 		////////////////////////////////////////////////////////////
         //   ATTRIBUTES 
         ////////////////////////////////////////////////////////////
@@ -200,7 +205,7 @@ package org.openvv {
             _sprite.addEventListener("throttle", onThrottleEvent);
 
             var ovvAssetSource: String = new OVVAssetJSSource().toString();
-            ovvAssetSource = ovvAssetSource.replace(/OVVID/g, _id).replace(/INTERVAL/g, _interval);
+            ovvAssetSource = ovvAssetSource.replace(/OVVID/g, _id).replace(/INTERVAL/g, _interval).replace(/VERSION/g, VERSION);
 			
 			if (beaconSwfUrl)
 			{

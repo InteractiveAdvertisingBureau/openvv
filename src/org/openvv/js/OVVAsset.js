@@ -57,6 +57,12 @@ function OVV() {
      * @type {Number}
      */
     this.interval = INTERVAL;
+	
+	/**
+     * OVV version
+     * @type {Number}
+     */
+    this.version = VERSION;
 
     ///////////////////////////////////////////////////////////////////////////
     // PRIVATE ATTRIBUTES
