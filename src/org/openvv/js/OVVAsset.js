@@ -833,15 +833,7 @@ function OVVAsset(uid) {
         var middleCornersVisible = 0;
         var innerCornersVisible = 0;
         check.beacons = new Array(TOTAL_BEACONS);
-		
-		//Get player dimensions:
-		var objRect = player.getClientRects()[0];
-		check.objTop = objRect.top;
-		check.objBottom = objRect.bottom;
-		check.objLeft = objRect.left;
-		check.objRight = objRect.right;
-		//console.log('adSize: ' + objRect.top + ',' + objRect.bottom + ',' + objRect.left + ',' + objRect.right);
-
+				
         for (var index = 0; index <= TOTAL_BEACONS; index++) {
 
             var beacon = getBeacon(index);
