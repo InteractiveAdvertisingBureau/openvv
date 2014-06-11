@@ -38,41 +38,28 @@ var check:OVVCheck = asset.checkViewability();
 3rd party integration
 ==========================
 
-Allows 3rd parties to more easily provide video viewability measurement by exposing the VPAID data as well as the viewability data via a JavaScript API.  The release extends the functionality of OVVAsset.as for it to be used as the base class for integrating openvv into SWF Ads.
+Allows 3rd parties to easily provide video viewability measurement by exposing the VPAID data as well as the viewability data via a JavaScript API.  The release extends the functionality of OVVAsset.as for it to be used as the base class for integrating openvv into SWF Ads.
 
 ## Demo
 A working demo based on the openvv demo is available here: http://video.doubleverify.com
 ## Overview
-The addition to OVVAsset.as includes an **initEventsWiring** method which does the following:
-	
-	
-1.  Registers OVVAsset.as as an event listener to VPAID events fired by the creative
-2.  Registers itself as a listener to existing OVV events fired by the asset itself. 
-3.  publishes JavaScript pub/sub ($ovv) to page. 
+The addition to OVVAsset.as includes an **initEventsWiring** and **addJavaScriptResourceOnEvent** methods to be use for third parties integrations as follow:
 
-## Usage 
-### ActionScript
 1.  Instantiate an OVVAsset object and pass it a unique identifier. 
-2.  Call initEventsWiring method and pass it the EventDispatcher that fires VPAID events. 
+2.  Registers OVVAsset.as as an event listener to VPAID events fired by the creative using **initEventsWiring** function passing the EventDispatcher that Fires IVPAID events.
+3.  Call **addJavaScriptResourceOnEvent** function with the VPAID event name upon the JavaScript tag should be renderd and the JavaScript tag url.
 
 Code snippet:
 <pre>
 public function initAd(width:Number, height:Number, viewMode:String, desiredBitrate:Number, creativeData:String, environmentVars:String):void 
 {
    ...
-  _viewabilityAsset = new OVVAsset('http://localhost/OVVBeacon.swf', guid);  		
+  _viewabilityAsset = new OVVAsset('http://domain.com/OVVBeacon.swf', guid);  		
   // call initEventWiring with this to register asset as listener to VPAID events
   _viewabilityAsset.initEventsWiring(this); 						
-  // Load 3rd party tags
-  // Use adID to pass the asset ID
+  // Load 3rd party tags. Use **adID** to pass the asset ID
   var tagSrc:String = "http://someUrl.com/3rdPartyTag.js?adID=" + guid;			
-  var func:String = "function createTag() {"										
-			    + "var tag = document.createElement('script');"
-			    + "tag.type = 'text/javascript';" 
-			    + "tag.src = \"" + tagSrc + "\";" 
-			    + "document.body.insertBefore(tag, document.body.firstChild);}";			
-  var createTag:XML = new XML("<script><![CDATA[" + func + "]]></script>"); 				
-  ExternalInterface.call(createTag);
+  _viewabilityAsset.addJavaScriptResourceOnEvent(VPAIDEvent.AdStarted, tagSrc);
   ...
 }
 </pre>

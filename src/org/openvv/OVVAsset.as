@@ -150,7 +150,7 @@ package org.openvv {
 		/**
 		 * Indicate whether the Impression event was raised
 		 */
-		private var raiseImpressionEvent: Boolean = false;
+		private var _raiseImpressionEvent: Boolean = false;
 		
 		/**
 		 * A vector of all VPAID events
@@ -166,6 +166,7 @@ package org.openvv {
 		 */
 		private static const OVV_EVENTS:Vector.<String> = Vector.<String>([OVVEvent.OVVError,OVVEvent.OVVLog, OVVEvent.OVVImpression]);	
 	
+		private var _vpaidEventsDispatcher:EventDispatcher = null;
 
         ////////////////////////////////////////////////////////////
         //   CONSTRUCTOR 
@@ -243,9 +244,21 @@ package org.openvv {
 		public function initEventsWiring(vpaidEventsDispatcher:EventDispatcher): void {	
 			if (vpaidEventsDispatcher == null)
 				throw "You must pass an EventDispatcher to init event wiring";
-			registerEventHandler(vpaidEventsDispatcher);								
+			registerEventHandler(vpaidEventsDispatcher);
+			_vpaidEventsDispatcher = vpaidEventsDispatcher;
 		}
-
+		
+		/**
+		 * Add a JavaScript resource upon reciveing a given vpaidEvent
+		 * @param	vpaidEvent The name of the VPAID event to add the JavaScript resource upon recived
+		 * @param	tagUrl The JavaScript tag url
+		 */
+		public function addJavaScriptResourceOnEvent(vpaidEvent:String, tagUrl:String): void {
+			if (_vpaidEventsDispatcher == null)
+				throw "initEventsWiring must be called first.";
+			_vpaidEventsDispatcher.addEventListener(vpaidEvent, onInjectJavaScriptResource(tagUrl));
+		}
+		
         ////////////////////////////////////////////////////////////
         //   PUBLIC API 
         ////////////////////////////////////////////////////////////
@@ -342,7 +355,7 @@ package org.openvv {
 
             _intervalsInView = (results.viewabilityState == OVVCheck.VIEWABLE && results.focus == true) ? _intervalsInView + 1 : 0;
 
-            if (raiseImpressionEvent == false && _intervalsInView >= VIEWABLE_IMPRESSION_THRESHOLD) {
+            if (_raiseImpressionEvent == false && _intervalsInView >= VIEWABLE_IMPRESSION_THRESHOLD) {
                 raiseImpression(results);
             }
         }
@@ -394,6 +407,28 @@ package org.openvv {
         //   PRIVATE METHODS
         ////////////////////////////////////////////////////////////
 		
+		/**
+		 * Create a function for injecting the JavaScript resource
+		 * @param	tagUrl The JavaScript tag url
+		 * @return a Function for injection the JavaScript resource
+		 */
+		private function onInjectJavaScriptResource(tagUrl:String):Function  {
+			 return function(event:VPAIDEvent):void {
+				if (!externalInterfaceIsAvailable()) {					
+					return;
+				}
+				
+				var func:String = "function createTag() {"										
+					+ "var tag = document.createElement('script');"
+					+ "tag.type = \"text/javascript\";" 
+					+ "tag.src = \"" + tagUrl + "\";" 
+					+ "document.body.insertBefore(tag, document.body.firstChild);}"
+			
+				var createTag:XML = new XML("<script><![CDATA[" + func + "]]></script>"); 				
+				ExternalInterface.call(createTag);				
+			  };
+		}
+
 		/**
 		 * Register to VPAID and OVV events
 		 * @param	vpaidEventsDispatcher object that exposes VPAID events
@@ -468,7 +503,7 @@ package org.openvv {
 		private function raiseImpression(ovvData:*):void
 		{
 			dispatchEvent(new OVVEvent(OVVEvent.OVVImpression, ovvData));
-			raiseImpressionEvent = true;
+			_raiseImpressionEvent = true;
 		}
 
 		private function raiseLog(ovvData:*):void
