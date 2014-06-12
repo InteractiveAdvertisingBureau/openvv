@@ -742,6 +742,12 @@ function OVVAsset(uid) {
         return id;
     };
 
+    /**
+    * @returns {Object} The associated asset's player
+    */
+    this.getPlayer = function () {
+        return player;
+    };
     ///////////////////////////////////////////////////////////////////////////
     // PRIVATE FUNCTIONS
     ///////////////////////////////////////////////////////////////////////////
@@ -834,6 +840,13 @@ function OVVAsset(uid) {
         var middleCornersVisible = 0;
         var innerCornersVisible = 0;
         check.beacons = new Array(TOTAL_BEACONS);
+		
+		//Get player dimensions:
+		var objRect = player.getClientRects()[0];
+		check.objTop = objRect.top;
+		check.objBottom = objRect.bottom;
+		check.objLeft = objRect.left;
+		check.objRight = objRect.right;
 				
         for (var index = 0; index <= TOTAL_BEACONS; index++) {
 
@@ -999,7 +1012,7 @@ function OVVAsset(uid) {
             return;
         }
 
-        var playerLocation = player.getClientRects()[0];
+        var playerLocation = player.getClientRects()[0];		
 
         // when we don't have an initial position, or the position hasn't changed 
         if (lastPlayerLocation && (lastPlayerLocation.left === playerLocation.left && lastPlayerLocation.right === playerLocation.right && lastPlayerLocation.top === playerLocation.top && lastPlayerLocation.bottom === playerLocation.bottom)) {
