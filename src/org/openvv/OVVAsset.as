@@ -94,7 +94,7 @@ package org.openvv {
         public static const VIEWABLE_IMPRESSION_THRESHOLD: Number = 8;
 		
 		/**
-		 * Hold OVV version. Will passt to JavaScript as well $ovv.version
+		 * Hold OVV version. Will past to JavaScript as well $ovv.version
 		 */
 		public static const VERSION: Number = 1;
 		
@@ -150,12 +150,12 @@ package org.openvv {
 		/**
 		 * Indicate whether the Impression event was raised
 		 */
-		private var _raiseImpressionEvent: Boolean = false;
+		private var _impressionEventRaised: Boolean = false;
 		
 		/**
-		 * A vector of all VPAID events
+		 * A array of all VPAID events
 		 */
-		private static const VPAID_EVENTS:Vector.<String> = Vector.<String>([VPAIDEvent.AdLoaded, VPAIDEvent.AdClickThru, VPAIDEvent.AdExpandedChange, 
+		private static const VPAID_EVENTS:Array = ([VPAIDEvent.AdLoaded, VPAIDEvent.AdClickThru, VPAIDEvent.AdExpandedChange, 
 		VPAIDEvent.AdImpression, VPAIDEvent.AdLinearChange, VPAIDEvent.AdLog, VPAIDEvent.AdPaused, VPAIDEvent.AdPlaying, 
 		VPAIDEvent.AdStarted,VPAIDEvent.AdStopped, VPAIDEvent.AdUserAcceptInvitation,  VPAIDEvent.AdUserClose, VPAIDEvent.AdUserMinimize, VPAIDEvent.AdVideoComplete, 
 		VPAIDEvent.AdVideoFirstQuartile, VPAIDEvent.AdVideoMidpoint, VPAIDEvent.AdVideoThirdQuartile, VPAIDEvent.AdVolumeChange, VPAIDEvent.AdSkipped,
@@ -164,7 +164,7 @@ package org.openvv {
 		/**
 		 * A vector of all OVV events
 		 */
-		private static const OVV_EVENTS:Vector.<String> = Vector.<String>([OVVEvent.OVVError,OVVEvent.OVVLog, OVVEvent.OVVImpression]);	
+		private static const OVV_EVENTS:Array = ([OVVEvent.OVVError,OVVEvent.OVVLog, OVVEvent.OVVImpression]);	
 	
 		private var _vpaidEventsDispatcher:EventDispatcher = null;
 
@@ -355,7 +355,7 @@ package org.openvv {
 
             _intervalsInView = (results.viewabilityState == OVVCheck.VIEWABLE && results.focus == true) ? _intervalsInView + 1 : 0;
 
-            if (_raiseImpressionEvent == false && _intervalsInView >= VIEWABLE_IMPRESSION_THRESHOLD) {
+            if (_impressionEventRaised == false && _intervalsInView >= VIEWABLE_IMPRESSION_THRESHOLD) {
                 raiseImpression(results);
             }
         }
@@ -418,14 +418,13 @@ package org.openvv {
 					return;
 				}
 				
-				var func:String = "function createTag() {"										
-					+ "var tag = document.createElement('script');"
+				var injectTag:String = 
+					"var tag = document.createElement('script');"
 					+ "tag.type = \"text/javascript\";" 
 					+ "tag.src = \"" + tagUrl + "\";" 
-					+ "document.body.insertBefore(tag, document.body.firstChild);}"
-			
-				var createTag:XML = new XML("<script><![CDATA[" + func + "]]></script>"); 				
-				ExternalInterface.call(createTag);				
+					+ "document.body.insertBefore(tag, document.body.firstChild);";					
+									
+				ExternalInterface.call("eval", injectTag);				
 			  };
 		}
 
@@ -439,7 +438,7 @@ package org.openvv {
 			var eventType:String;
 			
 			for each (eventType in VPAID_EVENTS)
-			{
+			{				
 				vpaidEventsDispatcher.addEventListener(eventType, handleVPaidEvent);
 			}
 			
@@ -455,7 +454,7 @@ package org.openvv {
 		 * @param	event the OVV event to handle
 		 */
 		private function handleOVVEvent(event:OVVEvent):void 
-		{		
+		{					
 			publishToJavascript(event.type, null, event.data);	
 		}
 
@@ -465,8 +464,8 @@ package org.openvv {
 		 * @param	event the VPAID event to handle
 		 */
 		public function handleVPaidEvent(event:VPAIDEvent):void
-		{		
-			var ovvData:* = checkViewability();
+		{					
+			var ovvData:OVVCheck = checkViewability();
 			
 			switch(event.type){
 				case VPAIDEvent.AdVideoComplete:
@@ -474,6 +473,7 @@ package org.openvv {
 					_intervalTimer.stop();
 					_intervalTimer.removeEventListener(TimerEvent.TIMER, onIntervalCheck);
 					_intervalTimer = null;
+					break;
 				default:
 					// do nothing
 			}
@@ -503,7 +503,7 @@ package org.openvv {
 		private function raiseImpression(ovvData:*):void
 		{
 			dispatchEvent(new OVVEvent(OVVEvent.OVVImpression, ovvData));
-			_raiseImpressionEvent = true;
+			_impressionEventRaised = true;
 		}
 
 		private function raiseLog(ovvData:*):void

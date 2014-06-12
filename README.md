@@ -47,7 +47,7 @@ The addition to OVVAsset.as includes an **initEventsWiring** and **addJavaScript
 
 1.  Instantiate an OVVAsset object and pass it a unique identifier. 
 2.  Registers OVVAsset.as as an event listener to VPAID events fired by the creative using **initEventsWiring** function passing the EventDispatcher that Fires IVPAID events.
-3.  Call **addJavaScriptResourceOnEvent** function with the VPAID event name upon the JavaScript tag should be renderd and the JavaScript tag url.
+3.  Call **addJavaScriptResourceOnEvent** function with the VPAID event name upon the JavaScript tag should be rendered and the JavaScript tag url.
 
 Code snippet:
 <pre>

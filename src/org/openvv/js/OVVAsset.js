@@ -151,6 +151,7 @@ function OVV() {
 	 * @param {getPreviousEvents} if true all buffered event will be triggered     
      */
     this.subscribe = function (events, uid, func, getPreviousEvents) {
+		
         if (getPreviousEvents) {
             for (key in previousEvents[uid]) {
                 if (contains(previousEvents[uid][key].eventName, events)) { 
@@ -693,8 +694,8 @@ function OVVAsset(uid) {
                 check.viewabilityState = (beaconViewable || geometryViewable) ? OVVCheck.VIEWABLE : OVVCheck.UNVIEWABLE;
             }
         }
-
-        return check;
+		
+		return check;
     };
 
     /**
@@ -1158,7 +1159,8 @@ function OVVAsset(uid) {
     } else {
         // since we don't have to wait for beacons to be ready, we start the 
         // impression timer now
-        player.startImpressionTimer();
+        if (player && player.startImpressionTimer) 
+			player.startImpressionTimer();
     }
 }
 
