@@ -17,6 +17,8 @@
 package org.openvv {
 
     import flash.display.Sprite;
+    import flash.display.Stage;
+    import flash.display.StageDisplayState;
     import flash.events.Event;
     import flash.events.EventDispatcher;
     import flash.events.TimerEvent;
@@ -134,6 +136,10 @@ package org.openvv {
         private var _sprite: Sprite;
 
         /**
+         * A reference to the stage. Used for detecting full screen viewing.
+         */
+        private var _stage:Stage;
+        /**
          * The last recorded ThrottleState
          *
          * @see org.openvv.OVVThrottleType
@@ -159,9 +165,9 @@ package org.openvv {
          * @param interval The number of milliseconds between polls to
          * JavaScript for viewability information. Defaults to 250.
          */
-        public function OVVAsset(beaconSwfUrl:String = null, id:String = null, interval:int = 250) {
+        public function OVVAsset(beaconSwfUrl:String = null, id:String = null, interval:int = 250, stage:Stage=null) {
             
-			if (!externalInterfaceIsAvailable()) {
+            if (!externalInterfaceIsAvailable()) {
                 dispatchEvent(new OVVEvent(OVVEvent.OVVError, {
                     "message": "ExternalInterface unavailable"
                 }));
@@ -170,22 +176,23 @@ package org.openvv {
 
             _id = (id !== null) ? id : "ovv" + Math.floor(Math.random() * 1000000000).toString();
             _interval = interval;
+            _stage = stage;
 
             ExternalInterface.addCallback(_id, flashProbe);
             ExternalInterface.addCallback("startImpressionTimer", startImpressionTimer);
 
             _sprite = new Sprite();
             _renderMeter = new OVVRenderMeter(_sprite);
-            _sprite.addEventListener("throttle", onThrottleEvent);
+            _sprite.addEventListener(OVVThrottleType.THROTTLE, onThrottleEvent);
 
             var ovvAssetSource: String = new OVVAssetJSSource().toString();
             ovvAssetSource = ovvAssetSource.replace(/OVVID/g, _id).replace(/INTERVAL/g, _interval);
-			
-			if (beaconSwfUrl)
-			{
-				ovvAssetSource = ovvAssetSource.replace(/BEACON_SWF_URL/g, beaconSwfUrl);
-			}
-			
+
+            if (beaconSwfUrl)
+            {
+                ovvAssetSource = ovvAssetSource.replace(/BEACON_SWF_URL/g, beaconSwfUrl);
+            }
+
             ExternalInterface.call("eval", ovvAssetSource);
         }
 
@@ -231,6 +238,26 @@ package org.openvv {
 
             var jsResults: Object = ExternalInterface.call("$ovv.getAssetById('" + _id + "')" + ".checkViewability");
             var results: OVVCheck = new OVVCheck(jsResults);
+
+            try
+            {
+                switch (_stage.displayState)
+                {
+                    case StageDisplayState.FULL_SCREEN:
+                    case StageDisplayState.FULL_SCREEN_INTERACTIVE:
+                        results.viewabilityState = OVVCheck.VIEWABLE;
+                        break;
+
+                    case StageDisplayState.NORMAL:
+                        // can't be sure, have to rely on other techniques
+                        break;
+                }
+            }
+            catch(e:Error)
+            {
+                // Either stage was null or we can't access it due to security
+                // restrictions, either way we can ignore this error
+            }
 
             return results;
         }
