@@ -90,9 +90,15 @@ package org.openvv {
 
         /**
          * The number of consecutive intervals of viewability required before
-         * the VIEWABLE_IMPRESSION event will be fired (5 seconds)
+         * the VIEWABLE_IMPRESSION event will be fired (2 seconds)
          */
-        public static const VIEWABLE_IMPRESSION_THRESHOLD: Number = 8;
+        public static const VIEWABLE_IMPRESSION_THRESHOLD: Number = 10;
+
+        /**
+         * The number of milliseconds between polling JavaScript for
+         * viewability information
+         */
+        public static const POLL_INTERVAL:int = 200;
 
         ////////////////////////////////////////////////////////////
         //   ATTRIBUTES 
@@ -107,12 +113,6 @@ package org.openvv {
          * The randomly generated unique identifier of this asset
          */
         private var _id: String;
-
-        /**
-         * The number of milliseconds between polling JavaScript for
-         * viewability information
-         */
-        private var _interval:int;
 
         /**
          * The timer used to measure intervals
@@ -165,7 +165,7 @@ package org.openvv {
          * @param interval The number of milliseconds between polls to
          * JavaScript for viewability information. Defaults to 250.
          */
-        public function OVVAsset(beaconSwfUrl:String = null, id:String = null, interval:int = 250, stage:Stage=null) {
+        public function OVVAsset(beaconSwfUrl:String = null, id:String = null, stage:Stage=null) {
             
             if (!externalInterfaceIsAvailable()) {
                 dispatchEvent(new OVVEvent(OVVEvent.OVVError, {
@@ -175,7 +175,6 @@ package org.openvv {
             }
 
             _id = (id !== null) ? id : "ovv" + Math.floor(Math.random() * 1000000000).toString();
-            _interval = interval;
             _stage = stage;
 
             ExternalInterface.addCallback(_id, flashProbe);
@@ -186,7 +185,7 @@ package org.openvv {
             _sprite.addEventListener(OVVThrottleType.THROTTLE, onThrottleEvent);
 
             var ovvAssetSource: String = new OVVAssetJSSource().toString();
-            ovvAssetSource = ovvAssetSource.replace(/OVVID/g, _id).replace(/INTERVAL/g, _interval);
+            ovvAssetSource = ovvAssetSource.replace(/OVVID/g, _id).replace(/INTERVAL/g, POLL_INTERVAL);
 
             if (beaconSwfUrl)
             {
@@ -304,7 +303,7 @@ package org.openvv {
             if (!_intervalTimer) {
                 _intervalsInView = 0;
 
-                _intervalTimer = new Timer(_interval);
+                _intervalTimer = new Timer(POLL_INTERVAL);
                 _intervalTimer.addEventListener(TimerEvent.TIMER, onIntervalCheck);
                 _intervalTimer.start();
             }
