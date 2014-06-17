@@ -9,4 +9,4 @@ html-template/
 bin/
 asdoc/
 jsdoc/
-obj/*
+obj/
