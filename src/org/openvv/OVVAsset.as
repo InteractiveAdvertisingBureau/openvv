@@ -238,13 +238,21 @@ package org.openvv {
             var jsResults: Object = ExternalInterface.call("$ovv.getAssetById('" + _id + "')" + ".checkViewability");
             var results: OVVCheck = new OVVCheck(jsResults);
 
+            if (!_stage)
+            {
+                return results;
+            }
+
             try
             {
+                results.displayState = _stage.displayState;
+
                 switch (_stage.displayState)
                 {
                     case StageDisplayState.FULL_SCREEN:
                     case StageDisplayState.FULL_SCREEN_INTERACTIVE:
                         results.viewabilityState = OVVCheck.VIEWABLE;
+                        results.viewabilityStateOverrideReason = OVVCheck.FULLSCREEN;
                         break;
 
                     case StageDisplayState.NORMAL:
