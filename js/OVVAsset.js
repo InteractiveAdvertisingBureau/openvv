@@ -51,6 +51,21 @@ function OVV() {
      */
     this.asset = null;
 
+    var userAgent = navigator.userAgent.toLowerCase();
+
+    /**
+     * Information gathered about the browser being used. Taken from
+     * http://jquery.thewikies.com/browser/jquery.js
+     * @type {Object}
+     */
+    this.browser = {
+        version: (userAgent.match(/.+(?:rv|it|ra|ie)[\/: ]([\d.]+)/) || [])[1],
+        safari: /webkit/.test(userAgent),
+        opera: /opera/.test(userAgent),
+        msie: /msie/.test(userAgent) && !/opera/.test(userAgent),
+        mozilla: /mozilla/.test(userAgent) && !/(compatible|webkit)/.test(userAgent)
+    };
+
     /**
      * The interval in which ActionScript will poll OVV for viewability
      * information
@@ -518,6 +533,14 @@ function OVVAsset(uid) {
         if (!player) {
             check.error = 'Player not found!';
             return check;
+        }
+
+        // if we're in IE or FF and we're in an iframe, return unmeasurable
+        if (($ovv.browser.msie || $ovv.browser.mozilla) && $ovv.IN_IFRAME) {
+            check.viewabilityState = OVVCheck.UNMEASURABLE;
+            if (!$ovv.DEBUG) {
+                return check;
+            }
         }
 
         // if we can use the geometry method, use it over the beacon method
