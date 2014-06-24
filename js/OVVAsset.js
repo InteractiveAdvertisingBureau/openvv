@@ -51,6 +51,21 @@ function OVV() {
      */
     this.asset = null;
 
+    var userAgent = navigator.userAgent.toLowerCase();
+
+    /**
+     * Information gathered about the browser being used. Taken from
+     * http://jquery.thewikies.com/browser/jquery.js
+     * @type {Object}
+     */
+    this.browser = {
+        version: (userAgent.match(/.+(?:rv|it|ra|ie)[\/: ]([\d.]+)/) || [])[1],
+        safari: /webkit/.test(userAgent),
+        opera: /opera/.test(userAgent),
+        msie: /msie/.test(userAgent) && !/opera/.test(userAgent),
+        mozilla: /mozilla/.test(userAgent) && !/(compatible|webkit)/.test(userAgent)
+    };
+
     /**
      * The interval in which ActionScript will poll OVV for viewability
      * information
@@ -520,6 +535,14 @@ function OVVAsset(uid) {
             return check;
         }
 
+        // if we're in IE or FF and we're in an iframe, return unmeasurable
+        if (($ovv.browser.msie || $ovv.browser.mozilla) && $ovv.IN_IFRAME) {
+            check.viewabilityState = OVVCheck.UNMEASURABLE;
+            if (!$ovv.DEBUG) {
+                return check;
+            }
+        }
+
         // if we can use the geometry method, use it over the beacon method
         if (check.geometrySupported) {
             check.technique = OVVCheck.GEOMETRY;
@@ -901,6 +924,9 @@ function OVVAsset(uid) {
         // save for next time
         lastPlayerLocation = playerLocation;
 
+        var playerWidth = playerLocation.right - playerLocation.left;
+        var playerHeight = playerLocation.bottom - playerLocation.top;
+
         var innerWidth = playerLocation.width / (1 + SQRT_2);
         var innerHeight = playerLocation.height / (1 + SQRT_2);
 
@@ -918,53 +944,53 @@ function OVVAsset(uid) {
                     top = -100000;
                     break;
                 case CENTER:
-                    left += (playerLocation.width - BEACON_SIZE) / 2;
-                    top += (playerLocation.height - BEACON_SIZE) / 2;
+                    left += (playerWidth - BEACON_SIZE) / 2;
+                    top += (playerHeight - BEACON_SIZE) / 2;
                     break;
                 case OUTER_TOP_LEFT:
                     // nothing to do, already at default position
                     break;
                 case OUTER_TOP_RIGHT:
-                    left += playerLocation.width - BEACON_SIZE;
+                    left += playerWidth - BEACON_SIZE;
                     break;
                 case OUTER_BOTTOM_LEFT:
-                    top += playerLocation.height - BEACON_SIZE;
+                    top += playerHeight - BEACON_SIZE;
                     break;
                 case OUTER_BOTTOM_RIGHT:
-                    left += playerLocation.width - BEACON_SIZE;
-                    top += playerLocation.height - BEACON_SIZE;
+                    left += playerWidth - BEACON_SIZE;
+                    top += playerHeight - BEACON_SIZE;
                     break;
                 case MIDDLE_TOP_LEFT:
-                    left += (playerLocation.width - middleWidth) / 2;
-                    top += (playerLocation.height - middleHeight) / 2;
+                    left += (playerWidth - middleWidth) / 2;
+                    top += (playerHeight - middleHeight) / 2;
                     break;
                 case MIDDLE_TOP_RIGHT:
-                    left += ((playerLocation.width - middleWidth) / 2) + middleWidth;
-                    top += (playerLocation.height - middleHeight) / 2;
+                    left += ((playerWidth - middleWidth) / 2) + middleWidth;
+                    top += (playerHeight - middleHeight) / 2;
                     break;
                 case MIDDLE_BOTTOM_LEFT:
-                    left += (playerLocation.width - middleWidth) / 2;
-                    top += ((playerLocation.height - middleHeight) / 2) + middleHeight;
+                    left += (playerWidth - middleWidth) / 2;
+                    top += ((playerHeight - middleHeight) / 2) + middleHeight;
                     break;
                 case MIDDLE_BOTTOM_RIGHT:
-                    left += ((playerLocation.width - middleWidth) / 2) + middleWidth;
-                    top += ((playerLocation.height - middleHeight) / 2) + middleHeight;
+                    left += ((playerWidth - middleWidth) / 2) + middleWidth;
+                    top += ((playerHeight - middleHeight) / 2) + middleHeight;
                     break;
                 case INNER_TOP_LEFT:
-                    left += (playerLocation.width - innerWidth) / 2;
-                    top += (playerLocation.height - innerHeight) / 2;
+                    left += (playerWidth - innerWidth) / 2;
+                    top += (playerHeight - innerHeight) / 2;
                     break;
                 case INNER_TOP_RIGHT:
-                    left += ((playerLocation.width - innerWidth) / 2) + innerWidth;
-                    top += (playerLocation.height - innerHeight) / 2;
+                    left += ((playerWidth - innerWidth) / 2) + innerWidth;
+                    top += (playerHeight - innerHeight) / 2;
                     break;
                 case INNER_BOTTOM_LEFT:
-                    left += (playerLocation.width - innerWidth) / 2;
-                    top += ((playerLocation.height - innerHeight) / 2) + innerHeight;
+                    left += (playerWidth - innerWidth) / 2;
+                    top += ((playerHeight - innerHeight) / 2) + innerHeight;
                     break;
                 case INNER_BOTTOM_RIGHT:
-                    left += ((playerLocation.width - innerWidth) / 2) + innerWidth;
-                    top += ((playerLocation.height - innerHeight) / 2) + innerHeight;
+                    left += ((playerWidth - innerWidth) / 2) + innerWidth;
+                    top += ((playerHeight - innerHeight) / 2) + innerHeight;
                     break;
             }
 
