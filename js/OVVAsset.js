@@ -927,11 +927,11 @@ function OVVAsset(uid) {
         var playerWidth = playerLocation.right - playerLocation.left;
         var playerHeight = playerLocation.bottom - playerLocation.top;
 
-        var innerWidth = playerLocation.width / (1 + SQRT_2);
-        var innerHeight = playerLocation.height / (1 + SQRT_2);
+        var innerWidth = playerWidth / (1 + SQRT_2);
+        var innerHeight = playerHeight / (1 + SQRT_2);
 
-        var middleWidth = playerLocation.width / SQRT_2;
-        var middleHeight = playerLocation.height / SQRT_2;
+        var middleWidth = playerWidth / SQRT_2;
+        var middleHeight = playerHeight / SQRT_2;
 
         for (var index = 0; index <= TOTAL_BEACONS; index++) {
 
