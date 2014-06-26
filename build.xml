@@ -1,16 +1,19 @@
 <?xml version="1.0" encoding="utf-8"?>
 <project name="OpenVV"
 		 basedir="."
-		 default="compileBeacon">
+		 default="compileAll">
 
-	<property name="FLEX_HOME" value=""/>
-
+	<property environment="env"/>
+ 	<property name="FLEX_HOME" value="${env.FLEX_HOME}"/>
+	
 	<property name="src.dir" value="src" />
 	<property name="bin.dir" value="bin" />
 	<property name="asdoc.dir" value="asdoc" />
 	
 	<taskdef resource="flexTasks.tasks" classpath="${FLEX_HOME}/ant/lib/flexTasks.jar"/>
 	
+    <target name="compileAll" depends="compileBeacon, swc, compileDemo"></target>
+        
 	<target name="compileBeacon">
 		<fail message="You must set FLEX_HOME to your SDK's home directory">
 			<condition>
@@ -30,6 +33,21 @@
 			<source-path path-element="${src.dir}"/>
 		</compc>
 	</target>
+    
+    <target name="compileDemo">
+		<fail message="You must set FLEX_HOME to your SDK's home directory">
+			<condition>
+				<equals arg1="${FLEX_HOME}" arg2="" />
+			</condition>
+		</fail>
+		<mxmlc file="${src.dir}/Main.as"
+			   output="${bin.dir}/demo.swf"
+			   static-rsls="true">
+			<source-path path-element="${src.dir}"/>
+		</mxmlc>
+	</target>
+
+    
 
 	<target name="doc">
 		<asdoc output="${asdoc.dir}" lenient="true" failonerror="true"> 
