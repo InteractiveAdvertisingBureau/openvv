@@ -32,4 +32,4 @@ var asset:OVVAsset = new OVVAsset('http://localhost/OVVBeacon.swf');
 ```actionscript
 var check:OVVCheck = asset.checkViewability();
 ```
-* Query the properties of the `OVVCheck` object to report on your player's viewability.
+* Query the properties of the `OVVCheck` object to report on your player's viewability. 
