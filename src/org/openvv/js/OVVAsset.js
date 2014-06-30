@@ -62,7 +62,7 @@ function OVV() {
         version: (userAgent.match(/.+(?:rv|it|ra|ie)[\/: ]([\d.]+)/) || [])[1],
         safari: /webkit/.test(userAgent),
         opera: /opera/.test(userAgent),
-        msie: /msie|trident\\/7.*rv:11|rv:11.*trident\\/7/.test(userAgent) && !/opera/.test(userAgent),
+        msie: /msie|trident\\/7.*rv:11|rv:11.*trident\\/7/.test(userAgent),
         mozilla: /mozilla/.test(userAgent) && !/(compatible|webkit)/.test(userAgent)
     };
 
