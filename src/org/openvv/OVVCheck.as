@@ -35,6 +35,15 @@ package org.openvv {
         public static const BEACON: String = "beacon";
 
         /**
+         * A string used to indicate that the viewabilityState reported
+         * by JavaScript was overridden by ActionScript due to the
+         * asset being in fullscreen
+         *
+         * @see #viewabilityStateOverrideReason
+         */
+        public static const FULLSCREEN:String = "fullscreen"
+
+        /**
          * When OVVCheck.technique is set to GEOMETRY, the geometry technique
          * was used to determine the viewabilityState
          */
@@ -104,6 +113,12 @@ package org.openvv {
         public var fps: Number = -1;
 
         /**
+         * The display state of the asset's stage. i.e. normal or fullscreen
+         * @see http://help.adobe.com/en_US/FlashPlatform/reference/actionscript/3/flash/display/StageDisplayState.html
+         */
+        public var displayState:String;
+
+        /**
          * Whether OpenVV can use JavaScript bounds to determine viewability
          */
         public var geometrySupported: Boolean;
@@ -166,6 +181,14 @@ package org.openvv {
          * @see #UNMEASURABLE
          */
         public var viewabilityState: String;
+
+        /**
+         * When the viewabilityState is changed by ActionScript detecting that
+         * the asset is in fullscreen, this will be set to FULLSCREEN;
+         *
+         * @see #FULLSCREEN
+         */
+        public var viewabilityStateOverrideReason:String;
 
         ////////////////////////////////////////////////////////////
         //   CONSTRUCTOR 

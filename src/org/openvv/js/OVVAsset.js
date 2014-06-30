@@ -62,7 +62,7 @@ function OVV() {
         version: (userAgent.match(/.+(?:rv|it|ra|ie)[\/: ]([\d.]+)/) || [])[1],
         safari: /webkit/.test(userAgent),
         opera: /opera/.test(userAgent),
-        msie: /msie/.test(userAgent) && !/opera/.test(userAgent),
+        msie: (/msie/.test(userAgent) || /Trident\/7\./.test(userAgent)) && !/opera/.test(userAgent),
         mozilla: /mozilla/.test(userAgent) && !/(compatible|webkit)/.test(userAgent)
     };
 
@@ -74,9 +74,9 @@ function OVV() {
     this.interval = INTERVAL;
 
     /**
-    * OVV version
-    * @type {Number}
-    */
+     * OVV version
+     * @type {Number}
+     */
     this.version = VERSION;
 
     ///////////////////////////////////////////////////////////////////////////
@@ -91,21 +91,21 @@ function OVV() {
     var assets = {};
 
     /**
-    * An array for storing the first PREVIOUS_EVENTS_CAPACITY events for each event type. {@see PREVIOUS_EVENTS_CAPACITY}
-    * @type {Array}
-    */
+     * An array for storing the first PREVIOUS_EVENTS_CAPACITY events for each event type. {@see PREVIOUS_EVENTS_CAPACITY}
+     * @type {Array}
+     */
     var previousEvents = [];
 
     /**
-    * Number of event to store
-    * @type {int}
-    */
+     * Number of event to store
+     * @type {int}
+     */
     var PREVIOUS_EVENTS_CAPACITY = 1000;
 
     /**
-    * An array that holds all the subscribes for a eventName+uid combination
-    * @type {Array}
-    */
+     * An array that holds all the subscribes for a eventName+uid combination
+     * @type {Array}
+     */
     var subscribers = [];
 
     ///////////////////////////////////////////////////////////////////////////
@@ -124,7 +124,7 @@ function OVV() {
             // save a reference for convenience
             this.asset = ovvAsset;
         }
-    }
+    };
 
     /**
      * Removes an {@link OVVAsset} from OVV.
@@ -132,7 +132,7 @@ function OVV() {
      */
     this.removeAsset = function(ovvAsset) {
         delete assets[ovvAsset.getId()];
-    }
+    };
 
     /**
      * Retreives an {@link OVVAsset} based on its ID
@@ -142,7 +142,7 @@ function OVV() {
      */
     this.getAssetById = function(id) {
         return assets[id];
-    }
+    };
 
     /**
      * @returns {Object} Object an object containing all of the OVVAssets being tracked
@@ -155,22 +155,22 @@ function OVV() {
             }
         }
         return copy;
-    }
+    };
 
     /**
-    * Subscribe the {func} to the list of {events}. When getPreviousEvents is true all the stored events that were passed will be fired
-    * in a chronological order
-    * @param {events} array with all the event names to subscribe to
-    * @param {uid} asset identifier
-    * @param {func} a function to execute once the assert raise the event	 
-    * @param {getPreviousEvents} if true all buffered event will be triggered     
-    */
-    this.subscribe = function (events, uid, func, getPreviousEvents) {
+     * Subscribe the {func} to the list of {events}. When getPreviousEvents is true all the stored events that were passed will be fired
+     * in a chronological order
+     * @param {events} array with all the event names to subscribe to
+     * @param {uid} asset identifier
+     * @param {func} a function to execute once the assert raise the event
+     * @param {getPreviousEvents} if true all buffered event will be triggered
+     */
+    this.subscribe = function(events, uid, func, getPreviousEvents) {
 
         if (getPreviousEvents) {
             for (key in previousEvents[uid]) {
                 if (contains(previousEvents[uid][key].eventName, events)) {
-                    runSafely(function () {
+                    runSafely(function() {
                         func(uid, previousEvents[uid][key]); // changed in vtag.js
                     });
                 }
@@ -180,17 +180,19 @@ function OVV() {
         for (key in events) {
             if (!subscribers[events[key] + uid])
                 subscribers[events[key] + uid] = [];
-            subscribers[events[key] + uid].push({ Func: func });
+            subscribers[events[key] + uid].push({
+                Func: func
+            });
         }
     };
 
     /**
-    * Publish {eventName} to all the subscribers. Also, storing the publish event in a buffered array is the capacity wasn't reached	 
-    * @param {eventName} name of the event to publish
-    * @param {uid} asset identifier
-    * @param {args} argument to send to the published function
-    */
-    this.publish = function (eventName, uid, args) {
+     * Publish {eventName} to all the subscribers. Also, storing the publish event in a buffered array is the capacity wasn't reached
+     * @param {eventName} name of the event to publish
+     * @param {uid} asset identifier
+     * @param {args} argument to send to the published function
+     */
+    this.publish = function(eventName, uid, args) {
         var eventArgs = {
             eventName: eventName,
             eventTime: getCurrentTime(),
@@ -208,7 +210,7 @@ function OVV() {
             for (var i = 0; i < subscribers[eventName + uid].length; i++) {
                 var funcObject = subscribers[eventName + uid][i];
                 if (funcObject && funcObject.Func && typeof funcObject.Func === "function") {
-                    runSafely(function () {
+                    runSafely(function() {
                         funcObject.Func(uid, eventArgs);
                     });
                 }
@@ -216,24 +218,24 @@ function OVV() {
         }
     };
 
-    var getCurrentTime = function () {
+    var getCurrentTime = function() {
         "use strict";
         if (Date.now) {
             return Date.now();
         }
         return (new Date()).getTime();
-    }
+    };
 
-    var contains = function (item, list) {
+    var contains = function(item, list) {
         for (var i = 0; i < list.length; i++) {
             if (list[i] === item) {
                 return true;
             }
         }
         return false;
-    }
+    };
 
-    var runSafely = function (action) {
+    var runSafely = function(action) {
         try {
             var ret = action();
             return ret !== undefined ? ret : true;
@@ -638,7 +640,7 @@ function OVVAsset(uid) {
         check.inIframe = $ovv.IN_IFRAME;
         check.geometrySupported = !$ovv.IN_IFRAME;
 
-        check.focus = isInFocus();        
+        check.focus = isInFocus();
         if (!player) {
             check.error = 'Player not found!';
             return check;
@@ -731,7 +733,7 @@ function OVVAsset(uid) {
             getBeacon(index).debug();
         }
 
-        if (index == 0) {
+        if (index === 0) {
             return;
         }
 
@@ -766,9 +768,9 @@ function OVVAsset(uid) {
     };
 
     /**
-    * @returns {Object} The associated asset's player
-    */
-    this.getPlayer = function () {
+     * @returns {Object} The associated asset's player
+     */
+    this.getPlayer = function() {
         return player;
     };
     ///////////////////////////////////////////////////////////////////////////
@@ -1049,11 +1051,11 @@ function OVVAsset(uid) {
         var playerWidth = playerLocation.right - playerLocation.left;
         var playerHeight = playerLocation.bottom - playerLocation.top;
 
-        var innerWidth = playerLocation.width / (1 + SQRT_2);
-        var innerHeight = playerLocation.height / (1 + SQRT_2);
+        var innerWidth = playerWidth / (1 + SQRT_2);
+        var innerHeight = playerHeight / (1 + SQRT_2);
 
-        var middleWidth = playerLocation.width / SQRT_2;
-        var middleHeight = playerLocation.height / SQRT_2;
+        var middleWidth = playerWidth / SQRT_2;
+        var middleHeight = playerHeight / SQRT_2;
 
         for (var index = 0; index <= TOTAL_BEACONS; index++) {
 
@@ -1122,7 +1124,7 @@ function OVVAsset(uid) {
                 top -= (BEACON_SIZE / 2);
             }
 
-            var swfContainer = getBeaconContainer(index)
+            var swfContainer = getBeaconContainer(index);
             swfContainer.style.left = left + 'px';
             swfContainer.style.top = top + 'px';
         }
@@ -1188,23 +1190,23 @@ function OVVAsset(uid) {
         return null;
     };
 
-    var isInFocus = function () {
+    var isInFocus = function() {
         var inFocus = true;
         if (visibilityBrowserProperty)
             inFocus = window.document[visibilityBrowserProperty] ? false : true;
-        else if(typeof document.hasFocus === 'function')
+        else if (typeof document.hasFocus === 'function')
             inFocus = document.hasFocus();
         return inFocus;
     };
 
-    var getToBrowserHiddenProperty = function () {		
-        var hiddenProperty = null, 
+    var getToBrowserHiddenProperty = function() {
+        var hiddenProperty = null,
             browserHiddenOptions = ['hidden', 'mozHidden', 'webkitHidden', 'msHidden', 'oHidden']
 
-        for (hiddenOption in browserHiddenOptions) {            			
-            if ( browserHiddenOptions[hiddenOption] in document) {
+        for (hiddenOption in browserHiddenOptions) {
+            if (browserHiddenOptions[hiddenOption] in document) {
                 hiddenProperty = browserHiddenOptions[hiddenOption];
-				break;
+                break;
             }
         }
 
