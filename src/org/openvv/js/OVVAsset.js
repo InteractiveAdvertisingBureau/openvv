@@ -62,7 +62,7 @@ function OVV() {
         version: (userAgent.match(/.+(?:rv|it|ra|ie)[\/: ]([\d.]+)/) || [])[1],
         safari: /webkit/.test(userAgent),
         opera: /opera/.test(userAgent),
-        msie: (/msie/.test(userAgent) || /Trident\/7\./.test(userAgent)) && !/opera/.test(userAgent),
+        msie: /msie|trident\\/7.*rv:11|rv:11.*trident\\/7/.test(userAgent) && !/opera/.test(userAgent),
         mozilla: /mozilla/.test(userAgent) && !/(compatible|webkit)/.test(userAgent)
     };
 
@@ -646,7 +646,7 @@ function OVVAsset(uid) {
             return check;
         }
 
-        // if we're in IE or FF and we're in an iframe, return unmeasurable
+        // if we're in IE or FF and we're in an iframe, return unmeasurable				
         if (($ovv.browser.msie || $ovv.browser.mozilla) && $ovv.IN_IFRAME) {
             check.viewabilityState = OVVCheck.UNMEASURABLE;
             if (!$ovv.DEBUG) {
