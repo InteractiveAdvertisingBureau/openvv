@@ -1,0 +1,129 @@
+html, body {
+  width: 100%;
+  height: 100%;
+  background-color: #ffffff;
+}
+body {
+  margin:0;
+  padding:0;
+  overflow:visible;
+}
+
+#debug_window {
+  position:fixed;
+  display:block;
+  width:auto;
+  height:auto;
+  top:5px;
+  left:5px;
+  background-color:#F30;
+  text-align:left;
+  padding-top:10px;
+  padding-right:10px;
+  padding-bottom:10px;
+  padding-left:10px;
+  border: 1px solid #FFF;
+  font-weight: bold;
+  color: #FFF;
+}
+
+@charset "utf-8";
+.chip {
+	position:fixed;
+	display:block;
+	width:300px;
+	height:auto;
+	top:5px;
+	right:5px;
+	background-color:#000;
+	text-align:left;
+	padding-top:10px;
+	padding-right:10px;
+	padding-bottom:10px;
+	padding-left:10px;
+	border:1px solid #FFF;
+}
+.chip_title {
+	font-family:'InterstateBlackCondensedRg';
+	font-size:14px;
+	color:#FFF;
+}
+.chip_section {
+	width:auto;
+	height:auto;
+}
+.chip_bubble {
+	width:100%;
+	vertical-align:middle;
+	margin-top:10px;
+}
+.chip_bubble_image {
+
+}
+.chip_bubble_title {
+	font-family:'InterstateBlackCondensedRg';
+	font-size:14px;
+	color:#fff;
+	padding-left:6px;
+}
+.chip_bubble_percent {
+	font-family:InterstateBlackRegular;
+	font-size:16px;
+	color:#fff;
+	text-align:right;
+}
+.chip_bubble_result {
+	font-family:InterstateBlackCondensedRg;
+	font-size:10px;
+	text-align:center;
+	background-color:#FFF;
+	margin-right:6px;
+	margin-left:6px;
+	width:80px;
+	padding-top:4px;
+	padding-bottom:4px;
+	margin-top:1px;
+}
+.viewable_color {
+	background-color:#00B200;
+}
+.notviewable_color {
+	background-color:#CC0000;
+}
+.unmeasurable_color {
+	background-color:#333333;	
+}
+.viewable_text {
+	color:#00B200;
+}
+.notviewable_text {
+	color:#CC0000;
+}
+.chip_stats {
+	vertical-align:middle;
+	margin-top:10px;
+	border:1px solid #FFF;
+	padding-top:3px;
+	padding-right:4px;
+	padding-bottom:5px;
+	padding-left:4px;
+}
+.chip_stat_title {
+	font-family:InterstateBlackCondensedRg;
+	font-size:14px;
+	color:#CCC;
+	text-align:right;
+	vertical-align:bottom;
+}
+.chip_stat_number {
+	font-family:InterstateBlackRegular;
+	font-size:16px;
+	color:#fff;
+	text-align:left;
+	vertical-align:bottom;
+}
+.chip_shadow {
+	-webkit-box-shadow: 0px 0px 40px rgba(50, 50, 50, 1);
+	-moz-box-shadow:    0px 0px 40px rgba(50, 50, 50, 1);
+	box-shadow:         0px 0px 40px rgba(50, 50, 50, 1);
+}
