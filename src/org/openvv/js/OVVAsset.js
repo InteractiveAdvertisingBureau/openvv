@@ -641,7 +641,7 @@ function OVVAsset(uid) {
         check.geometrySupported = !$ovv.IN_IFRAME;
 
         check.focus = isInFocus();
-        if (!player) {
+		if (!player) {
             check.error = 'Player not found!';
             return check;
         }
@@ -1192,11 +1192,16 @@ function OVVAsset(uid) {
 
     var isInFocus = function() {
         var inFocus = true;
-        if (visibilityBrowserProperty)
-            inFocus = window.document[visibilityBrowserProperty] ? false : true;
-        else if (typeof document.hasFocus === 'function')
-            inFocus = document.hasFocus();
-        return inFocus;
+        if (visibilityBrowserProperty) {
+            inFocus = window.document[visibilityBrowserProperty] ? false : true;			
+        } else if (typeof document.hasFocus === 'function'){
+            inFocus = document.hasFocus();			
+		}
+		
+		if ($ovv.IN_IFRAME  === false && inFocus === true && typeof document.hasFocus === 'function'){
+            inFocus = document.hasFocus();			
+		}			
+        return inFocus;        
     };
 
     var getToBrowserHiddenProperty = function() {
