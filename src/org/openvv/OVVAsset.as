@@ -307,7 +307,7 @@ package org.openvv {
                 switch (_stage.displayState)
                 {
                     case StageDisplayState.FULL_SCREEN:
-                    case StageDisplayState.FULL_SCREEN_INTERACTIVE:
+                    case "fullScreenInteractive": // StageDisplayState.FULL_SCREEN_INTERACTIVE is available >= Flash Player 11.3
                         results.viewabilityState = OVVCheck.VIEWABLE;
                         results.viewabilityStateOverrideReason = OVVCheck.FULLSCREEN;
                         break;
