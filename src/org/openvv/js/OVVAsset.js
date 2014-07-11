@@ -42,7 +42,7 @@ function OVV() {
      * Whether OpenVV is running within an iframe or not.
      * @type {Boolean}
      */
-    this.IN_IFRAME = (parent !== window);
+    this.IN_IFRAME = (window.top !== window.self);
 
     /**
      * The last asset added to OVV. Useful for easy access from the
