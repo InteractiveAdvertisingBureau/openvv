@@ -51,13 +51,13 @@ function OVV() {
      */
     this.asset = null;
 
-    var userAgent = navigator.userAgent.toLowerCase();
-
+    var userAgent = navigator.userAgent;
     /**
      * Information gathered about the browser being used. Taken from
      * http://jquery.thewikies.com/browser/jquery.js
      * @type {Object}
      */
+	 /*
     this.browser = {
         version: (userAgent.match(/.+(?:rv|it|ra|ie)[\/: ]([\d.]+)/) || [])[1],
         safari: /webkit/.test(userAgent),
@@ -67,6 +67,74 @@ function OVV() {
         msie: /msie|trident\\/7.*rv:11|rv:11.*trident\\/7/.test(userAgent),
         mozilla: /mozilla/.test(userAgent) && !/(compatible|webkit)/.test(userAgent)
     };
+	/**/
+	
+	function getBrowserDetailsByUserAgent(ua) {
+
+		var getData = function () {			
+			var data = { ID: 0, name: '', version: '' };
+			var dataString = ua;
+			for (var i = 0; i < dataBrowsers.length; i++) {
+				// Fill Browser ID
+				if (dataString.match(new RegExp(dataBrowsers[i].brRegex)) != null) {
+					data.ID = dataBrowsers[i].id;
+					data.name = dataBrowsers[i].name;
+					if (dataBrowsers[i].verRegex == null) {
+						break;
+					}
+					//Fill Browser Version
+					var brverRes = dataString.match(new RegExp(dataBrowsers[i].verRegex + '[0-9]*'));
+					if (brverRes != null) {
+						var replaceStr = brverRes[0].match(new RegExp(dataBrowsers[i].verRegex));
+						data.version = brverRes[0].replace(replaceStr[0], '');
+					}
+					break;
+				}
+			}
+			return data;
+		};
+
+		var dataBrowsers = [{
+				id: 4,
+				name: 'Opera',
+				brRegex: 'OPR|Opera',
+				verRegex: '(OPR\/|Version\/)'
+			}, {
+				id: 1,
+				name: 'MSIE',
+				brRegex: 'MSIE|Trident/7.*rv:11|rv:11.*Trident/7',
+				verRegex: '(MSIE |rv:)'
+			}, {
+				id: 2,
+				name: 'Firefox',
+				brRegex: 'Firefox',
+				verRegex: 'Firefox\/'
+			}, {
+				id: 3,
+				name: 'Chrome',
+				brRegex: 'Chrome',
+				verRegex: 'Chrome\/'
+			}, {
+				id: 5,
+				name: 'Safari',
+				brRegex: 'Safari|(OS |OS X )[0-9].*AppleWebKit',
+				verRegex: 'Version\/'
+			}
+		];
+
+		return getData();
+	};
+	
+	this.browserIDEnum = {
+		MSIE: 1,
+		Firefox: 2,
+		Chrome: 3,
+		Opera: 4,
+		safari: 5
+	};
+	
+	 this.browser = getBrowserDetailsByUserAgent(userAgent);
+	
 
     /**
      * The interval in which ActionScript will poll OVV for viewability
@@ -648,8 +716,8 @@ function OVVAsset(uid) {
             return check;
         }
 
-        // if we're in IE or FF and we're in an iframe, return unmeasurable				
-        if (($ovv.browser.msie || $ovv.browser.mozilla) && $ovv.IN_IFRAME) {
+        // if we're in IE or FF and we're in an iframe, return unmeasurable						
+        if (($ovv.browser.ID === $ovv.browserIDEnum.MSIE || $ovv.browser.ID === $ovv.browserIDEnum.Firefox) && $ovv.IN_IFRAME) {			
             check.viewabilityState = OVVCheck.UNMEASURABLE;
             if (!$ovv.DEBUG) {
                 return check;
@@ -1192,36 +1260,21 @@ function OVVAsset(uid) {
         return null;
     };
 
-    var isInFocus = function() {
+    var isInFocus = function() {		
         var inFocus = true;
-        if (visibilityBrowserProperty) {
-            inFocus = window.document[visibilityBrowserProperty] ? false : true;			
-        } else if (typeof document.hasFocus === 'function'){
+        if (typeof document.hidden !== 'undefined') {
+				inFocus = window.document.hidden ? false : true;
+        } else if (document.hasFocus){
             inFocus = document.hasFocus();			
 		}
 		
-		if ($ovv.IN_IFRAME  === false && inFocus === true && typeof document.hasFocus === 'function'){
+		if ($ovv.IN_IFRAME  === false && inFocus === true && document.hasFocus){
             inFocus = document.hasFocus();			
 		}			
         return inFocus;        
     };
 
-    var getToBrowserHiddenProperty = function() {
-        var hiddenProperty = null,
-            browserHiddenOptions = ['hidden', 'mozHidden', 'webkitHidden', 'msHidden', 'oHidden']
-
-        for (hiddenOption in browserHiddenOptions) {
-            if (browserHiddenOptions[hiddenOption] in document) {
-                hiddenProperty = browserHiddenOptions[hiddenOption];
-                break;
-            }
-        }
-
-        return hiddenProperty;
-    };
-
-    player = findPlayer();
-    visibilityBrowserProperty = getToBrowserHiddenProperty();
+	player = findPlayer();    
 
     // only use the beacons if we're in an iframe, but go ahead and add them
     // during debug mode
