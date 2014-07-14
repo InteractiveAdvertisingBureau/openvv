@@ -52,7 +52,11 @@ function OVV() {
     this.asset = null;
 
     var userAgent = navigator.userAgent;
-   
+	
+	/**
+     * Returns an object that contains the browser name, version and id {@link OVV#browserIDEnum}		
+     * @param {ua} userAgent
+     */
 	function getBrowserDetailsByUserAgent(ua) {
 
 		var getData = function () {			
@@ -117,7 +121,15 @@ function OVV() {
 		safari: 5
 	};
 	
-	 this.browser = getBrowserDetailsByUserAgent(userAgent);
+	/**
+	* browser:
+	*	{ 
+	*		ID: ,  
+	*	  	name: '', 
+	*	  	version: '' 
+	*	};
+	*/
+	this.browser = getBrowserDetailsByUserAgent(userAgent);
 	
 
     /**
@@ -896,7 +908,7 @@ function OVVAsset(uid) {
                 var xMax = Math.floor(Math.min(check.clientWidth, objRect.right));
                 var yMin = Math.ceil(Math.max(0, objRect.top));
                 var yMax = Math.floor(Math.min(check.clientHeight, objRect.bottom));
-                var visibleObjectArea = (xMax - xMin + 1) * (yMax - yMin + 1);
+                var visibleObjectArea = (xMax - xMin + 1) * (yMax - yMin + 1);			
                 check.percentViewable = Math.round(visibleObjectArea / totalObjectArea * 100);
             }
         }
@@ -1254,7 +1266,8 @@ function OVVAsset(uid) {
 		
 		if ($ovv.IN_IFRAME  === false && inFocus === true && document.hasFocus){
             inFocus = document.hasFocus();			
-		}			
+		}	
+		
         return inFocus;        
     };
 
