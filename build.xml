@@ -3,10 +3,9 @@
 		 basedir="."
 		 default="swc">
 
-  <property environment="env"/>
-  <property name="FLEX_HOME" value="${env.FLEX_HOME}"/>
+	<property environment="env"/>
+	<property name="FLEX_HOME" value="${env.FLEX_HOME}"/>
 
-  
 	<property name="src.dir" value="src" />
 	<property name="bin.dir" value="bin" />
 	<property name="asdoc.dir" value="asdoc" />
@@ -43,12 +42,11 @@
 
 	<target name="checkEnv">
 		<fail message="You must set the FLEX_HOME environment variable to your SDK's home directory">
-      <condition>
-        <not>
-          <isset property="env.FLEX_HOME"/>
-        </not>
-      </condition>
-    </fail>
+			<condition>
+				<not>
+					<isset property="env.FLEX_HOME"/>
+			  </not>
+			</condition>
+		</fail>
 	</target>
-
 </project>
