@@ -52,23 +52,7 @@ function OVV() {
     this.asset = null;
 
     var userAgent = navigator.userAgent;
-    /**
-     * Information gathered about the browser being used. Taken from
-     * http://jquery.thewikies.com/browser/jquery.js
-     * @type {Object}
-     */
-	 /*
-    this.browser = {
-        version: (userAgent.match(/.+(?:rv|it|ra|ie)[\/: ]([\d.]+)/) || [])[1],
-        safari: /webkit/.test(userAgent),
-        opera: /opera/.test(userAgent),
-        // note that the regex on the next line is double-escaped to account 
-        // for when it is eval()'d by ActionScript
-        msie: /msie|trident\\/7.*rv:11|rv:11.*trident\\/7/.test(userAgent),
-        mozilla: /mozilla/.test(userAgent) && !/(compatible|webkit)/.test(userAgent)
-    };
-	/**/
-	
+   
 	function getBrowserDetailsByUserAgent(ua) {
 
 		var getData = function () {			
