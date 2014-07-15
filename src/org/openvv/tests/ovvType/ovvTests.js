@@ -23,6 +23,11 @@ test("Test getBrowserDetailsByUserAgent, MSIE10", function () {
 	baseGetBrowserDetailsByUserAgentTest(userAgent,browserObj);
 });
 
+test("Test getBrowserDetailsByUserAgent, MSIE11", function () {
+	var userAgent = 'Mozilla/5.0 (Windows NT 6.3; Trident/7.0; rv:11.0) like Gecko';
+    var browserObj = {ID:1, name:"MSIE", version:"11"};
+	baseGetBrowserDetailsByUserAgentTest(userAgent,browserObj);
+});
 
 test("Test getBrowserDetailsByUserAgent, Chrome 35", function () {
 	var userAgent = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_3) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/35.0.1916.47 Safari/537.36';
