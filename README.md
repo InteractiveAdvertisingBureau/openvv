@@ -3,10 +3,13 @@ openvv
 
 # Getting Started
 * Clone the repository and cd into the root directory of it.
-* Modify the `FLEX_HOME` property of `build.xml` to point to the local directory of your Flex SDK. For example:
-```xml
-<property name="FLEX_HOME" value="/Applications/Adobe Flash Builder 4.7/sdks/4.6.0"/>
+* Set the environment variable FLEX_HOME on your system, e.g. 
+
 ```
+export FLEX_HOME=/Applications/flex_sdk_4.6
+```
+in your /etc/.profile or ~/.profile on Mac OS X, or Unix-like systems.  My Computer > Advanced System Properties > Environment variables on Windows systems.
+
 * You need Apache ANT to go forward. If you don't have it, you can install it from [the official website](http://ant.apache.org/)
 
 ## Build the SWC

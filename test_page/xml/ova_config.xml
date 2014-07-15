@@ -1,0 +1,37 @@
+
+<config>
+   <ova.title>
+       Brightroll Ad
+   </ova.title>
+   <ova.json>
+<![CDATA[
+{
+    "debug": {
+        "debugger": "firebug",
+        "levels": "fatal, config, vast_template"
+    },
+    "canFireEventAPICalls": true,
+    "ads": {
+        "displayCompanions": true,
+        "restoreCompanions": false,
+        "companions": [
+            {
+                "id": "comp_div",
+                "width": "300",
+                "height": "250"
+            }
+        ],
+        "schedule": [
+            {
+                "position": "pre-roll",
+                "server": {
+                    "type": "direct",
+                    "tag": "xml/vast.xml"
+                }
+            }
+        ]
+    }
+}
+]]>
+   </ova.json>
+</config>

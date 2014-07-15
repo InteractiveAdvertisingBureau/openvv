@@ -1,0 +1,10 @@
+<html><body>
+<h1>How to Setup This Test Page</h1>
+<ol>
+	<li>Drop your OVV-integrated VPAID unit into this directory and name it <em>ad.swf</em>. Alternatively, alter <em>xml/vast.xml</em> to point to your OVV-integrated VPAID unit.</li>
+	<li>Within your VPAID unit, use ExternalInterface to call <pre style="display:inline">displayEvent()</pre>, for example:
+<pre>	ExternalInterface.call("displayEvent", vpaidEvent.type, ovvCheck.percentViewable, ovvCheck.focus, ovvCheck.viewabilityState);</pre>
+	</li>
+	<li>(Optional) Drop a content video into this directory and name it <em>content.flv</em>. Alternatively, alter the <em>flashvars.file</em> attribute in <em>js/viewability.js</em> to point to your content video.</li>
+<ol>
+</body></html>
