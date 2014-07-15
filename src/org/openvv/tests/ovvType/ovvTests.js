@@ -1,4 +1,70 @@
-﻿module("PubSub");
+﻿
+module("ovv", { setup: function () {    
+}
+});
+
+test("Test getBrowserDetailsByUserAgent, MSIE8", function () {
+	var userAgent = 'Mozilla/4.0 (compatible; MSIE 8.0; Windows NT 6.1; WOW64; Trident/4.0; SLCC2; .NET CLR 2.0.50727; .NET CLR 3.5.30729; .NET CLR 3.0.30729; Media Center PC 6.0';
+    var browserObj = {ID:1, name:"MSIE", version:"8"};
+	baseGetBrowserDetailsByUserAgentTest(userAgent,browserObj);
+});
+
+
+test("Test getBrowserDetailsByUserAgent, MSIE9", function () {
+	var userAgent = 'Mozilla/5.0 (Windows; U; MSIE 9.0; Windows NT 9.0; en-US)';
+    var browserObj = {ID:1, name:"MSIE", version:"9"};
+	baseGetBrowserDetailsByUserAgentTest(userAgent,browserObj);
+});
+
+
+test("Test getBrowserDetailsByUserAgent, MSIE10", function () {
+	var userAgent = 'Mozilla/5.0 (compatible; MSIE 10.0; Windows NT 6.1; WOW64; Trident/6.0)';
+    var browserObj = {ID:1, name:"MSIE", version:"10"};
+	baseGetBrowserDetailsByUserAgentTest(userAgent,browserObj);
+});
+
+
+test("Test getBrowserDetailsByUserAgent, Chrome 35", function () {
+	var userAgent = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_3) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/35.0.1916.47 Safari/537.36';
+    var browserObj = {ID:3, name:"Chrome", version:"35"};
+	baseGetBrowserDetailsByUserAgentTest(userAgent, browserObj);
+});
+
+test("Test getBrowserDetailsByUserAgent, Firefox 31", function () {
+	var userAgent = 'Mozilla/5.0 (Windows NT 5.1; rv:31.0) Gecko/20100101 Firefox/31.0';
+    var browserObj = {ID:2, name:"Firefox", version:"31"};
+	baseGetBrowserDetailsByUserAgentTest(userAgent, browserObj);
+});
+
+
+test("Test getBrowserDetailsByUserAgent, Safari 6", function () {
+	var userAgent = 'Mozilla/5.0 (iPad; CPU OS 6_0 like Mac OS X) AppleWebKit/536.26 (KHTML, like Gecko) Version/6.0 Mobile/10A5355d Safari/8536.25';
+    var browserObj = {ID:5, name:"Safari", version:"6"};
+	baseGetBrowserDetailsByUserAgentTest(userAgent, browserObj);
+});
+
+
+test("Test getBrowserDetailsByUserAgent, Opera 12", function () {
+	var userAgent = 'Opera/9.80 (Windows NT 6.0) Presto/2.12.388 Version/12.14';
+    var browserObj = {ID:4, name:"Opera", version:"12"};
+	baseGetBrowserDetailsByUserAgentTest(userAgent, browserObj);
+});
+
+
+
+
+
+function baseGetBrowserDetailsByUserAgentTest(userAgent, broswerObj) {
+	//Arrange    
+	window.testOvvConfig = {};
+    window.testOvvConfig.userAgent = userAgent;
+    
+	//Act
+	var $ovv = new window.OVV();    
+
+    //Assert
+    deepEqual($ovv.browser, broswerObj, 'wrong broswer object.');	
+}
 
 module("PubSub", { setup: function () {    
 }

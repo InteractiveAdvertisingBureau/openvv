@@ -51,7 +51,7 @@ function OVV() {
      */
     this.asset = null;
 
-    var userAgent = navigator.userAgent;
+    var userAgent = window.testOvvConfig && window.testOvvConfig.userAgent ? window.testOvvConfig.userAgent : navigator.userAgent;
 	
 	/**
      * Returns an object that contains the browser name, version and id {@link OVV#browserIDEnum}		
