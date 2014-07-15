@@ -908,8 +908,8 @@ function OVVAsset(uid) {
                 var xMax = Math.floor(Math.min(check.clientWidth, objRect.right));
                 var yMin = Math.ceil(Math.max(0, objRect.top));
                 var yMax = Math.floor(Math.min(check.clientHeight, objRect.bottom));
-                var visibleObjectArea = (xMax - xMin + 1) * (yMax - yMin + 1);			
-                check.percentViewable = Math.round(visibleObjectArea / totalObjectArea * 100);
+                var visibleObjectArea = (xMax - xMin + 1) * (yMax - yMin + 1);
+                check.percentViewable = Math.floor(visibleObjectArea / totalObjectArea * 100);
             }
         }
     }
