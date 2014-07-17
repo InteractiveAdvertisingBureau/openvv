@@ -20,6 +20,7 @@ package org.openvv {
     import flash.display.Stage;
     import flash.display.StageDisplayState;
     import flash.events.Event;
+	import flash.events.IEventDispatcher
     import flash.events.EventDispatcher;
     import flash.events.TimerEvent;
     import flash.external.ExternalInterface;
@@ -173,7 +174,7 @@ package org.openvv {
 		 */
 		private static const OVV_EVENTS:Array = ([OVVEvent.OVVError,OVVEvent.OVVLog, OVVEvent.OVVImpression]);	
 	
-		private var _vpaidEventsDispatcher:EventDispatcher = null;
+		private var _vpaidEventsDispatcher:IEventDispatcher = null;
 
         ////////////////////////////////////////////////////////////
         //   CONSTRUCTOR 
@@ -250,7 +251,7 @@ package org.openvv {
 		 * by exposing the VPAID data as well as the viewability data via a JavaScript API. 		 
 		 * @param	vpaidEventsDispatcher object that exposes VPAID events
 		 */
-		public function initEventsWiring(vpaidEventsDispatcher:EventDispatcher): void {	
+		public function initEventsWiring(vpaidEventsDispatcher:IEventDispatcher): void {	
 			if (vpaidEventsDispatcher == null)
 				throw "You must pass an EventDispatcher to init event wiring";
 			registerEventHandler(vpaidEventsDispatcher);
@@ -469,7 +470,7 @@ package org.openvv {
 		 * Register to VPAID and OVV events
 		 * @param	vpaidEventsDispatcher object that exposes VPAID events
 		 */
-		private function registerEventHandler(vpaidEventsDispatcher:EventDispatcher):void
+		private function registerEventHandler(vpaidEventsDispatcher:IEventDispatcher):void
 		{		
 			// Register to VPAID events
 			var eventType:String;
