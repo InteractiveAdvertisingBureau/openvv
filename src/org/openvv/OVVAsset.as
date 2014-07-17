@@ -24,9 +24,8 @@ package org.openvv {
     import flash.events.TimerEvent;
     import flash.external.ExternalInterface;
     import flash.utils.Timer;
-    	
     import org.openvv.events.OVVEvent;
-	import net.iab.VPAIDEvent;
+    import net.iab.VPAIDEvent;
 
     /**
      * The event dispatched when the asset has been viewable for 5 contiguous seconds
@@ -451,7 +450,7 @@ package org.openvv {
 		 * @return a Function for injection the JavaScript resource
 		 */
 		private function onInjectJavaScriptResource(tagUrl:String):Function  {
-			 return function(event:VPAIDEvent):void {
+			 return function(event:Event):void {
 				if (!externalInterfaceIsAvailable()) {					
 					return;
 				}
@@ -501,7 +500,7 @@ package org.openvv {
 		 * In case when the event is AdVideoComplete the internal interval that measures the asset will be stopped
 		 * @param	event the VPAID event to handle
 		 */
-		public function handleVPaidEvent(event:VPAIDEvent):void
+		public function handleVPaidEvent(event:Event):void
 		{					
 			var ovvData:OVVCheck = checkViewability();
 			
@@ -516,7 +515,7 @@ package org.openvv {
 					// do nothing
 			}
 			
-			publishToJavascript(event.type, event.data, ovvData);
+			publishToJavascript(event.type, getEventData(event), ovvData);
 		}		
 		
 		/**
@@ -538,6 +537,22 @@ package org.openvv {
 			ExternalInterface.call(jsOvvPublish, eventType ,_id, publishedData);
 		}
 		
+		private function getEventData(event:Event):Object
+		{
+			var data:Object;
+
+			try
+			{
+				data = event['data'];
+			}
+			catch (e:ReferenceError)
+			{
+				data = null;
+			}
+
+			return data;
+		}
+
 		private function raiseImpression(ovvData:*):void
 		{
 			dispatchEvent(new OVVEvent(OVVEvent.OVVImpression, ovvData));
