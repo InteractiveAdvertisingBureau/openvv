@@ -35,9 +35,14 @@ package org.openvv.events {
         public static const OVVError: String = "OVVError";
 
         /**
-         * Events of this type represent 5 seconds of contiguous viewability have occurred
+         * Events of this type represent 2 seconds of contiguous viewability have occurred
          */
         public static const OVVImpression: String = "OVVImpression";
+        
+        /**
+         * Events of this type represent when viewability is unmeasurable
+         */
+        public static const OVVImpressionUnmeasurable: String = "OVVImpressionUnmeasurable";
 
         /**
          * Events of this type represent informational logging messages
