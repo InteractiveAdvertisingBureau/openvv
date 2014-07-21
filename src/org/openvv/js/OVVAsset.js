@@ -474,6 +474,7 @@ function OVVCheck() {
      * @see {@link OVVCheck.UNMEASURABLE}
      * @see {@link OVVCheck.VIEWABLE}
      * @see {@link OVVCheck.UNVIEWABLE}
+	 * @see {@link OVVCheck.NOT_READY}
      */
     this.viewabilityState = '';
 }
@@ -495,6 +496,13 @@ OVVCheck.VIEWABLE = 'viewable';
  * determines that the asset is less than 50% viewable.
  */
 OVVCheck.UNVIEWABLE = 'unviewable';
+
+
+/**
+ * The value that {@link OVVCheck#viewabilityState} will be set to if the beacons
+ * are not ready to determin the viewability state
+ */
+OVVCheck.NOT_READY = 'not_ready';
 
 /**
  * The value that {@link OVVCheck#technique} will be set to if OVV
@@ -751,7 +759,10 @@ function OVVAsset(uid) {
 
         // if the control beacon checked out, and all the beacons are ready
         // proceed
-        if (check.beaconsSupported && beaconsReady()) {
+		if (!beaconsReady()) {
+			check.technique = OVVCheck.BEACON;
+			check.viewabilityState = OVVCheck.NOT_READY;
+        } else if (check.beaconsSupported) {
             check.technique = OVVCheck.BEACON;
             var viewable = checkBeacons.bind(this)(check);
             // certain scenarios return null when the beacons can't guarantee
