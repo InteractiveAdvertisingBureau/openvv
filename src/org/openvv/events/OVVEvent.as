@@ -40,6 +40,11 @@ package org.openvv.events {
         public static const OVVImpression: String = "OVVImpression";
 
         /**
+         * Events of this type represent when viewability is unmeasurable
+         */
+        public static const OVVImpressionUnmeasurable: String = "OVVImpressionUnmeasurable";
+
+        /**
          * Events of this type represent informational logging messages
          */
         public static const OVVLog: String = "OVVLog";
