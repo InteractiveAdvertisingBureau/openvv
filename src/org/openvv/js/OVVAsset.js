@@ -474,9 +474,11 @@ function OVVCheck() {
      * @see {@link OVVCheck.UNMEASURABLE}
      * @see {@link OVVCheck.VIEWABLE}
      * @see {@link OVVCheck.UNVIEWABLE}
+	 * @see {@link OVVCheck.NOT_READY}
      */
     this.viewabilityState = '';
 }
+
 
 /**
  * The value that {@link OVVCheck#viewabilityState} will be set to if OVV cannot
@@ -495,6 +497,12 @@ OVVCheck.VIEWABLE = 'viewable';
  * determines that the asset is less than 50% viewable.
  */
 OVVCheck.UNVIEWABLE = 'unviewable';
+
+/**
+ * The value that {@link OVVCheck#viewabilityState} will be set to if the beacons
+ * are not ready to determin the viewability state
+ */
+OVVCheck.NOT_READY = 'not_ready';
 
 /**
  * The value that {@link OVVCheck#technique} will be set to if OVV
@@ -735,8 +743,8 @@ function OVVAsset(uid) {
         }
 
         var controlBeacon = getBeacon(0);
-
-        // check to make sure the control beacon is found and its 
+		
+		// check to make sure the control beacon is found and its 
         // callback has been setup
         if (controlBeacon && controlBeacon.isViewable) {
             // the control beacon should always be off screen and not viewable,
@@ -747,13 +755,14 @@ function OVVAsset(uid) {
             // if the control beacon wasn't found or it isn't ready yet,
             // then beacons can't be used for this check
             check.beaconsSupported = false;
-        }
-
-        // if the control beacon checked out, and all the beacons are ready
-        // proceed
-        if (check.beaconsSupported && beaconsReady()) {
-            check.technique = OVVCheck.BEACON;
-            var viewable = checkBeacons.bind(this)(check);
+        }		
+		
+		if (!beaconsReady()) {
+			check.technique = OVVCheck.BEACON;
+        	check.viewabilityState = OVVCheck.NOT_READY;						
+        } else if (check.beaconsSupported) { // if the control beacon checked out, and all the beacons are ready proceed
+            check.technique = OVVCheck.BEACON;      
+			var viewable = checkBeacons.bind(this)(check);
             // certain scenarios return null when the beacons can't guarantee
             // that the player is > 50% viewable, so it's deemed unmeasurable
             if (viewable === null) {
