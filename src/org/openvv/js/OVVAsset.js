@@ -474,7 +474,6 @@ function OVVCheck() {
      * @see {@link OVVCheck.UNMEASURABLE}
      * @see {@link OVVCheck.VIEWABLE}
      * @see {@link OVVCheck.UNVIEWABLE}
-	 * @see {@link OVVCheck.NOT_READY}
      */
     this.viewabilityState = '';
 }
@@ -496,13 +495,6 @@ OVVCheck.VIEWABLE = 'viewable';
  * determines that the asset is less than 50% viewable.
  */
 OVVCheck.UNVIEWABLE = 'unviewable';
-
-
-/**
- * The value that {@link OVVCheck#viewabilityState} will be set to if the beacons
- * are not ready to determin the viewability state
- */
-OVVCheck.NOT_READY = 'not_ready';
 
 /**
  * The value that {@link OVVCheck#technique} will be set to if OVV
@@ -757,20 +749,10 @@ function OVVAsset(uid) {
             check.beaconsSupported = false;
         }
 
-        if (check.beaconsSupported) {
-
+        // if the control beacon checked out, and all the beacons are ready
+        // proceed
+        if (check.beaconsSupported && beaconsReady()) {
             check.technique = OVVCheck.BEACON;
-
-            if (!beaconsReady()) {
-                check.viewabilityState = OVVCheck.NOT_READY;
-
-                // if the beacons aren't ready, can't proceed
-                if(!$ovv.DEBUG)
-                {
-                    return check;
-                }
-            }
-            
             var viewable = checkBeacons.bind(this)(check);
             // certain scenarios return null when the beacons can't guarantee
             // that the player is > 50% viewable, so it's deemed unmeasurable
