@@ -97,9 +97,9 @@ package org.openvv {
         
         /**
          * The number of consecutive intervals of unmeasurability required before
-         * the UNMEASURABLE_IMPRESSION_ event will be fired (2 seconds)
+         * the UNMEASURABLE_IMPRESSION_ event will be fired (800ms)
          */
-        public static const UNMEASURABLE_IMPRESSION_THRESHOLD: Number = 10; 
+        public static const UNMEASURABLE_IMPRESSION_THRESHOLD: Number = 4; 
 
         /**
          * The number of milliseconds between polling JavaScript for
