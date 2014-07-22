@@ -743,8 +743,8 @@ function OVVAsset(uid) {
         }
 
         var controlBeacon = getBeacon(0);
-
-        // check to make sure the control beacon is found and its 
+		
+		// check to make sure the control beacon is found and its 
         // callback has been setup
         if (controlBeacon && controlBeacon.isViewable) {
             // the control beacon should always be off screen and not viewable,
@@ -755,23 +755,14 @@ function OVVAsset(uid) {
             // if the control beacon wasn't found or it isn't ready yet,
             // then beacons can't be used for this check
             check.beaconsSupported = false;
-        }
-
-        if (check.beaconsSupported) {
-
-            check.technique = OVVCheck.BEACON;
-
-            if (!beaconsReady()) {
-                check.viewabilityState = OVVCheck.NOT_READY;
-
-                // if the beacons aren't ready, can't proceed
-                if(!$ovv.DEBUG)
-                {
-                    return check;
-                }
-            }
-            
-            var viewable = checkBeacons.bind(this)(check);
+        }		
+		
+		if (!beaconsReady()) {
+			check.technique = OVVCheck.BEACON;
+        	check.viewabilityState = OVVCheck.NOT_READY;			
+        } else if (check.beaconsSupported) {
+            check.technique = OVVCheck.BEACON;      
+			var viewable = checkBeacons.bind(this)(check);
             // certain scenarios return null when the beacons can't guarantee
             // that the player is > 50% viewable, so it's deemed unmeasurable
             if (viewable === null) {
