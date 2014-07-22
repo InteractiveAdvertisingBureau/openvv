@@ -757,13 +757,20 @@ function OVVAsset(uid) {
             check.beaconsSupported = false;
         }
 
-        // if the control beacon checked out, and all the beacons are ready
-        // proceed
-		if (!beaconsReady()) {
-			check.technique = OVVCheck.BEACON;
-			check.viewabilityState = OVVCheck.NOT_READY;
-        } else if (check.beaconsSupported) {
+        if (check.beaconsSupported) {
+
             check.technique = OVVCheck.BEACON;
+
+            if (!beaconsReady()) {
+                check.viewabilityState = OVVCheck.NOT_READY;
+
+                // if the beacons aren't ready, can't proceed
+                if(!$ovv.DEBUG)
+                {
+                    return check;
+                }
+            }
+            
             var viewable = checkBeacons.bind(this)(check);
             // certain scenarios return null when the beacons can't guarantee
             // that the player is > 50% viewable, so it's deemed unmeasurable
