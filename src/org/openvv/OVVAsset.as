@@ -96,6 +96,12 @@ package org.openvv {
         public static const VIEWABLE_IMPRESSION_THRESHOLD: Number = 10;				
         
         /**
+         * The number of consecutive intervals of unmeasurability required before
+         * the UNMEASURABLE_IMPRESSION_ event will be fired (800ms)
+         */
+        public static const UNMEASURABLE_IMPRESSION_THRESHOLD: Number = 4; 
+
+        /**
          * The number of milliseconds between polling JavaScript for
          * viewability information
          */
@@ -132,6 +138,12 @@ package org.openvv {
          */
         private var _intervalsInView: Number;
 
+         /**
+         * The number of consecutive intervals in which the asset has been
+         * unmeasurable. Reset to 0 when the asset is found to be measurable.
+         */
+        private var _intervalsUnMeasurable: Number;        
+
         /**
          * The RenderMeter which gauges the frame rate of the asset
          */
@@ -161,6 +173,11 @@ package org.openvv {
 		private var _impressionEventRaised: Boolean = false;
 		
 		/**
+		* Indicate whether the ImpressionUnmeasurable event was raised
+		*/
+		private var _impressionUnmeasurableEventRaised: Boolean = false;
+
+		/**
 		 * A array of all VPAID events
 		 */
 		private static const VPAID_EVENTS:Array = ([VPAIDEvent.AdLoaded, VPAIDEvent.AdClickThru, VPAIDEvent.AdExpandedChange, 
@@ -172,7 +189,7 @@ package org.openvv {
 		/**
 		 * A vector of all OVV events
 		 */
-		private static const OVV_EVENTS:Array = ([OVVEvent.OVVError,OVVEvent.OVVLog, OVVEvent.OVVImpression]);	
+		private static const OVV_EVENTS:Array = ([OVVEvent.OVVError,OVVEvent.OVVLog, OVVEvent.OVVImpression, OVVEvent.OVVImpressionUnmeasurable]);	
 	
 		private var _vpaidEventsDispatcher:IEventDispatcher = null;
 
@@ -367,6 +384,7 @@ package org.openvv {
         public function startImpressionTimer(): void {
             if (!_intervalTimer) {
                 _intervalsInView = 0;
+                _intervalsUnMeasurable = 0;
 
                 _intervalTimer = new Timer(POLL_INTERVAL);
                 _intervalTimer.addEventListener(TimerEvent.TIMER, onIntervalCheck);
@@ -391,10 +409,14 @@ package org.openvv {
             var results: Object = checkViewability();
 			raiseLog(results);
 
+            _intervalsUnMeasurable = (results.viewabilityState == OVVCheck.UNMEASURABLE) ? _intervalsUnMeasurable + 1 : 0;
             _intervalsInView = (results.viewabilityState == OVVCheck.VIEWABLE && results.focus == true) ? _intervalsInView + 1 : 0;
 
             if (_impressionEventRaised == false && _intervalsInView >= VIEWABLE_IMPRESSION_THRESHOLD) {
                 raiseImpression(results);
+            }
+            else if (_impressionUnmeasurableEventRaised == false && _intervalsUnMeasurable >= UNMEASURABLE_IMPRESSION_THRESHOLD) {
+                raiseImpressionUnmeasurable(results);
             }
         }
 
@@ -558,6 +580,12 @@ package org.openvv {
 		{
 			dispatchEvent(new OVVEvent(OVVEvent.OVVImpression, ovvData));
 			_impressionEventRaised = true;
+		}
+
+		private function raiseImpressionUnmeasurable(ovvData:*):void
+		{
+			dispatchEvent(new OVVEvent(OVVEvent.OVVImpressionUnmeasurable, ovvData));
+			_impressionUnmeasurableEventRaised = true;
 		}
 
 		private function raiseLog(ovvData:*):void
