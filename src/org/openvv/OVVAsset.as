@@ -173,9 +173,13 @@ package org.openvv {
 		private var _impressionEventRaised: Boolean = false;
 		
 		/**
-		* Indicate whether the ImpressionUnmeasurable event was raised
-		*/
+		 * Indicate whether the ImpressionUnmeasurable event was raised
+		 */
 		private var _impressionUnmeasurableEventRaised: Boolean = false;
+
+        private var _startImpressionCheckAutomatically: Boolean;
+
+        private var _jsReady: Boolean;
 
 		/**
 		 * A array of all VPAID events
@@ -211,20 +215,18 @@ package org.openvv {
          * @param interval The number of milliseconds between polls to
          * JavaScript for viewability information. Defaults to 250.
          */
-        public function OVVAsset(beaconSwfUrl:String = null, id:String = null, stage:Stage=null) {
+        public function OVVAsset(beaconSwfUrl:String = null, id:String = null, stage:Stage = null, startImpressionCheckAutomatically:Boolean = true) {
             
             if (!externalInterfaceIsAvailable()) {
-                dispatchEvent(new OVVEvent(OVVEvent.OVVError, {
-                    "message": "ExternalInterface unavailable"
-                }));
                 return;
             }
 
             _id = (id !== null) ? id : "ovv" + Math.floor(Math.random() * 1000000000).toString();
             _stage = stage;
+            _startImpressionCheckAutomatically = startImpressionCheckAutomatically;
 
             ExternalInterface.addCallback(_id, flashProbe);
-            ExternalInterface.addCallback("startImpressionTimer", startImpressionTimer);
+            ExternalInterface.addCallback("startImpressionTimer", handleStartImpressionCheck);
 
             _sprite = new Sprite();
             _renderMeter = new OVVRenderMeter(_sprite);
@@ -373,7 +375,7 @@ package org.openvv {
          *
          * @param someData An optional parameter which is ignored
          */
-        public function flashProbe(someData: * ): void {
+        protected function flashProbe(someData: * ): void {
             return;
         }
 
@@ -381,7 +383,23 @@ package org.openvv {
          * When the JavaScript portion of OpenVV is ready, it calls this function
          * to start the interval timer which does viewability checks every
          */
+        protected function handleStartImpressionCheck():void {
+            _jsReady = true;
+
+            if (_startImpressionCheckAutomatically) {
+                startImpressionTimer();
+            }
+        }
+
+        /**
+         * Starts impression check if not started yet
+         */
         public function startImpressionTimer(): void {
+            if (!_jsReady && !_intervalTimer) {
+                _startImpressionCheckAutomatically = true;
+                return;
+            }
+
             if (!_intervalTimer) {
                 _intervalsInView = 0;
                 _intervalsUnMeasurable = 0;
