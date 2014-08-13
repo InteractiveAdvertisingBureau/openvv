@@ -418,6 +418,7 @@ package org.openvv {
             _intervalsInView = (results.viewabilityState == OVVCheck.VIEWABLE && results.focus == true) ? _intervalsInView + 1 : 0;
 
             if (_impressionEventRaised == false && _intervalsInView >= VIEWABLE_IMPRESSION_THRESHOLD) {
+				_intervalTimer.removeEventListener(TimerEvent.TIMER, onIntervalCheck);
                 raiseImpression(results);
             }
             else if (_impressionUnmeasurableEventRaised == false && _intervalsUnMeasurable >= UNMEASURABLE_IMPRESSION_THRESHOLD) {
