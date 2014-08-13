@@ -55,6 +55,11 @@ function OVV() {
      */
     this.asset = null;
 
+	/**
+	 * The id of the interval responsible for positioning beacons.
+	 */
+	this.positionInterval;
+
     var userAgent = window.testOvvConfig && window.testOvvConfig.userAgent ? window.testOvvConfig.userAgent : navigator.userAgent;
 	
 	/**
@@ -828,7 +833,7 @@ function OVVAsset(uid) {
                 container.parentElement.removeChild(container);
             }
         }
-
+		clearInterval( this.positionInterval );
         window.$ovv.removeAsset(this);
     };
 
@@ -1084,7 +1089,7 @@ function OVVAsset(uid) {
         // it takes ~500ms for beacons to know if they've been moved off
         // screen, so they're repositioned at this interval so they'll be
         // ready for the next check
-        setInterval(positionBeacons.bind(this), 500);
+        this.positionInterval = setInterval(positionBeacons.bind(this), 500);
     };
 
     /**
