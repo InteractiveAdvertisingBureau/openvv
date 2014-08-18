@@ -95,7 +95,7 @@ public function initAd(width:Number, height:Number, viewMode:String, desiredBitr
   _viewabilityAsset.initEventsWiring(this); 						
   // Load 3rd party tags. Use **adID** to pass the asset ID
   var tagSrc:String = "http://someUrl.com/3rdPartyTag.js?adID=" + guid;			
-  _viewabilityAsset.addJavaScriptResourceOnEvent(VPAIDEvent.AdStarted, tagSrc);
+  _viewabilityAsset.addJavaScriptResourceOnEvent(VPAIDEvent.AdImpression, tagSrc);
   ...
 }
 </pre>
