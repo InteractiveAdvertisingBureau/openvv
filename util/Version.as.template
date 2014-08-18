@@ -1,0 +1,11 @@
+/*
+  Version Template - "burn" a version # into the compiled component
+  The build process uses this template to generate a Version.as class
+*/
+package org.openvv {
+  public class OVVVersion {
+    public static function getVersion():String {
+      return "@version@";
+    }
+  }
+}

@@ -138,12 +138,18 @@ function OVV() {
      * @type {Number}
      */
     this.interval = INTERVAL;
-
-    /**
+	
+	/**
      * OVV version
      * @type {Number}
      */
-    this.version = VERSION;
+	 this.version = 'OVVVERSION';
+	 
+	 /**
+     * OVV build version
+     * @type {String}
+     */
+	 this.buildVersion = 'OVVBUILDVERSION';
 
     ///////////////////////////////////////////////////////////////////////////
     // PRIVATE ATTRIBUTES
