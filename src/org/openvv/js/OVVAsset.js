@@ -143,7 +143,7 @@ function OVV() {
      * OVV version
      * @type {Number}
      */
-	 this.version = 'OVVVERSION';
+	 this.releaseVersion = 'OVVRELEASEVERSION';
 	 
 	 /**
      * OVV build version
