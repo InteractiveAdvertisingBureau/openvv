@@ -131,6 +131,20 @@ function OVV() {
     */
     this.browser = getBrowserDetailsByUserAgent(userAgent);
 
+    this.servingScenarioEnum = { OnPage: 1, SameDomainIframe: 2, CrossDomainIframe: 3 };
+
+    function getServingScenarioType(servingScenarioEnum) {        
+        try {
+            if (window.top == window) {
+                return servingScenarioEnum.OnPage;
+            } else if (window.top.document.domain == window.document.domain) {
+                return servingScenario.SameDomain;
+            }
+        } catch (e) { }
+        return servingScenarioEnum.CrossDomain;
+    };
+
+    this.servingScenario = getServingScenarioType(servingScenarioEnum);
 
     /**
     * The interval in which ActionScript will poll OVV for viewability
@@ -207,8 +221,8 @@ function OVV() {
     };
 
     /**
-    * Retreives an {@link OVVAsset} based on its ID
-    * @param {String} The id of the element to retreive
+    * Retrieves an {@link OVVAsset} based on its ID
+    * @param {String} The id of the element to retrieve
     * @returns {OVVAsset|null} The element matching the given ID, or null if
     * one could not be found
     */
@@ -341,7 +355,7 @@ function OVVCheck() {
     this.clientWidth = -1;
 
     /**
-    * A description of any error that occured
+    * A description of any error that occurred
     * @type {String}
     */
     this.error = '';
@@ -353,7 +367,7 @@ function OVVCheck() {
     this.focus = null;
 
     /**
-    * The framerate of the asset (populated by ActionScript)
+    * The frame rate of the asset (populated by ActionScript)
     * @type {Number}
     */
     this.fps = -1;
@@ -506,7 +520,7 @@ OVVCheck.UNVIEWABLE = 'unviewable';
 
 /**
 * The value that {@link OVVCheck#viewabilityState} will be set to if the beacons
-* are not ready to determin the viewability state
+* are not ready to determine the viewability state
 */
 OVVCheck.NOT_READY = 'not_ready';
 
@@ -657,13 +671,13 @@ function OVVAsset(uid) {
     ///////////////////////////////////////////////////////////////////////////
 
     /**
-    * the id of the ad that this asset is associatied with
+    * the id of the ad that this asset is associated with
     * @type {!String}
     */
     var id = uid;
 
     /**
-    * The numer of beacons that have checked in as being ready
+    * The number of beacons that have checked in as being ready
     * @type {Number}
     */
     var beaconsStarted = 0;
@@ -698,13 +712,13 @@ function OVVAsset(uid) {
     * Returns an {@link OVVCheck} object populated with information gathered
     * from the browser. The viewabilityState attribute is populated with
     * either {@link OVVCheck.VIEWABLE}, {@link OVVCheck.UNVIEWABLE}, or {@link OVVCheck.UNMEASURABLE}
-    * as determined by either xbeacon technique when in an iframe, or the
+    * as determined by either beacon technique when in a cross domain iframe, or the
     * geometry technique otherwise.
     * </p><p>
     * The geometry technique compares the bounds of the viewport, taking
     * scrolling into account, and the bounds of the player.
     * </p><p>
-    * The beacon technique places a single beacon offscreen and several
+    * The beacon technique places a single beacon off-screen and several
     * on top of the player. It then queries the state of the beacons on top
     * of the player to determine how much of the player is viewable.
     * </p>
@@ -718,7 +732,7 @@ function OVVAsset(uid) {
         var check = new OVVCheck();
         check.id = id;
         check.inIframe = $ovv.IN_IFRAME;
-        check.geometrySupported = !$ovv.IN_IFRAME;
+        check.geometrySupported = $ovv.servingScenario !== $ovv.servingScenarioEnum.CrossDomainIframe;
 
         check.focus = isInFocus();
         if (!player) {
@@ -727,7 +741,8 @@ function OVVAsset(uid) {
         }
 
         // if we're in IE or FF and we're in an iframe, return unmeasurable						
-        if (($ovv.browser.ID === $ovv.browserIDEnum.MSIE || $ovv.browser.ID === $ovv.browserIDEnum.Firefox) && $ovv.IN_IFRAME) {
+        if (($ovv.browser.ID === $ovv.browserIDEnum.MSIE || $ovv.browser.ID === $ovv.browserIDEnum.Firefox) &&
+            check.geometrySupported === false) {
             check.viewabilityState = OVVCheck.UNMEASURABLE;
             if (!$ovv.DEBUG) {
                 return check;
