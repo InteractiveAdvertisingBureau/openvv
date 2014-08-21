@@ -110,7 +110,7 @@ package org.openvv {
         /**
          * Hold OVV version. Will past to JavaScript as well $ovv.version
          */
-        public static const VERSION: Number = 1;
+        public static const RELEASE_VERSION: String = "1.1.0";
         
 
         ////////////////////////////////////////////////////////////
@@ -118,6 +118,11 @@ package org.openvv {
         ////////////////////////////////////////////////////////////
 
         /**
+         * Holds repositoy latest commit number
+         */
+        private var _buildVersion: String = OVVVersion.getVersion();
+		
+		/**
          * Whether the asset has dispatched the DISCERNABLE_IMPRESSION event
          */
         private var _hasDispatchedDImp: Boolean = false;
@@ -212,7 +217,6 @@ package org.openvv {
          * JavaScript for viewability information. Defaults to 250.
          */
         public function OVVAsset(beaconSwfUrl:String = null, id:String = null, stage:Stage=null) {
-            
             if (!externalInterfaceIsAvailable()) {
                 dispatchEvent(new OVVEvent(OVVEvent.OVVError, {
                     "message": "ExternalInterface unavailable"
@@ -234,7 +238,8 @@ package org.openvv {
             ovvAssetSource = ovvAssetSource
                                 .replace(/OVVID/g, _id)
                                 .replace(/INTERVAL/g, POLL_INTERVAL)
-                                .replace(/VERSION/g, VERSION);
+                                .replace(/OVVBUILDVERSION/g, _buildVersion)
+								.replace(/OVVRELEASEVERSION/g, RELEASE_VERSION);
 			
 			if (beaconSwfUrl)
 			{
