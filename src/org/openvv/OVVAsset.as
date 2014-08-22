@@ -193,6 +193,16 @@ package org.openvv {
 	
 		private var _vpaidEventsDispatcher:IEventDispatcher = null;
 
+		/**
+		 * True if VPAID AdVideoStarted event has been received
+		 */
+		private var videoStarted:Boolean;
+		/**
+		 * True if JS is ready, and beacons are loaded if needed.
+		 */
+		private var jsReady:Boolean;
+
+
         ////////////////////////////////////////////////////////////
         //   CONSTRUCTOR 
         ////////////////////////////////////////////////////////////
@@ -382,6 +392,10 @@ package org.openvv {
          * this function is called so that the ad can wait for the beacons to load before dispatching AdLoaded
          */
 		public function onJsReady(): void {
+			jsReady = true;
+			if ( videoStarted ) {
+				startImpressionTimer();
+			}
 			raiseReady();
 		}
 		/**
@@ -542,7 +556,10 @@ package org.openvv {
 					_intervalTimer = null;
 					break;
 				case VPAIDEvent.AdVideoStart:
-					startImpressionTimer();
+					videoStarted = true;
+					if ( jsReady ) {
+						startImpressionTimer();
+					}
 					break;
 				default:
 					// do nothing
