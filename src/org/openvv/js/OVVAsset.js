@@ -1288,8 +1288,7 @@ function OVVAsset(uid) {
         // 'BEACON_SWF_URL' is String substituted from ActionScript
         createBeacons.bind(this)('BEACON_SWF_URL');
     } else {
-        // since we don't have to wait for beacons to be ready, we start the 
-        // impression timer now
+        // since we don't have to wait for beacons to be ready, we're ready now
         if (player && player.onJsReady)
             player.onJsReady();
     }
