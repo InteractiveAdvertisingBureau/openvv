@@ -28,14 +28,17 @@ package org.openvv.events {
         ////////////////////////////////////////////////////////////
         //   CONSTANTS 
         ////////////////////////////////////////////////////////////
-
+		/**
+		 * Events of this type represent OVVAsset is ready and all beacons have loaded (if needed)
+		 */
+		public static const OVVReady: String = "OVVReady";
         /**
          * Events of this type represent an error that has occurred
          */
         public static const OVVError: String = "OVVError";
 
         /**
-         * Events of this type represent 5 seconds of contiguous viewability have occurred
+         * Events of this type represent 2 seconds of contiguous viewability have occurred
          */
         public static const OVVImpression: String = "OVVImpression";
 

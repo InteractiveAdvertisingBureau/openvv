@@ -815,7 +815,7 @@ function OVVAsset(uid) {
         beaconsStarted++;
 
         if (beaconsReady()) {
-            player.startImpressionTimer();
+            player.onJsReady();
         }
     };
 
@@ -1290,8 +1290,8 @@ function OVVAsset(uid) {
     } else {
         // since we don't have to wait for beacons to be ready, we start the 
         // impression timer now
-        if (player && player.startImpressionTimer)
-            player.startImpressionTimer();
+        if (player && player.onJsReady)
+            player.onJsReady();
     }
 }
 

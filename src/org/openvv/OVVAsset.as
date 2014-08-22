@@ -224,7 +224,7 @@ package org.openvv {
             _stage = stage;
 
             ExternalInterface.addCallback(_id, flashProbe);
-            ExternalInterface.addCallback("startImpressionTimer", startImpressionTimer);
+            ExternalInterface.addCallback("onJsReady", onJsReady);
 
             _sprite = new Sprite();
             _renderMeter = new OVVRenderMeter(_sprite);
@@ -378,8 +378,15 @@ package org.openvv {
         }
 
         /**
-         * When the JavaScript portion of OpenVV is ready, it calls this function
-         * to start the interval timer which does viewability checks every
+         * When the JavaScript portion of OpenVV is ready and the beacons have loaded (if needed),
+         * this function is called so that the ad can wait for the beacons to load before dispatching AdLoaded
+         */
+		public function onJsReady(): void {
+			raiseReady();
+		}
+		/**
+         * When the VPAID AdVideoStart event is received, it triggers this function
+         * to start the interval timer which does viewability checks every 200ms (POLL_INTERVAL)
          */
         public function startImpressionTimer(): void {
             if (!_intervalTimer) {
@@ -534,8 +541,12 @@ package org.openvv {
 					_intervalTimer.removeEventListener(TimerEvent.TIMER, onIntervalCheck);
 					_intervalTimer = null;
 					break;
+				case VPAIDEvent.AdVideoStart:
+					startImpressionTimer();
+					break;
 				default:
 					// do nothing
+					break;
 			}
 			
 			publishToJavascript(event.type, getEventData(event), ovvData);
@@ -575,7 +586,10 @@ package org.openvv {
 
 			return data;
 		}
-
+		private function raiseReady():void
+		{
+			dispatchEvent(new OVVEvent(OVVEvent.OVVReady, null));
+		}
 		private function raiseImpression(ovvData:*):void
 		{
 			dispatchEvent(new OVVEvent(OVVEvent.OVVImpression, ovvData));
