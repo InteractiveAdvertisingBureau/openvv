@@ -143,7 +143,7 @@ function OVV() {
         } catch (e) { }
         return servingScenarioEnum.CrossDomainIframe;
     };
-debugger;
+
     this.servingScenario = getServingScenarioType(this.servingScenarioEnum);
 
     /**
