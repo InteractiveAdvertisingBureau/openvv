@@ -138,13 +138,13 @@ function OVV() {
             if (window.top == window) {
                 return servingScenarioEnum.OnPage;
             } else if (window.top.document.domain == window.document.domain) {
-                return servingScenario.SameDomain;
+                return servingScenarioEnum.SameDomainIframe;
             }
         } catch (e) { }
-        return servingScenarioEnum.CrossDomain;
+        return servingScenarioEnum.CrossDomainIframe;
     };
-
-    this.servingScenario = getServingScenarioType(servingScenarioEnum);
+debugger;
+    this.servingScenario = getServingScenarioType(this.servingScenarioEnum);
 
     /**
     * The interval in which ActionScript will poll OVV for viewability
@@ -882,7 +882,8 @@ function OVVAsset(uid) {
     * @param {Element} player The HTML Element to measure
     */
     var checkGeometry = function (check, player) {
-        //Avoid including scrollbars in viewport size by taking the smallest dimensions (also
+        debugger;
+		//Avoid including scrollbars in viewport size by taking the smallest dimensions (also
         //ensures ad object is not obscured)
         check.clientWidth = Infinity;
         check.clientHeight = Infinity;
@@ -1316,6 +1317,7 @@ function OVVAsset(uid) {
     }
 }
 
+debugger;
 // initialize the OVV object if it doesn't exist
 window.$ovv = window.$ovv || new OVV();
 
