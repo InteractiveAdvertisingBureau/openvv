@@ -133,7 +133,7 @@ function OVV() {
 
     this.servingScenarioEnum = { OnPage: 1, SameDomainIframe: 2, CrossDomainIframe: 3 };
 
-    function getServingScenarioType(servingScenarioEnum) {        
+    function getServingScenarioType(servingScenarioEnum) {
         try {
             if (window.top == window) {
                 return servingScenarioEnum.OnPage;
@@ -152,18 +152,18 @@ function OVV() {
     * @type {Number}
     */
     this.interval = INTERVAL;
-	
-	/**
-     * OVV version
-     * @type {Number}
-     */
-	 this.releaseVersion = 'OVVRELEASEVERSION';
-	 
-	 /**
-     * OVV build version
-     * @type {String}
-     */
-	 this.buildVersion = 'OVVBUILDVERSION';
+
+    /**
+    * OVV version
+    * @type {Number}
+    */
+    this.releaseVersion = 'OVVRELEASEVERSION';
+
+    /**
+    * OVV build version
+    * @type {String}
+    */
+    this.buildVersion = 'OVVBUILDVERSION';
 
     ///////////////////////////////////////////////////////////////////////////
     // PRIVATE ATTRIBUTES
@@ -541,7 +541,7 @@ OVVCheck.GEOMETRY = 'geometry';
 * @constructor
 * @param {String} uid - The unique identifier of this asset
 */
-function OVVAsset(uid) {
+function OVVAsset(uid, dependencies) {
 
     ///////////////////////////////////////////////////////////////////////////
     // CONSTANTS
@@ -701,7 +701,7 @@ function OVVAsset(uid) {
     */
     var player;
 
-    var visibilityBrowserProperty = null;
+    var geometryViewabilityCalculator = dependencies.geometryViewabilityCalculator;
 
     ///////////////////////////////////////////////////////////////////////////
     // PUBLIC FUNCTIONS
@@ -740,7 +740,8 @@ function OVVAsset(uid) {
             return check;
         }
 
-        // if we're in IE or FF and we're in an iframe, return unmeasurable						
+        // if we're in IE or FF and we're in an cross domain iframe, return unmeasurable						
+        // We are able to measure for same domain iframe ('friendly iframe')
         if (($ovv.browser.ID === $ovv.browserIDEnum.MSIE || $ovv.browser.ID === $ovv.browserIDEnum.Firefox) &&
             check.geometrySupported === false) {
             check.viewabilityState = OVVCheck.UNMEASURABLE;
@@ -752,11 +753,11 @@ function OVVAsset(uid) {
         // if we can use the geometry method, use it over the beacon method
         if (check.geometrySupported) {
             check.technique = OVVCheck.GEOMETRY;
-            checkGeometry.bind(this)(check, player);
+            checkGeometry(check, player);
             check.viewabilityState = (check.percentViewable >= 50) ? OVVCheck.VIEWABLE : OVVCheck.UNVIEWABLE;
 
             if ($ovv.DEBUG) {
-                // add an additonal field when debugging
+                // add an additional field when debugging
                 check.geometryViewabilityState = check.viewabilityState;
             } else {
                 return check;
@@ -783,7 +784,7 @@ function OVVAsset(uid) {
             check.viewabilityState = OVVCheck.NOT_READY;
         } else if (check.beaconsSupported) { // if the control beacon checked out, and all the beacons are ready proceed
             check.technique = OVVCheck.BEACON;
-            var viewable = checkBeacons.bind(this)(check);
+            var viewable = checkBeacons(check);
             // certain scenarios return null when the beacons can't guarantee
             // that the player is > 50% viewable, so it's deemed unmeasurable
             if (viewable === null) {
@@ -869,12 +870,13 @@ function OVVAsset(uid) {
     this.getPlayer = function () {
         return player;
     };
+
     ///////////////////////////////////////////////////////////////////////////
     // PRIVATE FUNCTIONS
     ///////////////////////////////////////////////////////////////////////////
 
     /**
-    * Performs the geometry technique to determin viewability. First gathers
+    * Performs the geometry technique to determine viewability. First gathers
     * information on the viewport and on the player. The compares the two to
     * determine what percentage, if any, of the player is within the bounds
     * of the viewport.
@@ -882,8 +884,11 @@ function OVVAsset(uid) {
     * @param {Element} player The HTML Element to measure
     */
     var checkGeometry = function (check, player) {
-        debugger;
-		//Avoid including scrollbars in viewport size by taking the smallest dimensions (also
+
+        var viewabilityResult = geometryViewabilityCalculator.getViewabilityState(player, window);
+
+        console.log("viewabilityResult.percentViewable: " + viewabilityResult.percentViewable);
+        //Avoid including scrollbars in viewport size by taking the smallest dimensions (also
         //ensures ad object is not obscured)
         check.clientWidth = Infinity;
         check.clientHeight = Infinity;
@@ -943,6 +948,7 @@ function OVVAsset(uid) {
                 check.percentViewable = Math.floor(visibleObjectArea / totalObjectArea * 100);
             }
         }
+        console.log("check.percentViewable: " + check.percentViewable);
     }
 
     /**
@@ -1317,9 +1323,190 @@ function OVVAsset(uid) {
     }
 }
 
-debugger;
+function OVVGeometryViewabilityCalculator() {
+
+    this.getViewabilityState = function (element, contextWindow) {
+        var viewPortSize = getViewPortSize();
+        var assetSize = getAssetVisibleDimension(element, contextWindow);
+        var viewablePercentage = getAssetViewablePercentage(assetSize, viewPortSize);
+
+        return {
+            clientWidth: viewPortSize.width,
+            clientHeight: viewPortSize.height,
+            objTop: '',
+            objBottom: '',
+            objLeft: '',
+            objRight: '',
+            percentViewable: viewablePercentage
+        };
+    };
+
+    ///////////////////////////////////////////////////////////////////////////
+    // PRIVATE FUNCTIONS
+    ///////////////////////////////////////////////////////////////////////////
+    
+    /**
+    * Get the viewport size by taking the smallest dimensions
+    */
+    var getViewPortSize = function () {
+        var viewPortSize = {
+            width: Infinity,
+            height: Infinity
+        };
+
+        var contextWindow = window.top;
+
+        //document.body  - Handling case where viewport is represented by documentBody
+        //.width
+        if (!isNaN(contextWindow.document.body.clientWidth) && contextWindow.document.body.clientWidth > 0) {
+            viewPortSize.width = contextWindow.document.body.clientWidth;
+        }
+        //.height
+        if (!isNaN(contextWindow.document.body.clientHeight) && contextWindow.document.body.clientHeight > 0) {
+            viewPortSize.height = contextWindow.document.body.clientHeight;
+        }
+        //document.documentElement - Handling case where viewport is represented by documentElement
+        //.width
+        if (!!contextWindow.document.documentElement && !!contextWindow.document.documentElement.clientWidth && !isNaN(contextWindow.document.documentElement.clientWidth)) {
+            viewPortSize.width = contextWindow.document.documentElement.clientWidth;
+        }
+        //.height
+        if (!!contextWindow.document.documentElement && !!contextWindow.document.documentElement.clientHeight && !isNaN(contextWindow.document.documentElement.clientHeight)) {
+            viewPortSize.height = contextWindow.document.documentElement.clientHeight;
+        }
+        //window.innerWidth/Height - Handling case where viewport is represented by window.innerH/W
+        //.innerWidth
+        if (!!contextWindow.innerWidth && !isNaN(contextWindow.nnerWidth)) {
+            viewPortSize.width = Math.min(viewPortSize.width, contextWindow.innerWidth);
+        }
+        //.innerHeight
+        if (!!contextWindow.innerHeight && !isNaN(contextWindow.innerHeight)) {
+            viewPortSize.height = Math.min(viewPortSize.height, contextWindow.innerHeight);
+        }
+
+        return viewPortSize;
+    };
+
+    var getAssetVisibleDimension = function (element, contextWindow) {
+        var currWindow = contextWindow;
+        var parentWindow = contextWindow.parent;
+        var resultDimension = { width: 0, height: 0, left: 0, right: 0, top: 0, bottom: 0 };
+
+        if (element) {
+            var elementRect = getPositionRelativeToViewPort(element, contextWindow);
+            elementRect.width = elementRect.right - elementRect.left;
+            elementRect.height = elementRect.bottom - elementRect.top;
+            resultDimension = elementRect;
+            if (currWindow != parentWindow) {
+                var parentDimension = getAssetVisibleDimension(currWindow.frameElement, parentWindow);
+                if (parentDimension.bottom < resultDimension.bottom) {
+                    if (parentDimension.bottom < resultDimension.top)
+                        resultDimension.top = parentDimension.bottom;
+                    resultDimension.bottom = parentDimension.bottom;
+                }
+                if (parentDimension.right < resultDimension.right) {
+                    if (parentDimension.right < resultDimension.left)
+                        resultDimension.left = parentDimension.right;
+                    resultDimension.right = parentDimension.right;
+                }
+                resultDimension.width = resultDimension.right - resultDimension.left;
+                resultDimension.height = resultDimension.bottom - resultDimension.top;
+            }
+        }
+        return resultDimension;
+    };
+
+    var getPositionRelativeToViewPort = function (element, contextWindow) {
+        var currWindow = contextWindow;
+        var parentWindow = contextWindow.parent;
+        var resultPosition = { left: 0, right: 0, top: 0, bottom: 0 };
+
+        if (element) {
+            var elementRect = element.getBoundingClientRect();
+            if (currWindow != parentWindow)
+                resultPosition = getPositionRelativeToViewPort(currWindow.frameElement, parentWindow);
+            resultPosition = {
+                left: elementRect.left + resultPosition.left,
+                right: elementRect.right + resultPosition.left,
+                top: elementRect.top + resultPosition.top,
+                bottom: elementRect.bottom + resultPosition.top
+            };
+        }
+        return resultPosition;
+    };
+
+    /**
+    * Calculate asset viewable percentage given the asset size and the viewport
+    * @param {effectiveAssetRect} the asset viewable rect; effectiveAssetRect = {left :, top :,bottom:,right:,}   
+    * @param {viewPortSize} the browser viewport size;
+    */
+    var getAssetViewablePercentage = function (effectiveAssetRect, viewPortSize) {
+        // holds the asset viewable surface
+        var assetVisiableHeight = 0, assetVisiableWidth = 0;
+
+        var asset = {
+            width: effectiveAssetRect.right - effectiveAssetRect.left,
+            height: effectiveAssetRect.bottom - effectiveAssetRect.top
+        };
+
+        // Ad is 100% out off-view
+        if (effectiveAssetRect.bottom < 0 // the entire asset is above the viewport
+            || effectiveAssetRect.right < 0 // the entire asset is left to the viewport
+            || effectiveAssetRect.top > viewPortSize.height // the entire asset bellow the viewport
+            || effectiveAssetRect.left > viewPortSize.width // the entire asset is right to the viewport
+            || asset.width <= 0 // the asset width is zero
+            || asset.height <= 0)  // the asset height is zero
+        {
+            return 0;
+        }
+
+        // ---- Handle asset visiable height ----
+        // the asset is partially above the viewport
+        if (effectiveAssetRect.top < 0) {
+            // take the visible part
+            assetVisiableHeight = asset.height + effectiveAssetRect.top;
+            //if the asset height is larger then the viewport height, set the asset height to be the viewport height
+            if (assetVisiableHeight > viewPortSize.height) {
+                assetVisiableHeight = viewPortSize.height;
+            }
+        }
+        // the asset is partially below the viewport
+        else if (effectiveAssetRect.top + asset.height > viewPortSize.height) {
+            // take the visible part
+            assetVisiableHeight = viewPortSize.height - effectiveAssetRect.top;
+        }
+        // the asset is in the viewport
+        else {
+            assetVisiableHeight = asset.height;
+        }
+
+        // ---- Handle asset visiable width ----
+        // the asset is partially left to the viewport
+        if (effectiveAssetRect.left < 0) {
+            // take the visible part
+            assetVisiableWidth = asset.width + effectiveAssetRect.left;
+            //if the asset width is larger then the viewport width, set the asset width to be the viewport width
+            if (assetVisiableWidth > viewPortSize.width) {
+                assetVisiableWidth = viewPortSize.width;
+            }
+        }
+        // the asset is partially right to the viewport
+        else if (effectiveAssetRect.left + asset.width > viewPortSize.width) {
+            // take the visible part
+            assetVisiableWidth = viewPortSize.width - effectiveAssetRect.left;
+        }
+        // the asset is in the viewport
+        else {
+            assetVisiableWidth = asset.width;
+        }
+
+        // Divied the visible asset area by the full asset area to the the visiable precentage
+        return Math.round((((assetVisiableWidth * assetVisiableHeight)) / (asset.width * asset.height)) * 100);
+    };
+}
+
 // initialize the OVV object if it doesn't exist
 window.$ovv = window.$ovv || new OVV();
 
 // 'OVVID' is String substituted from AS
-window.$ovv.addAsset(new OVVAsset('OVVID'));
+window.$ovv.addAsset(new OVVAsset('OVVID', { geometryViewabilityCalculator: new OVVGeometryViewabilityCalculator() }));
