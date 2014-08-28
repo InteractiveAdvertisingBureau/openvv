@@ -1460,7 +1460,7 @@ function OVVGeometryViewabilityCalculator() {
             return 0;
         }
 
-        // ---- Handle asset visiable height ----
+        // ---- Handle asset visible height ----
         // the asset is partially above the viewport
         if (effectiveAssetRect.top < 0) {
             // take the visible part
@@ -1480,7 +1480,7 @@ function OVVGeometryViewabilityCalculator() {
             assetVisiableHeight = asset.height;
         }
 
-        // ---- Handle asset visiable width ----
+        // ---- Handle asset visible width ----
         // the asset is partially left to the viewport
         if (effectiveAssetRect.left < 0) {
             // take the visible part
@@ -1500,7 +1500,7 @@ function OVVGeometryViewabilityCalculator() {
             assetVisiableWidth = asset.width;
         }
 
-        // Divied the visible asset area by the full asset area to the the visiable precentage
+        // Divied the visible asset area by the full asset area to the the visible percentage
         return Math.round((((assetVisiableWidth * assetVisiableHeight)) / (asset.width * asset.height)) * 100);
     };
 }
