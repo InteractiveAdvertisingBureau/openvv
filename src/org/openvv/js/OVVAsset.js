@@ -884,72 +884,20 @@ function OVVAsset(uid, dependencies) {
     * @param {Element} player The HTML Element to measure
     */
     var checkGeometry = function (check, player) {
-
         var viewabilityResult = geometryViewabilityCalculator.getViewabilityState(player, window);
-
-        console.log("viewabilityResult.percentViewable: " + viewabilityResult.percentViewable);
-        //Avoid including scrollbars in viewport size by taking the smallest dimensions (also
-        //ensures ad object is not obscured)
-        check.clientWidth = Infinity;
-        check.clientHeight = Infinity;
-        //document.body  - Handling case where viewport is represented by documentBody
-        //.width
-        if (!isNaN(document.body.clientWidth) && document.body.clientWidth > 0) {
-            check.clientWidth = document.body.clientWidth;
+        
+        if (!viewabilityResult.error) {            
+            check.clientWidth = viewabilityResult.clientWidth;
+            check.clientHeight = viewabilityResult.clientHeight;
+            check.percentViewable =  viewabilityResult.percentViewable;
+            check.objTop = viewabilityResult.objTop;
+            check.objBottom = viewabilityResult.objBottom;
+            check.objLeft = viewabilityResult.objLeft;
+            check.objRight = viewabilityResult.objRight;
         }
-        //.height
-        if (!isNaN(document.body.clientHeight) && document.body.clientHeight > 0) {
-            check.clientHeight = document.body.clientHeight;
-        }
-        //document.documentElement - Handling case where viewport is represented by documentElement
-        //.width
-        if (!!document.documentElement && !!document.documentElement.clientWidth && !isNaN(document.documentElement.clientWidth)) {
-            check.clientWidth = document.documentElement.clientWidth;
-        }
-        //.height
-        if (!!document.documentElement && !!document.documentElement.clientHeight && !isNaN(document.documentElement.clientHeight)) {
-            check.clientHeight = document.documentElement.clientHeight;
-        }
-        //window.innerWidth/Height - Handling case where viewport is represented by window.innerH/W
-        //.innerWidth
-        if (!!window.innerWidth && !isNaN(window.innerWidth)) {
-            check.clientWidth = Math.min(check.clientWidth,
-                window.innerWidth);
-        }
-        //.innerHeight
-        if (!!window.innerHeight && !isNaN(window.innerHeight)) {
-            check.clientHeight = Math.min(check.clientHeight,
-                window.innerHeight);
-        }
-        if (check.clientHeight == Infinity || check.clientWidth == Infinity) {
-            check = {
-                "error": "Failed to determine viewport"
-            };
-        } else {
-            //Get player dimensions:
-            var objRect = player.getClientRects()[0];
-            check.objTop = objRect.top;
-            check.objBottom = objRect.bottom;
-            check.objLeft = objRect.left;
-            check.objRight = objRect.right;
-
-            if (objRect.bottom < 0 || objRect.right < 0 ||
-                objRect.top > check.clientHeight || objRect.left > check.clientWidth) {
-                //Entire object is out of viewport
-                check.percentViewable = 0;
-            } else {
-                var totalObjectArea = (objRect.right - objRect.left) *
-                    (objRect.bottom - objRect.top);
-                var xMin = Math.ceil(Math.max(0, objRect.left));
-                var xMax = Math.floor(Math.min(check.clientWidth, objRect.right));
-                var yMin = Math.ceil(Math.max(0, objRect.top));
-                var yMax = Math.floor(Math.min(check.clientHeight, objRect.bottom));
-                var visibleObjectArea = (xMax - xMin + 1) * (yMax - yMin + 1);
-                check.percentViewable = Math.floor(visibleObjectArea / totalObjectArea * 100);
-            }
-        }
-        console.log("check.percentViewable: " + check.percentViewable);
-    }
+    
+        return viewabilityResult;
+    };
 
     /**
     * Performs the beacon technique. Queries the state of each beacon and
@@ -1327,16 +1275,22 @@ function OVVGeometryViewabilityCalculator() {
 
     this.getViewabilityState = function (element, contextWindow) {
         var viewPortSize = getViewPortSize();
+        if (viewPortSize.height == Infinity || viewPortSize.width == Infinity) {
+            return { error: "Failed to determine viewport"};
+        }
+
         var assetSize = getAssetVisibleDimension(element, contextWindow);
         var viewablePercentage = getAssetViewablePercentage(assetSize, viewPortSize);
-
+        //Get player dimensions:
+        var assetRect = element.getBoundingClientRect();
+        
         return {
             clientWidth: viewPortSize.width,
             clientHeight: viewPortSize.height,
-            objTop: '',
-            objBottom: '',
-            objLeft: '',
-            objRight: '',
+            objTop: assetRect.top,
+            objBottom: assetRect.bottom,
+            objLeft: assetRect.left,
+            objRight: assetRect.right,
             percentViewable: viewablePercentage
         };
     };
@@ -1376,7 +1330,7 @@ function OVVGeometryViewabilityCalculator() {
         }
         //window.innerWidth/Height - Handling case where viewport is represented by window.innerH/W
         //.innerWidth
-        if (!!contextWindow.innerWidth && !isNaN(contextWindow.nnerWidth)) {
+        if (!!contextWindow.innerWidth && !isNaN(contextWindow.innerWidth)) {
             viewPortSize.width = Math.min(viewPortSize.width, contextWindow.innerWidth);
         }
         //.innerHeight
