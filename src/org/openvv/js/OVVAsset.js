@@ -950,17 +950,15 @@ function OVVAsset(uid) {
 
         for (var index = 0; index <= TOTAL_BEACONS; index++) {
 
-            var beacon = getBeacon(index);
-            var isViewable = beacon.isViewable();
-            var onScreen = isOnScreen(beacon);
-
-            check.beacons[index] = isViewable && onScreen;
-
             // the control beacon is only involved in determining if the 
             // browser supports beacon measurement, so move on
             if (index === 0) {
                 continue;
             }
+            var beacon = getBeacon(index);
+            var isViewable = beacon.isViewable();
+            var onScreen = isOnScreen(beacon);
+            check.beacons[index] = isViewable && onScreen;
 
             if (isViewable) {
 
