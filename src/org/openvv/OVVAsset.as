@@ -399,6 +399,14 @@ package org.openvv {
 			}
 			raiseReady();
 		}
+
+		/**
+		 * Ready state from the JS code, including beacons.
+		 * @return
+		 */
+		public function isJsReady():Boolean {
+			return jsReady;
+		}
 		/**
          * When the VPAID AdVideoStart event is received, it triggers this function
          * to start the interval timer which does viewability checks every 200ms (POLL_INTERVAL)
