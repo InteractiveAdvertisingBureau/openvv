@@ -1020,7 +1020,8 @@ function OVVAsset(uid) {
         // // when top left and bottom right corners are visible
         if ((beacons[OUTER_TOP_LEFT] && beacons[OUTER_BOTTOM_RIGHT]) &&
             // and any of their diagonals are covered
-            (!beacons[MIDDLE_TOP_LEFT] || ![INNER_TOP_LEFT] || !beacons[CENTER] || beacons[INNER_BOTTOM_RIGHT] || beacons[MIDDLE_BOTTOM_RIGHT])
+            (!beacons[MIDDLE_TOP_LEFT] || ![INNER_TOP_LEFT] || !beacons[CENTER] || beacons[INNER_BOTTOM_RIGHT] ||
+				beacons[MIDDLE_BOTTOM_RIGHT])
         ) {
             return null;
         }
@@ -1028,7 +1029,8 @@ function OVVAsset(uid) {
         // when bottom left and top right corners are visible
         if ((beacons[OUTER_BOTTOM_LEFT] && beacons[OUTER_TOP_RIGHT]) &&
             // and any of their diagonals are covered
-            (!beacons[MIDDLE_BOTTOM_LEFT] || !beacons[INNER_BOTTOM_LEFT] || !beacons[CENTER] || !beacons[INNER_TOP_RIGHT] || !beacons[MIDDLE_TOP_RIGHT])
+            (!beacons[MIDDLE_BOTTOM_LEFT] || !beacons[INNER_BOTTOM_LEFT] || !beacons[CENTER] ||
+				!beacons[INNER_TOP_RIGHT] || !beacons[MIDDLE_TOP_RIGHT])
         ) {
             return null;
         }
