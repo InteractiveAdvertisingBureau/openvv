@@ -612,12 +612,14 @@ package org.openvv {
 		private function raiseImpression(ovvData:*):void
 		{
 			dispatchEvent(new OVVEvent(OVVEvent.OVVImpression, ovvData));
+			_intervalTimer.removeEventListener(TimerEvent.TIMER, onIntervalCheck);
 			_impressionEventRaised = true;
 		}
 
 		private function raiseImpressionUnmeasurable(ovvData:*):void
 		{
 			dispatchEvent(new OVVEvent(OVVEvent.OVVImpressionUnmeasurable, ovvData));
+			_intervalTimer.removeEventListener(TimerEvent.TIMER, onIntervalCheck);
 			_impressionUnmeasurableEventRaised = true;
 		}
 
