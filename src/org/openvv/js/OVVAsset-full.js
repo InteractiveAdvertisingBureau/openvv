@@ -816,7 +816,7 @@ function OVVAsset(uid) {
         beaconsStarted++;
 
         if (beaconsReady()) {
-            player.startImpressionTimer();
+            player.onJsReady();
         }
     };
 
@@ -947,19 +947,18 @@ function OVVAsset(uid) {
         check.objBottom = objRect.bottom;
         check.objLeft = objRect.left;
         check.objRight = objRect.right;
+
         for (var index = 0; index <= TOTAL_BEACONS; index++) {
-
-            var beacon = getBeacon(index);
-            var isViewable = beacon.isViewable();
-            var onScreen = isOnScreen(beacon);
-
-            check.beacons[index] = isViewable && onScreen;
 
             // the control beacon is only involved in determining if the 
             // browser supports beacon measurement, so move on
             if (index === 0) {
                 continue;
             }
+            var beacon = getBeacon(index);
+            var isViewable = beacon.isViewable();
+            var onScreen = isOnScreen(beacon);
+            check.beacons[index] = isViewable && onScreen;
 
             if (isViewable) {
 
@@ -1016,14 +1015,16 @@ function OVVAsset(uid) {
         // // when top left and bottom right corners are visible
         if ((beacons[OUTER_TOP_LEFT] && beacons[OUTER_BOTTOM_RIGHT]) &&
             // and any of their diagonals are covered
-            (!beacons[MIDDLE_TOP_LEFT] || ![INNER_TOP_LEFT] || !beacons[CENTER] || beacons[INNER_BOTTOM_RIGHT] || beacons[MIDDLE_BOTTOM_RIGHT])
+            (!beacons[MIDDLE_TOP_LEFT] || ![INNER_TOP_LEFT] || !beacons[CENTER] || beacons[INNER_BOTTOM_RIGHT] ||
+				beacons[MIDDLE_BOTTOM_RIGHT])
         ) {
             return null;
         }
         // when bottom left and top right corners are visible
         if ((beacons[OUTER_BOTTOM_LEFT] && beacons[OUTER_TOP_RIGHT]) &&
             // and any of their diagonals are covered
-            (!beacons[MIDDLE_BOTTOM_LEFT] || !beacons[INNER_BOTTOM_LEFT] || !beacons[CENTER] || !beacons[INNER_TOP_RIGHT] || !beacons[MIDDLE_TOP_RIGHT])
+            (!beacons[MIDDLE_BOTTOM_LEFT] || !beacons[INNER_BOTTOM_LEFT] || !beacons[CENTER] ||
+				!beacons[INNER_TOP_RIGHT] || !beacons[MIDDLE_TOP_RIGHT])
         ) {
             return null;
         }
@@ -1270,11 +1271,9 @@ function OVVAsset(uid) {
     if ($ovv.IN_IFRAME || $ovv.DEBUG) {
         // 'BEACON_SWF_URL' is String substituted from ActionScript
         createBeacons.bind(this)('BEACON_SWF_URL');
-    } else {
-        // since we don't have to wait for beacons to be ready, we start the 
-        // impression timer now
-        if (player && player.startImpressionTimer)
-            player.startImpressionTimer();
+    } else if (player && player.onJsReady) {
+		// since we don't have to wait for beacons to be ready, we're ready now
+		setTimeout( function(){ player.onJsReady() }, 5 ); //Use a tiny timeout to keep this async like the beacons
     }
 }
 
