@@ -404,7 +404,7 @@ package org.openvv {
 		 * Ready state from the JS code, including beacons.
 		 * @return
 		 */
-		public function isJsReady():Boolean {
+		public function get isJsReady():Boolean {
 			return jsReady;
 		}
 		/**
