@@ -548,6 +548,7 @@ package org.openvv {
 
 		/**
 		 * Handle VPAID event by publishing it to JavaScript.
+		 * In case when the event is AdVideoStart the internal interval that measures the asset will be started
 		 * In case when the event is AdVideoComplete the internal interval that measures the asset will be stopped
 		 * @param	event the VPAID event to handle
 		 */
