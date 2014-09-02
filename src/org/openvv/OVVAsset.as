@@ -483,13 +483,13 @@ package org.openvv {
 					return;
 				}
 				
-				var injectTag:String = 
-					"var tag = document.createElement('script');"
-					+ "tag.type = \"text/javascript\";" 
-					+ "tag.src = \"" + tagUrl + "\";" 
-					+ "document.body.insertBefore(tag, document.body.firstChild);";					
-									
-				ExternalInterface.call("eval", injectTag);				
+				var injectTag:String =
+					'function () {' +
+					'var tag = document.createElement("script");' +
+					'tag.src = "' + tagUrl + '";' +
+					'tag.type="text/javascript";' +
+					'document.getElementsByTagName("head")[0].appendChild(tag); }';
+				ExternalInterface.call( injectTag );
 			  };
 		}
 
