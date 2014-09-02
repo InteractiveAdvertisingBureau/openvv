@@ -841,7 +841,7 @@ function OVVAsset(uid) {
                 container.parentElement.removeChild(container);
             }
         }
-        clearInterval( this.positionInterval );
+        clearInterval( window.$ovv.positionInterval );
         window.$ovv.removeAsset(this);
     };
 
