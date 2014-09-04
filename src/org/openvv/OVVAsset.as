@@ -488,7 +488,7 @@ package org.openvv {
 					'var tag = document.createElement("script");' +
 					'tag.src = "' + tagUrl + '";' +
 					'tag.type="text/javascript";' +
-					'document.getElementsByTagName("head")[0].appendChild(tag); }';
+					'document.getElementsByTagName("body")[0].appendChild(tag); }';
 				ExternalInterface.call( injectTag );
 			  };
 		}
