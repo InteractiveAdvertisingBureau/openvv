@@ -1341,8 +1341,14 @@ function OVVGeometryViewabilityCalculator() {
         return viewPortSize;
     };
 
+    /**
+    * Recursive function that return the asset (element) visible dimension
+    * @param {element} The element to get his visible dimension
+    * @param {contextWindow} The relative window 
+    */
     var getAssetVisibleDimension = function (element, contextWindow) {
         var currWindow = contextWindow;
+        //Set parent window for recursive call
         var parentWindow = contextWindow.parent;
         var resultDimension = { width: 0, height: 0, left: 0, right: 0, top: 0, bottom: 0 };
 
@@ -1351,18 +1357,29 @@ function OVVGeometryViewabilityCalculator() {
             elementRect.width = elementRect.right - elementRect.left;
             elementRect.height = elementRect.bottom - elementRect.top;
             resultDimension = elementRect;
+            //Calculate the relative element dimension if we clime to a parent window
             if (currWindow != parentWindow) {
+                //Recursive call to get the relative element dimension from the parent window 
                 var parentDimension = getAssetVisibleDimension(currWindow.frameElement, parentWindow);
-                if (parentDimension.bottom < resultDimension.bottom) {
-                    if (parentDimension.bottom < resultDimension.top)
+                //The asset is partially below the parent window (asset bottom is below the visible window)
+                if (parentDimension.bottom < resultDimension.bottom) 
+                    if (parentDimension.bottom < resultDimension.top) {
+                        //The entire asset is below the parent window
                         resultDimension.top = parentDimension.bottom;
+                    }
+                    //Set the asset bottom to be the visible part
                     resultDimension.bottom = parentDimension.bottom;
                 }
+                //The asset is partially right to the parent window
                 if (parentDimension.right < resultDimension.right) {
-                    if (parentDimension.right < resultDimension.left)
+                    if (parentDimension.right < resultDimension.left) {
+                        //The entire asset is to the right of the parent window
                         resultDimension.left = parentDimension.right;
+                    }
+                    //Set the asset right to be the visible
                     resultDimension.right = parentDimension.right;
                 }
+
                 resultDimension.width = resultDimension.right - resultDimension.left;
                 resultDimension.height = resultDimension.bottom - resultDimension.top;
             }
