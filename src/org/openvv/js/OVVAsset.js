@@ -728,7 +728,6 @@ function OVVAsset(uid, dependencies) {
     * @see {@link checkBeacons}
     */
     this.checkViewability = function () {
-
         var check = new OVVCheck();
         check.id = id;
         check.inIframe = $ovv.IN_IFRAME;
@@ -749,7 +748,6 @@ function OVVAsset(uid, dependencies) {
                 return check;
             }
         }
-
         // if we can use the geometry method, use it over the beacon method
         if (check.geometrySupported) {
             check.technique = OVVCheck.GEOMETRY;
@@ -763,7 +761,6 @@ function OVVAsset(uid, dependencies) {
                 return check;
             }
         }
-
         var controlBeacon = getBeacon(0);
 
         // check to make sure the control beacon is found and its 
@@ -1362,7 +1359,7 @@ function OVVGeometryViewabilityCalculator() {
                 //Recursive call to get the relative element dimension from the parent window 
                 var parentDimension = getAssetVisibleDimension(currWindow.frameElement, parentWindow);
                 //The asset is partially below the parent window (asset bottom is below the visible window)
-                if (parentDimension.bottom < resultDimension.bottom) 
+                if (parentDimension.bottom < resultDimension.bottom) {
                     if (parentDimension.bottom < resultDimension.top) {
                         //The entire asset is below the parent window
                         resultDimension.top = parentDimension.bottom;
