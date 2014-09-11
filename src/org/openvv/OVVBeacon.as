@@ -96,6 +96,7 @@ package org.openvv {
             super();
 
             Security.allowDomain("*");
+            Security.allowInsecureDomain("*");
 
             _id = loaderInfo.parameters.id;
             _index = loaderInfo.parameters.index;
