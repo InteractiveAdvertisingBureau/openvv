@@ -1084,15 +1084,17 @@ function OVVAsset(uid) {
 
             var html =
                 '<object classid="clsid:D27CDB6E-AE6D-11cf-96B8-444553540000" width="' + BEACON_SIZE + '" height="' + BEACON_SIZE + '">' +
-                '<param name="movie" value="' + url + '?id=' + id + '&index=' + index + '" />' +
+                '<param name="movie" value="' + url + '" />' +
                 '<param name="quality" value="low" />' +
+                '<param name="flashvars" value="id=' + id + '&index=' + index + '" />' +
                 '<param name="bgcolor" value="#ffffff" />' +
                 '<param name="wmode" value="transparent" />' +
                 '<param name="allowScriptAccess" value="always" />' +
                 '<param name="allowFullScreen" value="false" />' +
                 '<!--[if !IE]>-->' +
-                '<object id="OVVBeacon_' + index + '_' + id + '" type="application/x-shockwave-flash" data="' + url + '?id=' + id + '&index=' + index + '" width="' + BEACON_SIZE + '" height="' + BEACON_SIZE + '">' +
+                '<object id="OVVBeacon_' + index + '_' + id + '" type="application/x-shockwave-flash" data="' + url + '" width="' + BEACON_SIZE + '" height="' + BEACON_SIZE + '">' +
                 '<param name="quality" value="low" />' +
+                '<param name="flashvars" value="id=' + id + '&index=' + index + '" />' +
                 '<param name="bgcolor" value="#ff0000" />' +
                 '<param name="wmode" value="transparent" />' +
                 '<param name="allowScriptAccess" value="always" />' +
