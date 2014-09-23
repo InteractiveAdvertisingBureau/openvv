@@ -5,7 +5,7 @@
 package org.openvv {
   public class OVVVersion {
     public static function getVersion():String {
-		var ovvVersion = "@version@";
+		var ovvVersion:String = "@version@";
 		if (ovvVersion  == "${build.version}"){
 			ovvVersion  = "UNKNOWN";
 		}
