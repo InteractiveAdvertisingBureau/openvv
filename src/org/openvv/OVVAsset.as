@@ -206,7 +206,7 @@ package org.openvv {
 		/**
 		 * True if JS is ready, and beacons are loaded if needed.
 		 */
-		private var jsReady:Boolean;
+		private var jsReady:Boolean = false;
 
 
         ////////////////////////////////////////////////////////////
