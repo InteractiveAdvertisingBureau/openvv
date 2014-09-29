@@ -198,6 +198,11 @@ package org.openvv {
 	
 		private var _vpaidEventsDispatcher:IEventDispatcher = null;
 
+        /**
+         * Reference to the vpaid ad
+         */
+        private var _ad:*;
+
         ////////////////////////////////////////////////////////////
         //   CONSTRUCTOR 
         ////////////////////////////////////////////////////////////
@@ -278,6 +283,10 @@ package org.openvv {
 				throw "You must pass an EventDispatcher to init event wiring";
 			registerEventHandler(vpaidEventsDispatcher);
 			_vpaidEventsDispatcher = vpaidEventsDispatcher;
+
+			if ((Object)(vpaidEventsDispatcher).hasOwnProperty('getVPAID') && vpaidEventsDispatcher['getVPAID']  is Function) {
+                _ad = (Object)(_vpaidEventsDispatcher).getVPAID();
+            }
 		}
 		
 		/**
@@ -504,7 +513,7 @@ package org.openvv {
 			
 			for each (eventType in VPAID_EVENTS)
 			{				
-				vpaidEventsDispatcher.addEventListener(eventType, handleVPaidEvent);
+				vpaidEventsDispatcher.addEventListener(eventType, handleVpaidEvent);
 			}
 			
 			// Register to openvv events
@@ -528,17 +537,21 @@ package org.openvv {
 		 * In case when the event is AdVideoComplete the internal interval that measures the asset will be stopped
 		 * @param	event the VPAID event to handle
 		 */
-		public function handleVPaidEvent(event:Event):void
+		public function handleVpaidEvent(event:Event):void
 		{					
 			var ovvData:OVVCheck = checkViewability();
-			
+
 			switch(event.type){
 				case VPAIDEvent.AdVideoComplete:
 					// stop time on ad completion
 					_intervalTimer.stop();
 					_intervalTimer.removeEventListener(TimerEvent.TIMER, onIntervalCheck);
-					_intervalTimer = null;
-					break;
+					_intervalTimer = null;				break;
+                case VPAIDEvent.AdVolumeChange:
+                    if (_ad != null && _ad.hasOwnProperty('adVolume')) {
+                        ovvData.volume = _ad['adVolume'];
+                    }
+                    break;
 				default:
 					// do nothing
 			}
@@ -555,7 +568,6 @@ package org.openvv {
 		private function publishToJavascript(eventType:String, vpaidData:Object, ovvData:Object):void
 		{	
 			var publishedData:* = {"vpaidData":vpaidData, "ovvData":ovvData}
-			
 			var jsOvvPublish:XML = <script><![CDATA[
 												function(event, id, args) { 
 													setTimeout($ovv.publish(event,  id, args), 0);
