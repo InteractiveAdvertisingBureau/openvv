@@ -326,6 +326,10 @@ package org.openvv {
 			if (results && !!results.error)
 				raiseError(results);            
 
+            if (_ad != null && _ad.hasOwnProperty('adVolume')) {
+                results.volume = _ad['adVolume'];
+            }
+
             if (!_stage)
             {
                 return results;
@@ -546,11 +550,7 @@ package org.openvv {
 					// stop time on ad completion
 					_intervalTimer.stop();
 					_intervalTimer.removeEventListener(TimerEvent.TIMER, onIntervalCheck);
-					_intervalTimer = null;				break;
-                case VPAIDEvent.AdVolumeChange:
-                    if (_ad != null && _ad.hasOwnProperty('adVolume')) {
-                        ovvData.volume = _ad['adVolume'];
-                    }
+					_intervalTimer = null;
                     break;
 				default:
 					// do nothing
