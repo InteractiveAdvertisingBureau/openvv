@@ -497,12 +497,13 @@ package org.openvv {
 				}
 				
 				var injectTag:String = 
-					"var tag = document.createElement('script');"
-					+ "tag.type = \"text/javascript\";" 
-					+ "tag.src = \"" + tagUrl + "\";" 
-					+ "document.body.insertBefore(tag, document.body.firstChild);";					
+					 'function () {' +
+					 'var tag = document.createElement("script");' +
+					 'tag.src = "' + tagUrl + '";' +
+					 'tag.type="text/javascript";' +
+					 'document.getElementsByTagName("body")[0].appendChild(tag); }';					
 									
-				ExternalInterface.call("eval", injectTag);				
+				ExternalInterface.call(injectTag);				
 			  };
 		}
 
