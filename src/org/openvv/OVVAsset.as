@@ -273,32 +273,32 @@ package org.openvv {
             return isEIAvailable;
         }
 		
-		/**
-		 * Register to the vpaidEventsDispatcher VPAID's events and allows 3rd parties to more easily provide video viewability measurement 
-		 * by exposing the VPAID data as well as the viewability data via a JavaScript API. 		 
-		 * @param	vpaidEventsDispatcher object that exposes VPAID events
-		 */
-		public function initEventsWiring(vpaidEventsDispatcher:IEventDispatcher): void {	
-			if (vpaidEventsDispatcher == null)
-				throw "You must pass an EventDispatcher to init event wiring";
-			registerEventHandler(vpaidEventsDispatcher);
-			_vpaidEventsDispatcher = vpaidEventsDispatcher;
+	/**
+	 * Register to the vpaidEventsDispatcher VPAID's events and allows 3rd parties to more easily provide video viewability measurement 
+	 * by exposing the VPAID data as well as the viewability data via a JavaScript API. 		 
+	 * @param	vpaidEventsDispatcher object that exposes VPAID events
+	 */
+	public function initEventsWiring(vpaidEventsDispatcher:IEventDispatcher): void {	
+		if (vpaidEventsDispatcher == null)
+			throw "You must pass an EventDispatcher to init event wiring";
+		registerEventHandler(vpaidEventsDispatcher);
+		_vpaidEventsDispatcher = vpaidEventsDispatcher;
 
-			if ((Object)(vpaidEventsDispatcher).hasOwnProperty('getVPAID') && vpaidEventsDispatcher['getVPAID']  is Function) {
-                _ad = (Object)(_vpaidEventsDispatcher).getVPAID();
-            }
-		}
-		
-		/**
-		 * Add a JavaScript resource upon reciveing a given vpaidEvent
-		 * @param	vpaidEvent The name of the VPAID event to add the JavaScript resource upon recived
-		 * @param	tagUrl The JavaScript tag url
-		 */
-		public function addJavaScriptResourceOnEvent(vpaidEvent:String, tagUrl:String): void {
-			if (_vpaidEventsDispatcher == null)
-				throw "initEventsWiring must be called first.";
-			_vpaidEventsDispatcher.addEventListener(vpaidEvent, onInjectJavaScriptResource(tagUrl));
-		}
+		if ((Object)(vpaidEventsDispatcher).hasOwnProperty('getVPAID') && vpaidEventsDispatcher['getVPAID']  is Function) {
+        		_ad = (Object)(_vpaidEventsDispatcher).getVPAID();
+    		}
+	}
+	
+	/**
+	 * Add a JavaScript resource upon reciveing a given vpaidEvent
+	 * @param	vpaidEvent The name of the VPAID event to add the JavaScript resource upon recived
+	 * @param	tagUrl The JavaScript tag url
+	 */
+	public function addJavaScriptResourceOnEvent(vpaidEvent:String, tagUrl:String): void {
+		if (_vpaidEventsDispatcher == null)
+			throw "initEventsWiring must be called first.";
+		_vpaidEventsDispatcher.addEventListener(vpaidEvent, onInjectJavaScriptResource(tagUrl));
+	}
 		
         ////////////////////////////////////////////////////////////
         //   PUBLIC API 
@@ -322,9 +322,9 @@ package org.openvv {
 
             var jsResults: Object = ExternalInterface.call("$ovv.getAssetById('" + _id + "')" + ".checkViewability");
             var results: OVVCheck = new OVVCheck(jsResults);
-			
-			if (results && !!results.error)
-				raiseError(results);            
+            
+            if (results && !!results.error)
+		raiseError(results);            
 
             if (_ad != null && _ad.hasOwnProperty('adVolume')) {
                 results.volume = _ad['adVolume'];
@@ -551,7 +551,7 @@ package org.openvv {
 					_intervalTimer.stop();
 					_intervalTimer.removeEventListener(TimerEvent.TIMER, onIntervalCheck);
 					_intervalTimer = null;
-                    break;
+                    			break;
 				default:
 					// do nothing
 			}
@@ -569,10 +569,10 @@ package org.openvv {
 		{	
 			var publishedData:* = {"vpaidData":vpaidData, "ovvData":ovvData}
 			var jsOvvPublish:XML = <script><![CDATA[
-												function(event, id, args) { 
-													setTimeout($ovv.publish(event,  id, args), 0);
-												}
-											]]></script>;	
+								function(event, id, args) { 
+									setTimeout($ovv.publish(event,  id, args), 0);
+								}
+							]]></script>;	
 			
 			ExternalInterface.call(jsOvvPublish, eventType ,_id, publishedData);
 		}
