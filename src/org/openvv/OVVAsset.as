@@ -203,6 +203,9 @@ package org.openvv {
          */
         private var _ad:*;
 
+        private var _isPaused: Boolean = false;
+
+
         ////////////////////////////////////////////////////////////
         //   CONSTRUCTOR 
         ////////////////////////////////////////////////////////////
@@ -427,14 +430,16 @@ package org.openvv {
             var results: Object = checkViewability();
 			raiseLog(results);
 
-            _intervalsUnMeasurable = (results.viewabilityState == OVVCheck.UNMEASURABLE) ? _intervalsUnMeasurable + 1 : 0;
-            _intervalsInView = (results.viewabilityState == OVVCheck.VIEWABLE && results.focus == true) ? _intervalsInView + 1 : 0;
+            if (_isPaused == false) {
+                _intervalsUnMeasurable = (results.viewabilityState == OVVCheck.UNMEASURABLE) ? _intervalsUnMeasurable + 1 : 0;
+                _intervalsInView = (results.viewabilityState == OVVCheck.VIEWABLE && results.focus == true) ? _intervalsInView + 1 : 0;
 
-            if (_impressionEventRaised == false && _intervalsInView >= VIEWABLE_IMPRESSION_THRESHOLD) {
-                raiseImpression(results);
-            }
-            else if (_impressionUnmeasurableEventRaised == false && _intervalsUnMeasurable >= UNMEASURABLE_IMPRESSION_THRESHOLD) {
-                raiseImpressionUnmeasurable(results);
+                if (_impressionEventRaised == false && _intervalsInView >= VIEWABLE_IMPRESSION_THRESHOLD) {
+                    raiseImpression(results);
+                }
+                else if (_impressionUnmeasurableEventRaised == false && _intervalsUnMeasurable >= UNMEASURABLE_IMPRESSION_THRESHOLD) {
+                    raiseImpressionUnmeasurable(results);
+                }
             }
         }
 
@@ -551,11 +556,17 @@ package org.openvv {
 					_intervalTimer.stop();
 					_intervalTimer.removeEventListener(TimerEvent.TIMER, onIntervalCheck);
 					_intervalTimer = null;
-                    			break;
-				default:
+					break;
+				case VPAIDEvent.AdPaused:
+                    _isPaused = true;
+                    break;
+                case VPAIDEvent.AdPlaying:
+                    _isPaused = false;
+                    break;
+                default:
 					// do nothing
-			}
-			
+					break;					
+			}			
 			publishToJavascript(event.type, getEventData(event), ovvData);
 		}		
 		
