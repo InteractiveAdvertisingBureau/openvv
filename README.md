@@ -89,26 +89,26 @@ Code snippet:
 ```actionscript
 public function initAd(width:Number, height:Number, viewMode:String, desiredBitrate:Number, creativeData:String, environmentVars:String):void 
 {
-   ...
+   
   _viewabilityAsset = new OVVAsset('http://domain.com/OVVBeacon.swf', guid);  		
   // call initEventWiring with this to register asset as listener to VPAID events
   _viewabilityAsset.initEventsWiring(this); 						
   // Load 3rd party tags. Use **adID** to pass the asset ID
   var tagSrc:String = "http://someUrl.com/3rdPartyTag.js?adID=" + guid;			
   _viewabilityAsset.addJavaScriptResourceOnEvent(VPAIDEvent.AdImpression, tagSrc);
-  ...
+  
 }
-'''
+```
 
 ### JavaScript
 1.	Subscribe to events on $ovv to receive viewability/VPAID data.
 
 Code snippet:
-<pre>
+```javascript
 $ovv.subscribe('AdImpression', playerID, function(event, id, args) {
   	...
 });
-</pre>
+```
 
 ###Understanding the data
 The javascript event will receive the args {"vpaidData":vpaidData, "ovvData":ovvData}
