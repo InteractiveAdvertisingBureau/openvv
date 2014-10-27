@@ -86,7 +86,7 @@ The addition to OVVAsset.as includes an **initEventsWiring** and **addJavaScript
 3.  Call **addJavaScriptResourceOnEvent** function with the VPAID event name upon the JavaScript tag should be rendered and the JavaScript tag url.
 
 Code snippet:
-<pre>
+```actionscript
 public function initAd(width:Number, height:Number, viewMode:String, desiredBitrate:Number, creativeData:String, environmentVars:String):void 
 {
    ...
@@ -98,7 +98,7 @@ public function initAd(width:Number, height:Number, viewMode:String, desiredBitr
   _viewabilityAsset.addJavaScriptResourceOnEvent(VPAIDEvent.AdImpression, tagSrc);
   ...
 }
-</pre>
+'''
 
 ### JavaScript
 1.	Subscribe to events on $ovv to receive viewability/VPAID data.
