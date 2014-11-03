@@ -779,7 +779,6 @@ function OVVAsset(uid, dependencies) {
             // then beacons can't be used for this check
             check.beaconsSupported = false;
         }
-
         if (!beaconsReady()) {
             check.technique = OVVCheck.BEACON;
             check.viewabilityState = OVVCheck.NOT_READY;
@@ -907,7 +906,6 @@ function OVVAsset(uid, dependencies) {
     * @param {OVVCheck} check The OVVCheck object to populate
     */
     var checkBeacons = function (check) {
-
         if (!beaconsReady()) {
             return null;
         }
@@ -974,14 +972,13 @@ function OVVAsset(uid, dependencies) {
         }
 
         var beacons = check.beacons;
-
         // when the center of the player is visible
         if ((beacons[CENTER] === true) &&
         // and 2 adjacent outside corners are visible
-            (beacons[OUTER_TOP_LEFT] === true && beacons[OUTER_TOP_RIGHT] == true) ||
+            ((beacons[OUTER_TOP_LEFT] === true && beacons[OUTER_TOP_RIGHT] == true) ||
             (beacons[OUTER_TOP_LEFT] === true && beacons[OUTER_BOTTOM_LEFT] == true) ||
             (beacons[OUTER_TOP_RIGHT] === true && beacons[OUTER_BOTTOM_RIGHT] == true) ||
-            (beacons[OUTER_BOTTOM_LEFT] === true && beacons[OUTER_BOTTOM_RIGHT] == true)
+            (beacons[OUTER_BOTTOM_LEFT] === true && beacons[OUTER_BOTTOM_RIGHT] == true))
         ) {
             return true;
         }
