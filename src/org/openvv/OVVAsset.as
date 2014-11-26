@@ -591,10 +591,10 @@ package org.openvv {
 					}
 					break;
 				case VPAIDEvent.AdPaused:
-					isPaused = true;
+					_isPaused = true;
 					break;
 				case VPAIDEvent.AdPlaying:
-					isPaused = false;
+					_isPaused = false;
 					break;
 				default:
 					// do nothing
@@ -650,7 +650,6 @@ package org.openvv {
 		private function raiseImpressionUnmeasurable(ovvData:*):void
 		{
 			dispatchEvent(new OVVEvent(OVVEvent.OVVImpressionUnmeasurable, ovvData));
-			_intervalTimer.removeEventListener(TimerEvent.TIMER, onIntervalCheck);
 			_impressionUnmeasurableEventRaised = true;
 		}
 
