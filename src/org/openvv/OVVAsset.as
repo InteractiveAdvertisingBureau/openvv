@@ -431,13 +431,18 @@ package org.openvv {
 			raiseLog(results);
 
             if (_isPaused == false) {
-                _intervalsUnMeasurable = (results.viewabilityState == OVVCheck.UNMEASURABLE) ? _intervalsUnMeasurable + 1 : 0;
-                _intervalsInView = (results.viewabilityState == OVVCheck.VIEWABLE && results.focus == true) ? _intervalsInView + 1 : 0;
+                _intervalsUnMeasurable = (results.viewabilityState == OVVCheck.UNMEASURABLE)
+                                            ? _intervalsUnMeasurable + 1 : 0;
+                _intervalsInView = (results.viewabilityState == OVVCheck.VIEWABLE &&
+                                    ( results.focus == true ||
+                                        results.viewabilityStateOverrideReason == OVVCheck.FULLSCREEN) )
+                                    ? _intervalsInView + 1 : 0;
 
                 if (_impressionEventRaised == false && _intervalsInView >= VIEWABLE_IMPRESSION_THRESHOLD) {
                     raiseImpression(results);
                 }
-                else if (_impressionUnmeasurableEventRaised == false && _intervalsUnMeasurable >= UNMEASURABLE_IMPRESSION_THRESHOLD) {
+                else if (_impressionUnmeasurableEventRaised == false &&
+                            _intervalsUnMeasurable >= UNMEASURABLE_IMPRESSION_THRESHOLD) {
                     raiseImpressionUnmeasurable(results);
                 }
             }
