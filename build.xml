@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <project name="OpenVV"
-		 basedir="."
-		 default="swc">
+		basedir="."
+		default="compile-all">
 
 	<property environment="env"/>
 	<property name="FLEX_HOME" value="${env.FLEX_HOME}"/>
@@ -11,8 +11,19 @@
 	<property name="asdoc.dir" value="asdoc" />
 	
 	<taskdef resource="flexTasks.tasks" classpath="${FLEX_HOME}/ant/lib/flexTasks.jar"/>
-	
-	<target name="compileBeacon" depends="checkEnv">
+
+	<target name="compile-all" depends="clean, compile-beacon, compile-lib"/>
+		
+	<target name="sign-version">
+		<sequential>
+			<echo>Signing build with version: ${build.version}</echo>
+			<delete file="${src.dir}/org/openvv/OVVVersion.as" />
+			<filter token="version" value="${build.version}"  />
+			<copy file="util/Version.as.template" toFile="${src.dir}/org/openvv/OVVVersion.as" filtering="true" />
+		</sequential>
+	</target>
+
+	<target name="compile-beacon" depends="check-env, sign-version">
 	
 		<mxmlc file="${src.dir}/org/openvv/OVVBeacon.as"
 			   output="${bin.dir}/OVVBeacon.swf"
@@ -21,26 +32,27 @@
 		</mxmlc>
 	</target>
 
-	<target name="swc" depends="checkEnv">
+	<target name="compile-lib" depends="check-env, sign-version">
 		<compc output="${bin.dir}/openvv.swc"
-			   include-classes="org.openvv.OVVAsset org.openvv.OVVCheck org.openvv.OVVRenderMeter org.openvv.OVVThrottleType org.openvv.events.OVVEvent net.iab.IVPAID net.iab.VPAIDEvent">
+			   include-classes="org.openvv.OVVAsset org.openvv.OVVCheck org.openvv.OVVRenderMeter org.openvv.OVVThrottleType org.openvv.events.OVVEvent net.iab.IVPAID net.iab.VPAIDEvent org.openvv.OVVVersion">
 			<source-path path-element="${src.dir}"/>
 		</compc>
 	</target>
 
-	<target name="doc">
+	<target name="compile-doc" depends="check-env, sign-version">
 		<asdoc output="${asdoc.dir}" lenient="true" failonerror="true"> 
 			<doc-sources path-element="${src.dir}" />
 		</asdoc>
 	</target>
 
 	<target name="clean">
+		<delete file="${src.dir}/org/openvv/OVVVersion.as" failonerror="false" />
 		<delete dir="${bin.dir}" failonerror="false" />
 		<delete dir="${asdoc.dir}" failonerror="false" />
-		<delete dir="${JSDOC_DIR}" failonerror="false" />	
 	</target>
 
-	<target name="checkEnv">
+	<target name="check-env">
+		<echo>Value of FLEX_HOME is ${FLEX_HOME}</echo>
 		<fail message="You must set the FLEX_HOME environment variable to your SDK's home directory">
 			<condition>
 				<not>
