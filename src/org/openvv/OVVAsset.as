@@ -195,7 +195,8 @@ package org.openvv {
 		/**
 		 * A vector of all OVV events
 		 */
-		private static const OVV_EVENTS:Array = ([OVVEvent.OVVError,OVVEvent.OVVLog, OVVEvent.OVVImpression, OVVEvent.OVVImpressionUnmeasurable]);	
+		private static const OVV_EVENTS:Array = ([OVVEvent.OVVError,OVVEvent.OVVLog, OVVEvent.OVVImpression,
+			OVVEvent.OVVImpressionUnmeasurable, OVVEvent.OVVReady]);
 	
 		private var _vpaidEventsDispatcher:IEventDispatcher = null;
 		/**
