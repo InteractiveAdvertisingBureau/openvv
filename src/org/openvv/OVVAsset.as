@@ -206,9 +206,9 @@ package org.openvv {
 
 	        private var _isPaused: Boolean = false;
 		/**
-		 * True if VPAID AdVideoStarted event has been received
+		 * True if VPAID AdImpression event has been received
 		 */
-		private var videoStarted:Boolean;
+		private var adStarted:Boolean;
 		/**
 		 * True if JS is ready, and beacons are loaded if needed.
 		 */
@@ -412,7 +412,7 @@ package org.openvv {
          */
 		public function onJsReady(): void {
 			jsReady = true;
-			if ( videoStarted ) {
+			if ( adStarted ) {
 				startImpressionTimer();
 			}
 			raiseReady();
@@ -426,7 +426,7 @@ package org.openvv {
 			return jsReady;
 		}
 		/**
-         * When the VPAID AdVideoStart event is received, it triggers this function
+         * When the VPAID AdImpression event is received, it triggers this function
          * to start the interval timer which does viewability checks every 200ms (POLL_INTERVAL)
          */
         public function startImpressionTimer(): void {
@@ -585,8 +585,8 @@ package org.openvv {
 					_intervalTimer.removeEventListener(TimerEvent.TIMER, onIntervalCheck);
 					_intervalTimer = null;
 					break;
-				case VPAIDEvent.AdVideoStart:
-					videoStarted = true;
+				case VPAIDEvent.AdImpression:
+					adStarted = true;
 					if ( jsReady ) {
 						startImpressionTimer();
 					}
