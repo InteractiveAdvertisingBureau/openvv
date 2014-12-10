@@ -189,22 +189,30 @@ package org.openvv {
 			VPAIDEvent.AdImpression, VPAIDEvent.AdLinearChange, VPAIDEvent.AdLog, VPAIDEvent.AdPaused, VPAIDEvent.AdPlaying, 
 			VPAIDEvent.AdStarted,VPAIDEvent.AdStopped, VPAIDEvent.AdUserAcceptInvitation,  VPAIDEvent.AdUserClose, VPAIDEvent.AdUserMinimize, VPAIDEvent.AdVideoComplete, 
 			VPAIDEvent.AdVideoFirstQuartile, VPAIDEvent.AdVideoMidpoint, VPAIDEvent.AdVideoThirdQuartile, VPAIDEvent.AdVolumeChange, VPAIDEvent.AdSkipped,
-			VPAIDEvent.AdSkippableStateChange, VPAIDEvent.AdSizeChange, VPAIDEvent.AdDurationChange, VPAIDEvent.AdInteraction]);
+			VPAIDEvent.AdSkippableStateChange, VPAIDEvent.AdSizeChange, VPAIDEvent.AdDurationChange,
+			VPAIDEvent.AdInteraction, VPAIDEvent.AdVideoStart]);
 	
 		/**
 		 * A vector of all OVV events
 		 */
-		private static const OVV_EVENTS:Array = ([OVVEvent.OVVError,OVVEvent.OVVLog, OVVEvent.OVVImpression, OVVEvent.OVVImpressionUnmeasurable]);	
+		private static const OVV_EVENTS:Array = ([OVVEvent.OVVError,OVVEvent.OVVLog, OVVEvent.OVVImpression,
+			OVVEvent.OVVImpressionUnmeasurable, OVVEvent.OVVReady]);
 	
 		private var _vpaidEventsDispatcher:IEventDispatcher = null;
+		/**
+	         * Reference to the vpaid ad
+        	 */
+	        private var _ad:*;
 
-        /**
-         * Reference to the vpaid ad
-         */
-        private var _ad:*;
-
-        private var _isPaused: Boolean = false;
-
+	        private var _isPaused: Boolean = false;
+		/**
+		 * True if VPAID AdImpression event has been received
+		 */
+		private var adStarted:Boolean;
+		/**
+		 * True if JS is ready, and beacons are loaded if needed.
+		 */
+		private var jsReady:Boolean;
 
         ////////////////////////////////////////////////////////////
         //   CONSTRUCTOR 
@@ -236,7 +244,7 @@ package org.openvv {
             _stage = stage;
 
             ExternalInterface.addCallback(_id, flashProbe);
-            ExternalInterface.addCallback("startImpressionTimer", startImpressionTimer);
+            ExternalInterface.addCallback("onJsReady", onJsReady);
 
             _sprite = new Sprite();
             _renderMeter = new OVVRenderMeter(_sprite);
@@ -399,8 +407,27 @@ package org.openvv {
         }
 
         /**
-         * When the JavaScript portion of OpenVV is ready, it calls this function
-         * to start the interval timer which does viewability checks every
+         * When the JavaScript portion of OpenVV is ready and the beacons have loaded (if needed),
+         * this function is called so that the ad can wait for the beacons to load before dispatching AdLoaded
+         */
+		public function onJsReady(): void {
+			jsReady = true;
+			if ( adStarted ) {
+				startImpressionTimer();
+			}
+			raiseReady();
+		}
+
+		/**
+		 * Ready state from the JS code, including beacons.
+		 * @return
+		 */
+		public function get isJsReady():Boolean {
+			return jsReady;
+		}
+		/**
+         * When the VPAID AdImpression event is received, it triggers this function
+         * to start the interval timer which does viewability checks every 200ms (POLL_INTERVAL)
          */
         public function startImpressionTimer(): void {
             if (!_intervalTimer) {
@@ -548,6 +575,7 @@ package org.openvv {
 
 		/**
 		 * Handle VPAID event by publishing it to JavaScript.
+		 * In case when the event is AdVideoStart the internal interval that measures the asset will be started
 		 * In case when the event is AdVideoComplete the internal interval that measures the asset will be stopped
 		 * @param	event the VPAID event to handle
 		 */
@@ -562,16 +590,23 @@ package org.openvv {
 					_intervalTimer.removeEventListener(TimerEvent.TIMER, onIntervalCheck);
 					_intervalTimer = null;
 					break;
+				case VPAIDEvent.AdImpression:
+					adStarted = true;
+					if ( jsReady ) {
+						startImpressionTimer();
+					}
+					break;
 				case VPAIDEvent.AdPaused:
-                    _isPaused = true;
-                    break;
-                case VPAIDEvent.AdPlaying:
-                    _isPaused = false;
-                    break;
-                default:
+					_isPaused = true;
+					break;
+				case VPAIDEvent.AdPlaying:
+					_isPaused = false;
+					break;
+				default:
 					// do nothing
-					break;					
-			}			
+					break;
+			}
+			
 			publishToJavascript(event.type, getEventData(event), ovvData);
 		}		
 		
@@ -608,7 +643,10 @@ package org.openvv {
 
 			return data;
 		}
-
+		private function raiseReady():void
+		{
+			dispatchEvent(new OVVEvent(OVVEvent.OVVReady, null));
+		}
 		private function raiseImpression(ovvData:*):void
 		{
 			dispatchEvent(new OVVEvent(OVVEvent.OVVImpression, ovvData));
