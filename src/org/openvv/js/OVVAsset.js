@@ -21,6 +21,7 @@
 * @constructor
 */
 function OVV() {
+    var that = this;
 
     ///////////////////////////////////////////////////////////////////////////
     // PUBLIC ATTRIBUTES
@@ -80,12 +81,17 @@ function OVV() {
                         var replaceStr = brverRes[0].match(new RegExp(dataBrowsers[i].verRegex));
                         data.version = brverRes[0].replace(replaceStr[0], '');
                     }
+                    var brOSRes = dataString.match(new RegExp(winOSRegex + '[0-9\\.]*'));
+                    if (brOSRes != null) {
+                        data.os = brOSRes[0];
+                    }
                     break;
                 }
             }
             return data;
         };
 
+        var winOSRegex = '(Windows NT )';
         var dataBrowsers = [{
             id: 4,
             name: 'Opera',
@@ -117,6 +123,19 @@ function OVV() {
         return getData();
     };
 
+    this.browserSupportsBeacons = function()
+    {
+        //Windows 8.1 is represented as Windows NT 6.3 in user agent string
+        var WIN_8_1 = 6.3;
+        var isIE = that.browser.ID == that.browserIDEnum.MSIE;
+        var isSupportedIEVersion = that.browser.version >= 11;
+        var ntVersionArr = that.browser.version ? that.browser.version.split(' ') : [0];
+        var ntVersion = ntVersionArr[ntVersionArr.length - 1];
+        var isSupportedOSForIE = ntVersion >= WIN_8_1;
+        var isFF = that.browser.ID == that.browserIDEnum.Firefox;
+        return !((isIE && !(isSupportedIEVersion && isSupportedOSForIE)) || isFF);
+    }
+
     this.browserIDEnum = {
         MSIE: 1,
         Firefox: 2,
@@ -130,7 +149,8 @@ function OVV() {
     *	{ 
     *		ID: ,  
     *	  	name: '', 
-    *	  	version: '' 
+    *	  	version: '',
+    *	    os: ''
     *	};
     */
     this.browser = getBrowserDetailsByUserAgent(userAgent);
@@ -546,7 +566,6 @@ OVVCheck.GEOMETRY = 'geometry';
 * @param {String} uid - The unique identifier of this asset
 */
 function OVVAsset(uid, dependencies) {
-
     ///////////////////////////////////////////////////////////////////////////
     // CONSTANTS
     ///////////////////////////////////////////////////////////////////////////
@@ -745,7 +764,7 @@ function OVVAsset(uid, dependencies) {
 
         // if we're in IE or FF and we're in an cross domain iframe, return unmeasurable						
         // We are able to measure for same domain iframe ('friendly iframe')
-        if (($ovv.browser.ID === $ovv.browserIDEnum.MSIE || $ovv.browser.ID === $ovv.browserIDEnum.Firefox) &&
+        if (!$ovv.browserSupportsBeacons() &&
             check.geometrySupported === false) {
             check.viewabilityState = OVVCheck.UNMEASURABLE;
             if (!$ovv.DEBUG) {
