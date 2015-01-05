@@ -712,6 +712,12 @@ function OVVAsset(uid, dependencies) {
 
     var geometryViewabilityCalculator = dependencies.geometryViewabilityCalculator;
 
+    /**
+    * hold a reference to a function that can get the relevant beacon
+    * @type {function}
+    */
+    var getBeaconFunc = function() {return null};
+
     ///////////////////////////////////////////////////////////////////////////
     // PUBLIC FUNCTIONS
     ///////////////////////////////////////////////////////////////////////////
@@ -1208,8 +1214,15 @@ function OVVAsset(uid, dependencies) {
     * Use memoize implementation to reduce duplicate document.getElementById calls
     */
     var getBeacon = (function (index) {
-        return document.getElementById('OVVBeacon_' + index + '_' + id);
+        return getBeaconFunc(index);
     }).memoize();
+
+    /**
+    * @returns {Element|null} A beacon by its index
+    */
+    var getFlashBeacon = function (index) {
+        return document.getElementById('OVVBeacon_' + index + '_' + id);
+    }
 
     /**
     * @returns {Element|null} A beacon container by its index.
@@ -1267,7 +1280,8 @@ function OVVAsset(uid, dependencies) {
 
     // only use the beacons if we're in an iframe, but go ahead and add them
     // during debug mode
-    else if ($ovv.IN_IFRAME || $ovv.DEBUG) {
+    if ($ovv.IN_IFRAME || $ovv.DEBUG) {
+        getBeaconFunc = getFlashBeacon;
         // 'BEACON_SWF_URL' is String substituted from ActionScript
         createBeacons.bind(this)('BEACON_SWF_URL');
     } else if (player && player.onJsReady) {
