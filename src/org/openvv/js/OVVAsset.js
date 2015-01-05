@@ -1205,10 +1205,11 @@ function OVVAsset(uid, dependencies) {
 
     /**
     * @returns {Element|null} A beacon by its index
+    * Use memoize implementation to reduce duplicate document.getElementById calls
     */
-    var getBeacon = function (index) {
+    var getBeacon = (function (index) {
         return document.getElementById('OVVBeacon_' + index + '_' + id);
-    };
+    }).memoize();
 
     /**
     * @returns {Element|null} A beacon container by its index.
@@ -1266,7 +1267,7 @@ function OVVAsset(uid, dependencies) {
 
     // only use the beacons if we're in an iframe, but go ahead and add them
     // during debug mode
-    if ($ovv.IN_IFRAME || $ovv.DEBUG) {
+    else if ($ovv.IN_IFRAME || $ovv.DEBUG) {
         // 'BEACON_SWF_URL' is String substituted from ActionScript
         createBeacons.bind(this)('BEACON_SWF_URL');
     } else if (player && player.onJsReady) {
