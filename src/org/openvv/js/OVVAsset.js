@@ -261,7 +261,7 @@ function OVV() {
             for (key in previousEvents[uid]) {
                 if (contains(previousEvents[uid][key].eventName, events)) {
                     runSafely(function () {
-                        func(uid, previousEvents[uid][key]); // changed in vtag.js
+                        func(uid, previousEvents[uid][key]);
                     });
                 }
             }
@@ -334,6 +334,7 @@ function OVV() {
         }
     };
 }
+
 
 /**
 * A container for all the values that OpenVV collects.
@@ -503,7 +504,6 @@ function OVVCheck() {
     this.viewabilityState = '';
 }
 
-
 /**
 * The value that {@link OVVCheck#viewabilityState} will be set to if OVV cannot
 * determine whether the asset is at least 50% viewable.
@@ -539,6 +539,8 @@ OVVCheck.BEACON = 'beacon';
 * uses the geometry technique to determine {@link OVVCheck#viewabilityState}
 */
 OVVCheck.GEOMETRY = 'geometry';
+
+
 
 /**
 * Represents an Asset which OVV is going to determine the viewability of
@@ -669,6 +671,9 @@ function OVVAsset(uid, dependencies) {
     * @type {Number}
     */
     var INNER_BOTTOM_RIGHT = 13;
+
+
+    var positionBeaconsIntervalDelay = 500;
 
     ///////////////////////////////////////////////////////////////////////////
     // PRIVATE ATTRIBUTES
@@ -1074,7 +1079,7 @@ function OVVAsset(uid, dependencies) {
         // it takes ~500ms for beacons to know if they've been moved off 
         // screen, so they're repositioned at this interval so they'll be
         // ready for the next check
-        this.positionInterval = setInterval(positionBeacons.bind(this), 500);
+        this.positionInterval = setInterval(positionBeacons.bind(this), positionBeaconsIntervalDelay);
     };
 
     /**
@@ -1206,11 +1211,14 @@ function OVVAsset(uid, dependencies) {
     };
 
     /**
-    * @returns {Element|null} A beacon container by its index
+    * @returns {Element|null} A beacon container by its index.
+    * Use memoize implementation to reduce duplicate document.getElementById calls
     */
-    var getBeaconContainer = function (index) {
+    var getBeaconContainer = (function (index) {
         return document.getElementById('OVVBeaconContainer_' + index + '_' + id);
-    };
+    }).memoize();
+
+
 
     /**
     * Finds the video player associated with this asset by searching through
@@ -1266,6 +1274,8 @@ function OVVAsset(uid, dependencies) {
 		setTimeout( function(){ player.onJsReady() }, 5 ); //Use a tiny timeout to keep this async like the beacons
     }
 }
+
+
 
 function OVVGeometryViewabilityCalculator() {
 
@@ -1471,6 +1481,21 @@ function OVVGeometryViewabilityCalculator() {
         return Math.round((((assetVisiableWidth * assetVisiableHeight)) / (asset.width * asset.height)) * 100);
     };
 }
+
+// A memoize function to store function results
+Function.prototype.memoized = function(key) {
+    this._cacheValue = this._cacheValue || {};
+    return this._cacheValue[key] !== undefined ?
+        this._cacheValue[key] : // return from cache
+        this._cacheValue[key] = this.apply(this, arguments); // call the function is not exist in cache and store in cache for next time
+};
+
+Function.prototype.memoize = function() {
+    var fn = this;
+    return function() {
+        return fn.memoized.apply(fn, arguments);
+    }
+};
 
 // initialize the OVV object if it doesn't exist
 window.$ovv = window.$ovv || new OVV();
