@@ -541,7 +541,6 @@ OVVCheck.BEACON = 'beacon';
 OVVCheck.GEOMETRY = 'geometry';
 
 
-
 /**
 * Represents an Asset which OVV is going to determine the viewability of
 * @constructor
@@ -672,7 +671,10 @@ function OVVAsset(uid, dependencies) {
     */
     var INNER_BOTTOM_RIGHT = 13;
 
-
+    /**
+    * millisecond delay between repositioning beacons
+    * @type {number}
+    */
     var positionBeaconsIntervalDelay = 500;
 
     ///////////////////////////////////////////////////////////////////////////
@@ -713,11 +715,15 @@ function OVVAsset(uid, dependencies) {
     var geometryViewabilityCalculator = dependencies.geometryViewabilityCalculator;
 
     /**
-    * hold a reference to a function that can get the relevant beacon
+    * hold a reference to a function that get the relevant beacon
     * @type {function}
     */
     var getBeaconFunc = function() {return null};
 
+    /**
+    * hold a reference to a function that get the relevant beacon continer
+    * @type {function}
+    */
     var getBeaconContainerFunc = function() {return null};
 
     ///////////////////////////////////////////////////////////////////////////
@@ -1297,10 +1303,6 @@ function OVVAsset(uid, dependencies) {
         return contentWindow;
     };
 
-    var getFrameBeaconContainer = function (index) {
-        return document.getElementById('OVVFrame_' + id + '_' + index);
-    };
-
     /**
     * @returns {Element|null} A beacon container by its index.
     * Use memoize implementation to reduce duplicate document.getElementById calls
@@ -1309,12 +1311,19 @@ function OVVAsset(uid, dependencies) {
         return getBeaconContainerFunc(index);
     }).memoize();
 
-
+    /**
+    * @returns {Element|null} A beacon container by its index
+    */
     var getFlashBeaconContainer = function (index) {
         return document.getElementById('OVVBeaconContainer_' + index + '_' + id);
     };
 
-
+    /**
+    * @returns {Element|null} A beacon frame container by its index
+    */
+    var getFrameBeaconContainer = function (index) {
+        return document.getElementById('OVVFrame_' + id + '_' + index);
+    };
 
     /**
     * Finds the video player associated with this asset by searching through
@@ -1364,6 +1373,7 @@ function OVVAsset(uid, dependencies) {
     // during debug mode
     if ($ovv.IN_IFRAME || $ovv.DEBUG) {
         if ($ovv.browser.ID === $ovv.browserIDEnum.Firefox){
+            //Use frame technique to measure viewability in cross domain FF scenario
             getBeaconFunc = getFrameBeacon;
             getBeaconContainerFunc = getFrameBeaconContainer;
             createFrameBeacons.bind(this)();
@@ -1379,7 +1389,6 @@ function OVVAsset(uid, dependencies) {
 		setTimeout( function(){ player.onJsReady() }, 5 ); //Use a tiny timeout to keep this async like the beacons
     }
 }
-
 
 
 function OVVGeometryViewabilityCalculator() {
