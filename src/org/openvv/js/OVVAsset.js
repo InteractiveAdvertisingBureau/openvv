@@ -781,7 +781,7 @@ function OVVAsset(uid, dependencies) {
         var controlBeaconContainer = getBeaconContainer(0);
 
         // check to make sure the control beacon is found and its callback has been setup
-        if (controlBeacon && controlBeacon.isViewable) {
+        if (controlBeacon && controlBeacon.isViewable && controlBeaconContainer) {
             // the control beacon should always be off screen and not viewable,
             // if that's not true, it can't be used
             var controlBeaconVisible = isOnScreen(controlBeaconContainer) && controlBeacon.isViewable();
@@ -1146,7 +1146,7 @@ function OVVAsset(uid, dependencies) {
         // it takes ~500ms for beacons to know if they've been moved off
         // screen, so they're repositioned at this interval so they'll be
         // ready for the next check
-        this.positionInterval = setInterval(positionBeacons.bind(this), 500);
+        this.positionInterval = setInterval(positionBeacons.bind(this), positionBeaconsIntervalDelay);
     };
 
     /**
@@ -1363,15 +1363,12 @@ function OVVAsset(uid, dependencies) {
     // only use the beacons if we're in an iframe, but go ahead and add them
     // during debug mode
     if ($ovv.IN_IFRAME || $ovv.DEBUG) {
-        console.log('In iframe scenario');
         if ($ovv.browser.ID === $ovv.browserIDEnum.Firefox){
-            console.log('FF');
             getBeaconFunc = getFrameBeacon;
             getBeaconContainerFunc = getFrameBeaconContainer;
             createFrameBeacons.bind(this)();
         }
         else {
-            console.log('Flash beacons');
             getBeaconFunc = getFlashBeacon;
             getBeaconContainerFunc = getFlashBeaconContainer;
             // 'BEACON_SWF_URL' is String substituted from ActionScript
