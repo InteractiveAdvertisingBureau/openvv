@@ -2,14 +2,14 @@
 * Copyright (c) 2013 Open VideoView
 *
 * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated
-* documentation files (the "Software"), to deal in the Software without restriction, including without limitation
+* documentation files (the 'Software'), to deal in the Software without restriction, including without limitation
 * the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and
 * to permit persons to whom the Software is furnished to do so, subject to the following conditions:
 *
 * The above copyright notice and this permission notice shall be included in all copies or substantial portions of
 * the Software.
 *
-* THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO
+* THE SOFTWARE IS PROVIDED 'AS IS', WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO
 * THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
 * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
 * TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
@@ -299,7 +299,7 @@ function OVV() {
         if (eventName && uid && subscribers[eventName + uid] instanceof Array) {
             for (var i = 0; i < subscribers[eventName + uid].length; i++) {
                 var funcObject = subscribers[eventName + uid][i];
-                if (funcObject && funcObject.Func && typeof funcObject.Func === "function") {
+                if (funcObject && funcObject.Func && typeof funcObject.Func === 'function') {
                     runSafely(function () {
                         funcObject.Func(uid, eventArgs);
                     });
@@ -309,7 +309,7 @@ function OVV() {
     };
 
     var getCurrentTime = function () {
-        "use strict";
+        'use strict';
         if (Date.now) {
             return Date.now();
         }
@@ -385,7 +385,7 @@ function OVVCheck() {
 
     /**
     * Whether beacon checking is supported. Beacon support is defined by
-    * placing a "control beacon" SWF off screen, and verifying that it is
+    * placing a 'control beacon' SWF off screen, and verifying that it is
     * throttled as expected.
     * @type {Boolean}
     */
@@ -430,7 +430,7 @@ function OVVCheck() {
     * When OVV is run in an iframe and the beacon technique is used, this array
     * is populated with the states of each beacon, identified by their index.
     * True means the beacon was viewable and false means the beacon was
-    * unviewable. Beacon 0 is the "control beacon" and should always be false.
+    * unviewable. Beacon 0 is the 'control beacon' and should always be false.
     * @type {Array.<Boolean>|null}
     * @see {@link OVVAsset.CONTROL}
     * @see {@link OVVAsset.CENTER}
@@ -718,6 +718,8 @@ function OVVAsset(uid, dependencies) {
     */
     var getBeaconFunc = function() {return null};
 
+    var getBeaconContainerFunc = function() {return null};
+
     ///////////////////////////////////////////////////////////////////////////
     // PUBLIC FUNCTIONS
     ///////////////////////////////////////////////////////////////////////////
@@ -756,8 +758,7 @@ function OVVAsset(uid, dependencies) {
 
         // if we're in IE or FF and we're in an cross domain iframe, return unmeasurable						
         // We are able to measure for same domain iframe ('friendly iframe')
-        if (($ovv.browser.ID === $ovv.browserIDEnum.MSIE || $ovv.browser.ID === $ovv.browserIDEnum.Firefox) &&
-            check.geometrySupported === false) {
+        if ($ovv.browser.ID === $ovv.browserIDEnum.MSIE && check.geometrySupported === false) {
             check.viewabilityState = OVVCheck.UNMEASURABLE;
             if (!$ovv.DEBUG) {
                 return check;
@@ -777,13 +778,13 @@ function OVVAsset(uid, dependencies) {
             }
         }
         var controlBeacon = getBeacon(0);
+        var controlBeaconContainer = getBeaconContainer(0);
 
-        // check to make sure the control beacon is found and its 
-        // callback has been setup
+        // check to make sure the control beacon is found and its callback has been setup
         if (controlBeacon && controlBeacon.isViewable) {
             // the control beacon should always be off screen and not viewable,
             // if that's not true, it can't be used
-            var controlBeaconVisible = isOnScreen(controlBeacon) && controlBeacon.isViewable();
+            var controlBeaconVisible = isOnScreen(controlBeaconContainer) && controlBeacon.isViewable();
             check.beaconsSupported = !controlBeaconVisible;
         } else {
             // if the control beacon wasn't found or it isn't ready yet,
@@ -796,6 +797,7 @@ function OVVAsset(uid, dependencies) {
         } else if (check.beaconsSupported) { // if the control beacon checked out, and all the beacons are ready proceed
             check.technique = OVVCheck.BEACON;
             var viewable = checkBeacons(check);
+
             // certain scenarios return null when the beacons can't guarantee
             // that the player is > 50% viewable, so it's deemed unmeasurable
             if (viewable === null) {
@@ -828,6 +830,8 @@ function OVVAsset(uid, dependencies) {
             }
         }
 
+        console.log(JSON.stringify(check));
+
         return check;
     };
 
@@ -837,7 +841,7 @@ function OVVAsset(uid, dependencies) {
     */
     this.beaconStarted = function (index) {
 
-        if ($ovv.DEBUG) {
+        if ($ovv.DEBUG && getBeacon(index).debug) {
             getBeacon(index).debug();
         }
 
@@ -942,8 +946,9 @@ function OVVAsset(uid, dependencies) {
                 continue;
             }
             var beacon = getBeacon(index);
+            var beaconContainer = getBeaconContainer(index);
             var isViewable = beacon.isViewable();
-            var onScreen = isOnScreen(beacon);
+            var onScreen = isOnScreen(beaconContainer);
             check.beacons[index] = isViewable && onScreen;
 
             if (isViewable) {
@@ -1088,6 +1093,62 @@ function OVVAsset(uid, dependencies) {
         this.positionInterval = setInterval(positionBeacons.bind(this), positionBeaconsIntervalDelay);
     };
 
+    var createFrameBeacons = function() {
+        for (var index = 0; index <= TOTAL_BEACONS; index++) {
+            var iframe = document.createElement('iframe');
+            iframe.name = iframe.id = 'OVVFrame_' + id + '_' + index;
+            iframe.width =  $ovv.DEBUG ? 20 : 1;
+            iframe.height =  $ovv.DEBUG ? 20 : 1;
+            iframe.frameBorder = 0;
+            iframe.style.position = 'absolute';
+            iframe.style.zIndex =  $ovv.DEBUG ? 99999 : -99999;
+
+            iframe.src = 'javascript: ' +
+                'window.isInViewArea = undefined; ' +
+                'window.wasInViewArea = false; ' +
+                'window.isInView = undefined; ' +
+                'window.wasViewed = false; ' +
+                'window.started = false; ' +
+                'window.index = ' + index + ';'  +
+                'window.isViewable = function() { return window.isInView; }; ' +
+                'var cnt = 0; ' +
+                'setTimeout(function() {' +
+                                'var span = document.createElement("span");' +
+                                'span.id = "ad1";' +
+                                'document.body.insertBefore(span, document.body.firstChild);' +
+                            '},300);' +
+                'setTimeout(function() {setInterval(' +
+                    'function() { ' +
+                        'ad1 = document.getElementById("ad1");' +
+                        'ad1.innerHTML = window.mozPaintCount > cnt ? "In View" : "Out of View";' +
+                        'var paintCount = window.mozPaintCount; ' +
+                        'window.isInView = (paintCount>cnt); ' +
+                        'cnt = paintCount; ' +
+                        'if (parent.$ovv.DEBUG == true) {' +
+                            'if(window.isInView === true){' +
+                                'document.body.style.background = "green";' +
+                            '} else {' +
+                                'document.body.style.background = "red";' +
+                            '}' +
+                        '}' +
+                        'if (window.started === false) {' +
+                            'parent.$ovv.getAssetById("'+id+'")' + '.beaconStarted(window.index);' +
+                            'window.started = true;' +
+                        '}' +
+                    '}, 500)},400);';
+
+            document.body.insertBefore(iframe, document.body.firstChild);
+        }
+
+        // move the frames to their initial position
+        positionBeacons.bind(this)();
+
+        // it takes ~500ms for beacons to know if they've been moved off
+        // screen, so they're repositioned at this interval so they'll be
+        // ready for the next check
+        this.positionInterval = setInterval(positionBeacons.bind(this), 500);
+    };
+
     /**
     * Repositions the beacon SWFs on top of the player
     */
@@ -1225,12 +1286,33 @@ function OVVAsset(uid, dependencies) {
     }
 
     /**
+    * @returns {Element|null} A beacon frame container by its index
+    */
+    var getFrameBeacon = function (index) {
+        var frame = document.getElementById('OVVFrame_' + id + '_' + index);
+        var contentWindow = null;
+        if (frame) {
+            contentWindow = frame.contentWindow;
+        }
+        return contentWindow;
+    };
+
+    var getFrameBeaconContainer = function (index) {
+        return document.getElementById('OVVFrame_' + id + '_' + index);
+    };
+
+    /**
     * @returns {Element|null} A beacon container by its index.
     * Use memoize implementation to reduce duplicate document.getElementById calls
     */
     var getBeaconContainer = (function (index) {
-        return document.getElementById('OVVBeaconContainer_' + index + '_' + id);
+        return getBeaconContainerFunc(index);
     }).memoize();
+
+
+    var getFlashBeaconContainer = function (index) {
+        return document.getElementById('OVVBeaconContainer_' + index + '_' + id);
+    };
 
 
 
@@ -1281,9 +1363,20 @@ function OVVAsset(uid, dependencies) {
     // only use the beacons if we're in an iframe, but go ahead and add them
     // during debug mode
     if ($ovv.IN_IFRAME || $ovv.DEBUG) {
-        getBeaconFunc = getFlashBeacon;
-        // 'BEACON_SWF_URL' is String substituted from ActionScript
-        createBeacons.bind(this)('BEACON_SWF_URL');
+        console.log('In iframe scenario');
+        if ($ovv.browser.ID === $ovv.browserIDEnum.Firefox){
+            console.log('FF');
+            getBeaconFunc = getFrameBeacon;
+            getBeaconContainerFunc = getFrameBeaconContainer;
+            createFrameBeacons.bind(this)();
+        }
+        else {
+            console.log('Flash beacons');
+            getBeaconFunc = getFlashBeacon;
+            getBeaconContainerFunc = getFlashBeaconContainer;
+            // 'BEACON_SWF_URL' is String substituted from ActionScript
+            createBeacons.bind(this)('BEACON_SWF_URL');
+        }
     } else if (player && player.onJsReady) {
 		// since we don't have to wait for beacons to be ready, we're ready now
 		setTimeout( function(){ player.onJsReady() }, 5 ); //Use a tiny timeout to keep this async like the beacons
@@ -1297,7 +1390,7 @@ function OVVGeometryViewabilityCalculator() {
     this.getViewabilityState = function (element, contextWindow) {
         var viewPortSize = getViewPortSize();
         if (viewPortSize.height == Infinity || viewPortSize.width == Infinity) {
-            return { error: "Failed to determine viewport"};
+            return { error: 'Failed to determine viewport'};
         }
 
         var assetSize = getAssetVisibleDimension(element, contextWindow);
@@ -1514,6 +1607,6 @@ Function.prototype.memoize = function() {
 
 // initialize the OVV object if it doesn't exist
 window.$ovv = window.$ovv || new OVV();
-
+//window.$ovv.DEBUG = true;
 // 'OVVID' is String substituted from AS
 window.$ovv.addAsset(new OVVAsset('OVVID', { geometryViewabilityCalculator: new OVVGeometryViewabilityCalculator() }));
