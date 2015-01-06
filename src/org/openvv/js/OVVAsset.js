@@ -944,7 +944,7 @@ function OVVAsset(uid, dependencies) {
         check.beacons = new Array(TOTAL_BEACONS);
 
         //Get player dimensions:
-        var objRect = player.getClientRects()[0];
+        var objRect = player.getClientRects ? player.getClientRects()[0] : { top: -1, bottom: -1, left: -1, right: -1};
         check.objTop = objRect.top;
         check.objBottom = objRect.bottom;
         check.objLeft = objRect.left;
