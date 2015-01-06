@@ -308,6 +308,14 @@ function OVV() {
         }
     };
 
+    /**
+     * Return all published events
+     * @param {uid} asset identifier
+     */
+    this.getAllReceivedEvents = function(uid) {
+        return previousEvents[uid];
+    }
+
     var getCurrentTime = function () {
         'use strict';
         if (Date.now) {
