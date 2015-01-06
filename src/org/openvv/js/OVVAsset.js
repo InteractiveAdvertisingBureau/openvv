@@ -836,8 +836,6 @@ function OVVAsset(uid, dependencies) {
             }
         }
 
-        console.log(JSON.stringify(check));
-
         return check;
     };
 
