@@ -1619,6 +1619,6 @@ Function.prototype.memoize = function() {
 
 // initialize the OVV object if it doesn't exist
 window.$ovv = window.$ovv || new OVV();
-//window.$ovv.DEBUG = true;
+
 // 'OVVID' is String substituted from AS
 window.$ovv.addAsset(new OVVAsset('OVVID', { geometryViewabilityCalculator: new OVVGeometryViewabilityCalculator() }));
