@@ -770,7 +770,7 @@ function OVVAsset(uid, dependencies) {
             return check;
         }
 
-        // if we're in IE or FF and we're in an cross domain iframe, return unmeasurable						
+        // if we're in IE and we're in an cross domain iframe, return unmeasurable
         // We are able to measure for same domain iframe ('friendly iframe')
         if ($ovv.browser.ID === $ovv.browserIDEnum.MSIE && check.geometrySupported === false) {
             check.viewabilityState = OVVCheck.UNMEASURABLE;
