@@ -10,7 +10,11 @@
 	<property name="bin.dir" value="bin" />
 	<property name="tmp.dir" value="tmp" />
 	<property name="asdoc.dir" value="asdoc" />
-	
+
+	<condition property="uglifyjs" value="uglifyjs.cmd" else="uglifyjs">
+		<os family="windows"/>
+	</condition>
+
 	<taskdef resource="flexTasks.tasks" classpath="${FLEX_HOME}/ant/lib/flexTasks.jar"/>
 
 	<target name="compile-all" depends="clean, compile-beacon, compile-lib"/>
@@ -26,7 +30,7 @@
 
 	<target name="minify-js">
 		<mkdir dir="${tmp.dir}"/>
-		<exec executable="uglifyjs.cmd">
+		<exec executable="${uglifyjs}">
 			<arg path="${src.dir}/org/openvv/js/OVVAsset.js"/>
 			<arg value="-o"/>
 			<arg path="${tmp.dir}/OVVAsset.min.js"/>
