@@ -26,14 +26,13 @@
 
 	<target name="minify-js">
 		<mkdir dir="${tmp.dir}"/>
-		<apply executable="uglifyjs.cmd">
-			<fileset dir="${src.dir}/org/openvv/js" includes="OVVAsset.js"/>
-			<srcfile/>
-			<arg line="-o"/>
+		<exec executable="uglifyjs.cmd">
+			<arg path="${src.dir}/org/openvv/js/OVVAsset.js"/>
+			<arg value="-o"/>
 			<arg path="${tmp.dir}/OVVAsset.min.js"/>
-			<arg line="-c"/>
-			<arg line="-m"/>
-		</apply>
+			<arg value="-c"/>
+			<arg value="-m"/>
+		</exec>
 	</target>
 
 	<target name="compile-beacon" depends="check-env, sign-version">
