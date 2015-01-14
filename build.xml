@@ -96,5 +96,13 @@
 				</not>
 			</condition>
 		</fail>
+		<echo>UglifyJS will be invoked as ${uglifyjs}</echo>
+		<fail message="Could not find ${uglifyjs} in your PATH! Please get node.js and run `npm i -g uglify-js`">
+			<condition>
+				<not>
+					<available property="have-uglifyjs" file="${uglifyjs}" filepath="${env.PATH}${path.separator}${env.Path}${path.separator}${env.path}"/>
+				</not>
+			</condition>
+		</fail>
 	</target>
 </project>
