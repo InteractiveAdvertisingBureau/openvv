@@ -8,6 +8,7 @@
 
 	<property name="src.dir" value="src" />
 	<property name="bin.dir" value="bin" />
+	<property name="tmp.dir" value="tmp" />
 	<property name="asdoc.dir" value="asdoc" />
 	
 	<taskdef resource="flexTasks.tasks" classpath="${FLEX_HOME}/ant/lib/flexTasks.jar"/>
@@ -18,13 +19,24 @@
 		<sequential>
 			<echo>Signing build with version: ${build.version}</echo>
 			<delete file="${src.dir}/org/openvv/OVVVersion.as" />
-			<filter token="version" value="${build.version}"  />
+			<filter token="version" value="${build.version}" />
 			<copy file="util/Version.as.template" toFile="${src.dir}/org/openvv/OVVVersion.as" filtering="true" />
 		</sequential>
 	</target>
 
+	<target name="minify-js">
+		<mkdir dir="${tmp.dir}"/>
+		<apply executable="uglifyjs.cmd">
+			<fileset dir="${src.dir}/org/openvv/js" includes="OVVAsset.js"/>
+			<srcfile/>
+			<arg line="-o"/>
+			<arg path="${tmp.dir}/OVVAsset.min.js"/>
+			<arg line="-c"/>
+			<arg line="-m"/>
+		</apply>
+	</target>
+
 	<target name="compile-beacon" depends="check-env, sign-version">
-	
 		<mxmlc file="${src.dir}/org/openvv/OVVBeacon.as"
 			   output="${bin.dir}/OVVBeacon.swf"
 			   static-rsls="true">
@@ -32,11 +44,32 @@
 		</mxmlc>
 	</target>
 
-	<target name="compile-lib" depends="check-env, sign-version">
+	<target name="compile-lib" depends="check-env, sign-version, minify-js">
+		<!-- Copy the entire source tree to temp dir so we can alter the source code -->
+		<copy todir="${tmp.dir}">
+			<fileset dir="${src.dir}"/>
+		</copy>
+		<!-- Store the minified JS code (which was already under temp) in js-src -->
+		<loadfile property="js-src" srcfile="${tmp.dir}/OVVAsset.min.js"/>
+		<!-- Escape the minified JS code -->
+		<loadresource property="js-src-esc">
+			<propertyresource name="js-src"/>
+			<filterchain>
+				<tokenfilter>
+					<filetokenizer/>
+					<replacestring from="&quot;" to="\&quot;"/>
+				</tokenfilter>
+			</filterchain>
+		</loadresource>
+		<!-- Store the escaped and minified JS code in OVVAsset -->
+	 	<replace file="${tmp.dir}/org/openvv/OVVAsset.as" token="{{OVVAssetJS}}" value="${js-src-esc}" />
+	 	<!-- Time to compile! -->
 		<compc output="${bin.dir}/openvv.swc"
 			   include-classes="org.openvv.OVVAsset org.openvv.OVVCheck org.openvv.OVVRenderMeter org.openvv.OVVThrottleType org.openvv.events.OVVEvent net.iab.IVPAID net.iab.VPAIDEvent org.openvv.OVVVersion">
-			<source-path path-element="${src.dir}"/>
+			<source-path path-element="${tmp.dir}"/>
 		</compc>
+		<!-- Remove the temp dir -->
+		<delete dir="${tmp.dir}" failonerror="false"/>
 	</target>
 
 	<target name="compile-doc" depends="check-env, sign-version">
@@ -57,7 +90,7 @@
 			<condition>
 				<not>
 					<isset property="env.FLEX_HOME"/>
-			  </not>
+				</not>
 			</condition>
 		</fail>
 	</target>
