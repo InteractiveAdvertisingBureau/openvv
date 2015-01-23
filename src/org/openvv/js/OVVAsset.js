@@ -21,7 +21,6 @@
 * @constructor
 */
 function OVV() {
-    var that = this;
 
     ///////////////////////////////////////////////////////////////////////////
     // PUBLIC ATTRIBUTES
@@ -81,17 +80,12 @@ function OVV() {
                         var replaceStr = brverRes[0].match(new RegExp(dataBrowsers[i].verRegex));
                         data.version = brverRes[0].replace(replaceStr[0], '');
                     }
-                    var brOSRes = dataString.match(new RegExp(winOSRegex + '[0-9\\.]*'));
-                    if (brOSRes != null) {
-                        data.os = brOSRes[0];
-                    }
                     break;
                 }
             }
             return data;
         };
 
-        var winOSRegex = '(Windows NT )';
         var dataBrowsers = [{
             id: 4,
             name: 'Opera',
@@ -123,19 +117,6 @@ function OVV() {
         return getData();
     };
 
-    this.browserSupportsBeacons = function()
-    {
-        //Windows 8.1 is represented as Windows NT 6.3 in user agent string
-        var WIN_8_1 = 6.3;
-        var isIE = that.browser.ID == that.browserIDEnum.MSIE;
-        var isSupportedIEVersion = that.browser.version >= 11;
-        var ntVersionArr = that.browser.version ? that.browser.version.split(' ') : [0];
-        var ntVersion = ntVersionArr[ntVersionArr.length - 1];
-        var isSupportedOSForIE = ntVersion >= WIN_8_1;
-        var isFF = that.browser.ID == that.browserIDEnum.Firefox;
-        return !((isIE && !(isSupportedIEVersion && isSupportedOSForIE)) || isFF);
-    }
-
     this.browserIDEnum = {
         MSIE: 1,
         Firefox: 2,
@@ -149,8 +130,7 @@ function OVV() {
     *	{ 
     *		ID: ,  
     *	  	name: '', 
-    *	  	version: '',
-    *	    os: ''
+    *	  	version: '' 
     *	};
     */
     this.browser = getBrowserDetailsByUserAgent(userAgent);
@@ -765,7 +745,7 @@ function OVVAsset(uid, dependencies) {
 
         // if we're in IE or FF and we're in an cross domain iframe, return unmeasurable						
         // We are able to measure for same domain iframe ('friendly iframe')
-        if (!$ovv.browserSupportsBeacons() &&
+        if (($ovv.browser.ID === $ovv.browserIDEnum.MSIE || $ovv.browser.ID === $ovv.browserIDEnum.Firefox) &&
             check.geometrySupported === false) {
             check.viewabilityState = OVVCheck.UNMEASURABLE;
             if (!$ovv.DEBUG) {
@@ -1065,13 +1045,23 @@ function OVVAsset(uid, dependencies) {
             swfContainer.style.zIndex = $ovv.DEBUG ? 99999 : -99999;
 
             var html =
+                '<object classid="clsid:D27CDB6E-AE6D-11cf-96B8-444553540000" width="' + BEACON_SIZE + '" height="' + BEACON_SIZE + '">' +
+                '<param name="movie" value="' + url + '" />' +
+                '<param name="quality" value="low" />' +
+                '<param name="flashvars" value="id=' + id + '&index=' + index + '" />' +
+                '<param name="bgcolor" value="#ffffff" />' +
+                '<param name="wmode" value="transparent" />' +
+                '<param name="allowScriptAccess" value="always" />' +
+                '<param name="allowFullScreen" value="false" />' +
+                '<!--[if !IE]>-->' +
                 '<object id="OVVBeacon_' + index + '_' + id + '" type="application/x-shockwave-flash" data="' + url + '" width="' + BEACON_SIZE + '" height="' + BEACON_SIZE + '">' +
-                    '<param name="quality" value="low" />' +
-                    '<param name="flashvars" value="id=' + id + '&index=' + index + '" />' +
-                    '<param name="bgcolor" value="#ff0000" />' +
-                    '<param name="wmode" value="transparent" />' +
-                    '<param name="allowScriptAccess" value="always" />' +
-                    '<param name="allowFullScreen" value="false" />' +
+                '<param name="quality" value="low" />' +
+                '<param name="flashvars" value="id=' + id + '&index=' + index + '" />' +
+                '<param name="bgcolor" value="#ff0000" />' +
+                '<param name="wmode" value="transparent" />' +
+                '<param name="allowScriptAccess" value="always" />' +
+                '<param name="allowFullScreen" value="false" />' +
+                '<!--<![endif]-->' +
                 '</object>';
 
             swfContainer.innerHTML = html;
