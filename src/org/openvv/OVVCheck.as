@@ -64,13 +64,6 @@ package org.openvv {
          */
         public static const VIEWABLE: String = 'viewable';
 
-        /**
-         * The value that {@link OVVCheck#viewabilityState} will be set to if the beacons
-         * are not ready to determine the viewability state
-         */
-        public static const NOT_READY: String = "not_ready";
-
-
         ////////////////////////////////////////////////////////////
         //   ATTRIBUTES 
         ////////////////////////////////////////////////////////////
