@@ -437,7 +437,12 @@ package org.openvv {
             if(!ad) return;
 
             ad.removeEventListener(Event.ADDED_TO_STAGE, setStage);
-            _stage = ad.stage;
+            try{
+                _stage = ad.stage;
+            }
+            catch(ignore:Error){
+                //stage is inaccessible
+            }
             if(!_stage)
                 ad.addEventListener(Event.ADDED_TO_STAGE, setStage);
         }
