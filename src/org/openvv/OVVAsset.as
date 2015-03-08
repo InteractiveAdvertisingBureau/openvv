@@ -97,9 +97,9 @@ package org.openvv {
         
         /**
          * The number of consecutive intervals of unmeasurability required before
-         * the UNMEASURABLE_IMPRESSION_ event will be fired (800ms)
+         * the UNMEASURABLE_IMPRESSION_ event will be fired (1 second)
          */
-        public static const UNMEASURABLE_IMPRESSION_THRESHOLD: Number = 4; 
+        public static const UNMEASURABLE_IMPRESSION_THRESHOLD: Number = 5;
 
         /**
          * The number of milliseconds between polling JavaScript for
@@ -110,7 +110,7 @@ package org.openvv {
         /**
          * Hold OVV version. Will past to JavaScript as well $ovv.version
          */
-        public static const RELEASE_VERSION: String = "1.1.0";
+        public static const RELEASE_VERSION: String = "1.2.0";
         
 
         ////////////////////////////////////////////////////////////
@@ -335,7 +335,7 @@ package org.openvv {
             var results: OVVCheck = new OVVCheck(jsResults);
             
             if (results && !!results.error)
-		raiseError(results);            
+                raiseError(results);
 
             if (_ad != null && _ad.hasOwnProperty('adVolume')) {
                 results.volume = _ad['adVolume'];
