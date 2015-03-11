@@ -3,6 +3,7 @@
 *.swo
 .actionScriptProperties
 .project
+.idea
 bin-debug/
 html-template/
 .settings/
