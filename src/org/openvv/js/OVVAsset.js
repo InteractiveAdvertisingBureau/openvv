@@ -1019,6 +1019,17 @@ function OVVAsset(uid, dependencies) {
         }
 
         var beacons = check.beacons;
+
+        // when the center is not visible
+        if (beacons[CENTER] === false) {
+            // and 3 corners are visible
+            if((innerCornersVisible >= 3) || (middleCornersVisible >= 3) || (outerCornersVisible >= 3))
+            {
+                return null;
+            }
+            return false;
+        }
+
         // when the center of the player is visible
         if ((beacons[CENTER] === true) &&
         // and 2 adjacent outside corners are visible
@@ -1027,11 +1038,6 @@ function OVVAsset(uid, dependencies) {
             (beacons[OUTER_TOP_RIGHT] === true && beacons[OUTER_BOTTOM_RIGHT] == true) ||
             (beacons[OUTER_BOTTOM_LEFT] === true && beacons[OUTER_BOTTOM_RIGHT] == true))
         ) {
-            return true;
-        }
-
-        // when any 3 of the inner corners are visible
-        if (beacons[CENTER] === false && innerCornersVisible >= 3) {
             return true;
         }
 
