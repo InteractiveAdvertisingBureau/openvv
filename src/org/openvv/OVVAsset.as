@@ -16,6 +16,7 @@
  */
 package org.openvv {
 
+    import flash.display.DisplayObject;
     import flash.display.Sprite;
     import flash.display.Stage;
     import flash.display.StageDisplayState;
@@ -190,9 +191,9 @@ package org.openvv {
 	
 		private var _vpaidEventsDispatcher:IEventDispatcher = null;
 		/**
-	         * Reference to the vpaid ad
-        	 */
-	        private var _ad:*;
+	     * Reference to the vpaid ad
+         */
+	    private var _ad:*;
 
 	        private var _isPaused: Boolean = false;
 		/**
@@ -286,8 +287,9 @@ package org.openvv {
 		_vpaidEventsDispatcher = vpaidEventsDispatcher;
 
 		if ((Object)(vpaidEventsDispatcher).hasOwnProperty('getVPAID') && vpaidEventsDispatcher['getVPAID']  is Function) {
-        		_ad = (Object)(_vpaidEventsDispatcher).getVPAID();
-    		}
+            _ad = (Object)(_vpaidEventsDispatcher).getVPAID();
+            setStage();
+        }
 	}
 	
 	/**
@@ -336,27 +338,16 @@ package org.openvv {
                 return results;
             }
 
-            try
-            {
-                results.displayState = _stage.displayState;
+            var displayState:String = getDisplayState(results);
+            // StageDisplayState.FULL_SCREEN_INTERACTIVE is available >= Flash Player 11.3
+            if (displayState == StageDisplayState.FULL_SCREEN || displayState == 'fullScreenInteractive') {
+                results.displayState = displayState;
+                results.viewabilityState = OVVCheck.VIEWABLE;
+                results.viewabilityStateOverrideReason = OVVCheck.FULLSCREEN;
 
-                switch (_stage.displayState)
-                {
-                    case StageDisplayState.FULL_SCREEN:
-                    case "fullScreenInteractive": // StageDisplayState.FULL_SCREEN_INTERACTIVE is available >= Flash Player 11.3
-                        results.viewabilityState = OVVCheck.VIEWABLE;
-                        results.viewabilityStateOverrideReason = OVVCheck.FULLSCREEN;
-                        break;
-
-                    case StageDisplayState.NORMAL:
-                        // can't be sure, have to rely on other techniques
-                        break;
+                if (results.technique == OVVCheck.GEOMETRY) {
+                    results.percentViewable = 100;
                 }
-            }
-            catch(e:Error)
-            {
-                // Either stage was null or we can't access it due to security
-                // restrictions, either way we can ignore this error
             }
 
             return results;
@@ -428,6 +419,46 @@ package org.openvv {
                 _intervalTimer.addEventListener(TimerEvent.TIMER, onIntervalCheck);
                 _intervalTimer.start();
             }
+    }
+
+        private function setStage(evt:Event = null):void
+        {
+            var ad:DisplayObject = _ad as DisplayObject;
+            if(!ad) return;
+
+            ad.removeEventListener(Event.ADDED_TO_STAGE, setStage);
+            try{
+                _stage = ad.stage;
+            }
+            catch(ignore:Error){
+                //stage is inaccessible
+            }
+            if(!_stage)
+                ad.addEventListener(Event.ADDED_TO_STAGE, setStage);
+        }
+
+        private function getDisplayState(results:OVVCheck):String
+        {
+            var hasStageAccess:Boolean;
+            var displayState:String = StageDisplayState.NORMAL;
+
+            try{
+                displayState   = _stage.displayState;
+                hasStageAccess = true;
+            }
+            catch(ignore:Error){
+                // Either stage was null or we can't access it due to security
+                // restrictions, either way we can ignore this error
+            }
+
+            if(!hasStageAccess && _ad && (_ad is DisplayObject))
+            {
+                if ((_ad.width - (results.objRight - results.objLeft)) > 10 && (_ad.height - (results.objBottom - results.objTop)) > 10) {
+                    displayState = StageDisplayState.FULL_SCREEN;
+                }
+            }
+
+            return displayState;
         }
 
         ////////////////////////////////////////////////////////////
