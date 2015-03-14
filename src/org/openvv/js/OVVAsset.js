@@ -948,8 +948,10 @@ function OVVAsset(uid, dependencies) {
      * @param {Element} player The HTML Element to measure
      */
     var isCssElementInvisible = function (player) {
-        return ( player.css("visibility") == 'hidden' ||
-                 player.css("display") == 'none' )
+        var style = window.getComputedStyle(player, null);
+        var visibility = style.getPropertyValue('visibility');
+        var display = style.getPropertyValue('display');
+        return ( visibility == 'hidden' || display == 'none' );
     };
 
     /**
