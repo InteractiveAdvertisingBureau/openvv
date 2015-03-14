@@ -55,7 +55,7 @@ package org.openvv {
          * or on any containing element in the same javascript domain (page or iframe)
          * is used to determine that viewability state is OVVCheck.UNVIEWABLE
          */
-        public static const CSS_VISIBILITY: String = "visibility";
+        public static const CSS_VISIBILITY: String = "css_visibility";
 
         /**
          * OpenVV was unable to determine whether the asset was viewable or not
@@ -133,7 +133,7 @@ package org.openvv {
 
         /**
          * During debug mode, geometryViewabilityState is populated with the viewabilityState
-         * determined by the beacon technique
+         * determined by the geometry technique
          */
         public var geometryViewabilityState: String;
 

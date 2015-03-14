@@ -335,7 +335,7 @@ package org.openvv {
             var results: OVVCheck = new OVVCheck(jsResults);
             
             if (results && !!results.error)
-		raiseError(results);            
+                raiseError(results);
 
             if (_ad != null && _ad.hasOwnProperty('adVolume')) {
                 results.volume = _ad['adVolume'];
