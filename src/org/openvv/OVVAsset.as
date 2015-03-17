@@ -289,7 +289,7 @@ package org.openvv {
 	 * by exposing the VPAID data as well as the viewability data via a JavaScript API. 		 
 	 * @param	vpaidEventsDispatcher object that exposes VPAID events
 	 */
-	public function initEventsWiring(vpaidEventsDispatcher:IEventDispatcher): void {	
+	public function initEventsWiring(vpaidEventsDispatcher:IEventDispatcher): void {
 		if (vpaidEventsDispatcher == null)
 			throw "You must pass an EventDispatcher to init event wiring";
 		registerEventHandler(vpaidEventsDispatcher);
