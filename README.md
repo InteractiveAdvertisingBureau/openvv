@@ -86,7 +86,7 @@ The addition to OVVAsset.as includes an **initEventsWiring** and **addJavaScript
 3.  Call **addJavaScriptResourceOnEvent** function with the VPAID event name upon the JavaScript tag should be rendered and the JavaScript tag url.
 
 Code snippet:
-<pre>
+```actionscript
 public function initAd(width:Number, height:Number, viewMode:String, desiredBitrate:Number, creativeData:String, environmentVars:String):void 
 {
    ...
@@ -98,17 +98,17 @@ public function initAd(width:Number, height:Number, viewMode:String, desiredBitr
   _viewabilityAsset.addJavaScriptResourceOnEvent(VPAIDEvent.AdImpression, tagSrc);
   ...
 }
-</pre>
+```
 
 ### JavaScript
 1.	Subscribe to events on $ovv to receive viewability/VPAID data.
 
 Code snippet:
-<pre>
+```javascript
 $ovv.subscribe('AdImpression', playerID, function(event, id, args) {
   	...
 });
-</pre>
+```
 
 ###Understanding the data
 The javascript event will receive the args {"vpaidData":vpaidData, "ovvData":ovvData}
@@ -118,27 +118,27 @@ The vpaid event data if passed from the vpaid event otherwise null.
 
 ```json
 "ovvData":{  
-   "beacons": When OVV is run in an iframe and the beacon technique is used, this array is populated with the states of each beacon, identified by their index. True means the beacon was viewable and false means the beacon was unviewable. Beacon 0 is the "control beacon" and should always be false,
-   "id": The Asset id,
-   "beaconsSupported": Whether beacon checking is supported. Beacon support is defined by placing a "control beacon" SWF off screen, and verifying that it is throttled as expected,
-   "percentViewable": The percentage of the player that is viewable within the viewport,
-   "objLeft": The distance, in pixels, from the left of the asset to the left of the viewport,
-   "objRight": The distance, in pixels, from the right of the asset to the right of the viewport,
-   "objTop": The distance, in pixels, from the top of the asset to the top of the viewport,
-   "objBottom":The distance, in pixels, from the bottom of the asset to the bottom of the viewport,
-   "clientWidth": The width of the viewport,
-   "clientHeight": The height of the viewport,   
-   "technique": The technique used to populate OVVCheck.viewabilityState. Will be either OVV.GEOMETRY when OVV is run in the root page, or OVV.BEACON when OVV is run in an iframe. When in debug mode, will always remain blank,
-   "beaconViewabilityState": The viewability state measured by the geometry technique. Only populated when OVV.DEBUG is true,   
-   "geometryViewabilityState": The viewability state measured by the geometry technique. Only populated when OVV.DEBUG is true,
-   "viewabilityState": Set to OVVCheck.VIEWABLE when the player was at least 50% viewable. Set to OVVCheck when the player was less than 50% viewable. Set to OVVCheck.UNMEASURABLE when a determination could not be made,   
-   "geometrySupported": Whether geometry checking is supported. Geometry support requires that the asset is not within an iframe,
-   "fps": The framerate of the asset (populated by ActionScript),   
-   "inIframe": Whether this asset is in an iframe,   
-   "error": A description of any error that occured,
-   "viewabilityStateOverrideReason": When the viewabilityState is changed by ActionScript detecting that the asset is in fullscreen, this will be set to FULLSCREEN,
-   "displayState": A value from the StageDisplayState class that specifies which display state to use,
-   "focus": Whether the tab is focused or not
+   "beacons": "When OVV is run in an iframe and the beacon technique is used, this array is populated with the states of each beacon, identified by their index. True means the beacon was viewable and false means the beacon was unviewable. Beacon 0 is the "control beacon" and should always be false",
+   "id": "The Asset id",
+   "beaconsSupported": "Whether beacon checking is supported. Beacon support is defined by placing a "control beacon" SWF off screen, and verifying that it is throttled as expected",
+   "percentViewable": "The percentage of the player that is viewable within the viewport",
+   "objLeft": "The distance, in pixels, from the left of the asset to the left of the viewport",
+   "objRight": "The distance, in pixels, from the right of the asset to the right of the viewport",
+   "objTop": "The distance, in pixels, from the top of the asset to the top of the viewport",
+   "objBottom":"The distance, in pixels, from the bottom of the asset to the bottom of the viewport",
+   "clientWidth": "The width of the viewport",
+   "clientHeight": "The height of the viewport",   
+   "technique": "The technique used to populate OVVCheck.viewabilityState. Will be either OVV.GEOMETRY when OVV is run in the root page, or OVV.BEACON when OVV is run in an iframe. When in debug mode, will always remain blank",
+   "beaconViewabilityState": "The viewability state measured by the geometry technique. Only populated when OVV.DEBUG is true",   
+   "geometryViewabilityState": "The viewability state measured by the geometry technique. Only populated when OVV.DEBUG is true",
+   "viewabilityState": "Set to OVVCheck.VIEWABLE when the player was at least 50% viewable. Set to OVVCheck when the player was less than 50% viewable. Set to OVVCheck.UNMEASURABLE when a determination could not be made",   
+   "geometrySupported": "Whether geometry checking is supported. Geometry support requires that the asset is not within an iframe",
+   "fps": "The framerate of the asset (populated by ActionScript)",   
+   "inIframe": "Whether this asset is in an iframe",   
+   "error": "A description of any error that occured",
+   "viewabilityStateOverrideReason": "When the viewabilityState is changed by ActionScript detecting that the asset is in fullscreen, this will be set to FULLSCREEN",
+   "displayState": "A value from the StageDisplayState class that specifies which display state to use",
+   "focus": "Whether the tab is focused or not"
    
 }
 ```

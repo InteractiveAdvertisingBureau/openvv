@@ -190,6 +190,11 @@ package org.openvv {
          */
         public var viewabilityStateOverrideReason:String;
 
+        /**
+        * The asset volume
+        */
+        public var volume: Number = -1;
+
         ////////////////////////////////////////////////////////////
         //   CONSTRUCTOR 
         ////////////////////////////////////////////////////////////
