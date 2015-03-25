@@ -76,16 +76,6 @@ package org.openvv {
     public class OVVAsset extends EventDispatcher {
 
         ////////////////////////////////////////////////////////////
-        //EMBEDS 
-        ////////////////////////////////////////////////////////////
-
-        /**
-         * The JavaScript source code
-         */
-        [Embed(source = "js/OVVAsset.js", mimeType = "application/octet-stream")]
-        public static const OVVAssetJSSource: Class;
-
-        ////////////////////////////////////////////////////////////
         //   CONSTANTS 
         ////////////////////////////////////////////////////////////
 
@@ -250,7 +240,7 @@ package org.openvv {
             _renderMeter = new OVVRenderMeter(_sprite);
             _sprite.addEventListener(OVVThrottleType.THROTTLE, onThrottleEvent);
 
-            var ovvAssetSource: String = new OVVAssetJSSource().toString();
+            var ovvAssetSource: String = "{{OVVAssetJS}}";
             ovvAssetSource = ovvAssetSource
                                 .replace(/OVVID/g, _id)
                                 .replace(/INTERVAL/g, POLL_INTERVAL)
