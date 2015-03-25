@@ -18,7 +18,7 @@
 	<taskdef resource="flexTasks.tasks" classpath="${FLEX_HOME}/ant/lib/flexTasks.jar"/>
 
 	<target name="compile-all" depends="clean, compile-beacon, compile-lib"/>
-		
+
 	<target name="sign-version">
 		<sequential>
 			<echo>Signing build with version: ${build.version}</echo>
@@ -34,8 +34,9 @@
 			<arg path="${src.dir}/org/openvv/js/OVVAsset.js"/>
 			<arg value="-o"/>
 			<arg path="${tmp.dir}/OVVAsset.min.js"/>
-			<arg value="-c"/>
 			<arg value="-m"/>
+			<arg value="-c"/>
+			<arg value="evaluate=false"/>
 		</exec>
 	</target>
 
@@ -76,7 +77,7 @@
 	</target>
 
 	<target name="compile-doc" depends="check-env, sign-version">
-		<asdoc output="${asdoc.dir}" lenient="true" failonerror="true"> 
+		<asdoc output="${asdoc.dir}" lenient="true" failonerror="true">
 			<doc-sources path-element="${src.dir}" />
 		</asdoc>
 	</target>
