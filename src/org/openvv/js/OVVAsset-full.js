@@ -723,6 +723,7 @@ function OVVAsset(uid) {
         check.geometrySupported = !$ovv.IN_IFRAME;
 
         check.focus = isInFocus();
+        Debug.trace("FOCUS : ", check.focus);
 		if (!player) {
             check.error = 'Player not found!';
             return check;
@@ -1249,7 +1250,7 @@ function OVVAsset(uid) {
         return null;
     };
 
-    var isInFocus = function() {		
+    var isInFocus = function() {
         var inFocus = true;
         if (typeof document.hidden !== 'undefined') {
 				inFocus = window.document.hidden ? false : true;

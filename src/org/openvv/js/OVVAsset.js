@@ -425,6 +425,15 @@ function OVVCheck() {
     this.beaconViewabilityState = '';
 
     /**
+    * The viewability state measured by the css visibility technique. Only populated
+    * when OVV.DEBUG is true.
+    * @type {String}
+    * @see {@link isCssElementInvisible}
+    * @see {@link OVV#DEBUG}
+    */
+    this.cssViewabilityState = '';
+
+    /**
     * The technique used to populate OVVCheck.viewabilityState. Will be either
     * OVV.GEOMETRY when OVV is run in the root page, or OVV.BEACON when OVV is
     * run in an iframe. When in debug mode, will always remain blank.
@@ -526,7 +535,9 @@ OVVCheck.VIEWABLE = 'viewable';
 
 /**
 * The value that {@link OVVCheck#viewabilityState} will be set to if OVV
-* determines that the asset is less than 50% viewable.
+* determines that the asset is less than 50% viewable, or if the asset
+* or any detectable containing element is invisible due to css properties.
+*
 */
 OVVCheck.UNVIEWABLE = 'unviewable';
 
@@ -547,6 +558,13 @@ OVVCheck.BEACON = 'beacon';
 * uses the geometry technique to determine {@link OVVCheck#viewabilityState}
 */
 OVVCheck.GEOMETRY = 'geometry';
+
+/**
+* The value that {@link OVVCheck#technique} will be set to if OVV
+* uses css 'visibility' or 'display' state to determine an unviewable '
+* value for {@link OVVCheck#viewabilityState}
+*/
+OVVCheck.CSS_VISIBILITY = 'css_visibility';
 
 
 /**
@@ -743,8 +761,11 @@ function OVVAsset(uid, dependencies) {
     * Returns an {@link OVVCheck} object populated with information gathered
     * from the browser. The viewabilityState attribute is populated with
     * either {@link OVVCheck.VIEWABLE}, {@link OVVCheck.UNVIEWABLE}, or {@link OVVCheck.UNMEASURABLE}
-    * as determined by either beacon technique when in a cross domain iframe, or the
-    * geometry technique otherwise.
+    * as determined by either css visibility and/or display attributes, beacon technique when in a
+    * cross domain iframe, or the geometry technique otherwise.
+    * </p><p>
+    * The css visibility technique can only prove unviewability. If css elements are not hidden or
+    * collapsed then the other techniques must be used to determine viewability.
     * </p><p>
     * The geometry technique compares the bounds of the viewport, taking
     * scrolling into account, and the bounds of the player.
@@ -757,6 +778,7 @@ function OVVAsset(uid, dependencies) {
     * @see {@link OVVCheck}
     * @see {@link checkGeometry}
     * @see {@link checkBeacons}
+    * @see {@link checkCssViewability}
     */
     this.checkViewability = function () {
         var check = new OVVCheck();
@@ -768,6 +790,18 @@ function OVVAsset(uid, dependencies) {
         if (!player) {
             check.error = 'Player not found!';
             return check;
+        }
+
+        // Check if a CSS property ( 'visibility:hidden' or 'display:none' )
+        // on player or an inheritable containing element is hiding the player :
+        if (isCssElementInvisible(player)){
+            check.technique = OVVCheck.CSS_VISIBILITY;
+            check.viewabilityState = OVVCheck.UNVIEWABLE;
+            if ($ovv.DEBUG) {
+                check.cssViewabilityState = OVVCheck.UNVIEWABLE;
+            }else{
+                return check;
+            }
         }
 
         // if we're in IE and we're in an cross domain iframe, return unmeasurable
@@ -835,7 +869,9 @@ function OVVAsset(uid, dependencies) {
         if ($ovv.DEBUG) {
             // revert the technique to blank during debug, since both were used
             check.technique = '';
-            if (check.geometryViewabilityState === null && check.beaconViewabilityState === null) {
+            if ( check.geometryViewabilityState === null &&
+                check.beaconViewabilityState === null &&
+                check.cssViewabilityState === null ) {
                 check.viewabilityState = OVVCheck.UNMEASURABLE;
             } else {
                 var beaconViewable = (check.beaconViewabilityState === OVVCheck.VIEWABLE);
@@ -924,6 +960,24 @@ function OVVAsset(uid, dependencies) {
         }
     
         return viewabilityResult;
+    };
+
+    /**
+    * Checks if the player is made invisible by 'visibility:hidden' or 'display:none'
+    * Is so, viewability at the time of this check is 'not viewable' and no further check is
+    * required. But if not other checks must be made; element visibility alone does not
+    * prove viewability.
+    * These properties are inherited, so no need to parse up the DOM hierarchy.
+    * If the player is in an iframe inheritance is restricted to elements within
+    * the DOM of the iframe document
+    * @param {OVVCheck} check The OVVCheck object to populate
+    * @param {Element} player The HTML Element to measure
+    */
+    var isCssElementInvisible = function (player) {
+        var style = window.getComputedStyle(player, null);
+        var visibility = style.getPropertyValue('visibility');
+        var display = style.getPropertyValue('display');
+        return ( visibility == 'hidden' || display == 'none' );
     };
 
     /**
