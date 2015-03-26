@@ -1465,14 +1465,6 @@ function OVVGeometryViewabilityCalculator() {
 
         //Get player dimensions:
         var assetRect = element.getBoundingClientRect();
-        var playerSize = element.getClientRects()[0];
-
-        element.jsDebug("","viewPortSize", viewPortSize);
-        element.jsDebug("","assetSize", assetSize);
-        element.jsDebug("","assetRect", assetRect);
-        element.jsDebug("","playerSize", playerSize);
-
-        element.jsDebug({"viewablePercentage":viewablePercentage});
 
         return {
             clientWidth: viewPortSize.width,

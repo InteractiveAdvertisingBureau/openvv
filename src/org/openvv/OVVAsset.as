@@ -27,7 +27,6 @@ package org.openvv {
     import flash.utils.Timer;
     import org.openvv.events.OVVEvent;
     import net.iab.VPAIDEvent;
-    import com.tubemogul.util.Debug;
     /**
      * The event dispatched when the asset has been viewable for 5 contiguous seconds
      */
@@ -245,7 +244,6 @@ package org.openvv {
 
             ExternalInterface.addCallback(_id, flashProbe);
             ExternalInterface.addCallback("onJsReady", onJsReady);
-            ExternalInterface.addCallback("jsDebug", jsDebug);
 
             _sprite = new Sprite();
             _renderMeter = new OVVRenderMeter(_sprite);
@@ -670,14 +668,5 @@ package org.openvv {
 		{
 			dispatchEvent(new OVVEvent(OVVEvent.OVVError, ovvData));
 		}
-
-
-        public function jsDebug(...args):void{
-            for each ( var arg:* in args ) {
-                Debug.traceObj(arg);
-            }
-        }
-
-
     }
 }
