@@ -149,6 +149,7 @@ function OVV() {
     };
 
     this.servingScenario = getServingScenarioType(this.servingScenarioEnum);
+    this.geometrySupported = this.servingScenario !== this.servingScenarioEnum.CrossDomainIframe;
 
     /**
     * The interval in which ActionScript will poll OVV for viewability
@@ -401,7 +402,7 @@ function OVVCheck() {
 
     /**
     * Whether geometry checking is supported. Geometry support requires
-    * that the asset is not within an iframe.
+    * that the asset is not within a cross-domain iframe.
     * @type {Boolean}
     */
     this.geometrySupported = null;
@@ -762,9 +763,9 @@ function OVVAsset(uid, dependencies) {
         var check = new OVVCheck();
         check.id = id;
         check.inIframe = $ovv.IN_IFRAME;
-        check.geometrySupported = $ovv.servingScenario !== $ovv.servingScenarioEnum.CrossDomainIframe;
-
+        check.geometrySupported = $ovv.geometrySupported;
         check.focus = isInFocus();
+
         if (!player) {
             check.error = 'Player not found!';
             return check;
@@ -1375,9 +1376,9 @@ function OVVAsset(uid, dependencies) {
 
     player = findPlayer();
 
-    // only use the beacons if we're in an iframe, but go ahead and add them
+    // only use the beacons if we're in a cross-domain iframe, but go ahead and add them
     // during debug mode
-    if ($ovv.IN_IFRAME || $ovv.DEBUG) {
+    if ($ovv.geometrySupported == null || $ovv.DEBUG) {
         if ($ovv.browser.ID === $ovv.browserIDEnum.Firefox){
             //Use frame technique to measure viewability in cross domain FF scenario
             getBeaconFunc = getFrameBeacon;
