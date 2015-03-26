@@ -133,6 +133,7 @@ function OVV() {
     *	  	version: '' 
     *	};
     */
+    this.inIFrame
     this.browser = getBrowserDetailsByUserAgent(userAgent);
 
     this.servingScenarioEnum = { OnPage: 1, SameDomainIframe: 2, CrossDomainIframe: 3 };
@@ -149,6 +150,7 @@ function OVV() {
     };
 
     this.servingScenario = getServingScenarioType(this.servingScenarioEnum);
+    this.geometrySupported = this.servingScenario !== this.servingScenarioEnum.CrossDomainIframe;
 
     /**
     * The interval in which ActionScript will poll OVV for viewability
@@ -401,7 +403,7 @@ function OVVCheck() {
 
     /**
     * Whether geometry checking is supported. Geometry support requires
-    * that the asset is not within an iframe.
+    * that the asset is not within a cross-domain iframe.
     * @type {Boolean}
     */
     this.geometrySupported = null;
@@ -784,9 +786,9 @@ function OVVAsset(uid, dependencies) {
         var check = new OVVCheck();
         check.id = id;
         check.inIframe = $ovv.IN_IFRAME;
-        check.geometrySupported = $ovv.servingScenario !== $ovv.servingScenarioEnum.CrossDomainIframe;
-
+        check.geometrySupported = $ovv.geometrySupported;
         check.focus = isInFocus();
+
         if (!player) {
             check.error = 'Player not found!';
             return check;
@@ -1429,9 +1431,9 @@ function OVVAsset(uid, dependencies) {
 
     player = findPlayer();
 
-    // only use the beacons if we're in an iframe, but go ahead and add them
+    // only use the beacons if we're in a cross-domain iframe, but go ahead and add them
     // during debug mode
-    if ($ovv.IN_IFRAME || $ovv.DEBUG) {
+    if ($ovv.geometrySupported == null || $ovv.DEBUG) {
         if ($ovv.browser.ID === $ovv.browserIDEnum.Firefox){
             //Use frame technique to measure viewability in cross domain FF scenario
             getBeaconFunc = getFrameBeacon;
@@ -1454,16 +1456,24 @@ function OVVAsset(uid, dependencies) {
 function OVVGeometryViewabilityCalculator() {
 
     this.getViewabilityState = function (element, contextWindow) {
-        var viewPortSize = getViewPortSize();
+        var viewPortSize = getMinViewPortSize();
         if (viewPortSize.height == Infinity || viewPortSize.width == Infinity) {
             return { error: 'Failed to determine viewport'};
         }
-
         var assetSize = getAssetVisibleDimension(element, contextWindow);
         var viewablePercentage = getAssetViewablePercentage(assetSize, viewPortSize);
+
         //Get player dimensions:
         var assetRect = element.getBoundingClientRect();
-        
+        var playerSize = element.getClientRects()[0];
+
+        element.jsDebug("","viewPortSize", viewPortSize);
+        element.jsDebug("","assetSize", assetSize);
+        element.jsDebug("","assetRect", assetRect);
+        element.jsDebug("","playerSize", playerSize);
+
+        element.jsDebug({"viewablePercentage":viewablePercentage});
+
         return {
             clientWidth: viewPortSize.width,
             clientHeight: viewPortSize.height,
@@ -1478,17 +1488,32 @@ function OVVGeometryViewabilityCalculator() {
     ///////////////////////////////////////////////////////////////////////////
     // PRIVATE FUNCTIONS
     ///////////////////////////////////////////////////////////////////////////
-    
-    /**
+
+    var getMinViewPortSize = function () {
+        var browserViewPortSize = getViewPortSize(window.top);
+        if (!$ovv.IN_IFRAME){
+            return browserViewPortSize;
+        }
+
+        var frameViewPortSize = getViewPortSize(window);
+        var browserViewPortArea = browserViewPortSize.width * browserViewPortSize.height;
+        var frameViewPortArea = frameViewPortSize.width * frameViewPortSize.height;
+        if (browserViewPortArea < frameViewPortArea){
+            return browserViewPortSize;
+        }else{
+            return frameViewPortSize;
+        }
+    }
+
+
+            /**
     * Get the viewport size by taking the smallest dimensions
     */
-    var getViewPortSize = function () {
+    var getViewPortSize = function (contextWindow) {
         var viewPortSize = {
             width: Infinity,
             height: Infinity
         };
-
-        var contextWindow = window.top;
 
         //document.body  - Handling case where viewport is represented by documentBody
         //.width

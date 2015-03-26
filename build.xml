@@ -35,7 +35,7 @@
 	<target name="compile-lib" depends="check-env, sign-version">
 		<compc output="${bin.dir}/openvv.swc"
                debug="true"
-			   include-classes="org.openvv.OVVAsset org.openvv.OVVCheck org.openvv.OVVRenderMeter org.openvv.OVVThrottleType org.openvv.events.OVVEvent net.iab.IVPAID net.iab.VPAIDEvent org.openvv.OVVVersion">
+               include-classes="com.tubemogul.util.Debug org.openvv.OVVAsset org.openvv.OVVCheck org.openvv.OVVRenderMeter org.openvv.OVVThrottleType org.openvv.events.OVVEvent net.iab.IVPAID net.iab.VPAIDEvent org.openvv.OVVVersion">
 			<source-path path-element="${src.dir}"/>
 		</compc>
 	</target>
