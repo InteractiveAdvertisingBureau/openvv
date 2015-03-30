@@ -259,7 +259,7 @@ function OVV() {
 
         if (getPreviousEvents) {
             for (key in previousEvents[uid]) {
-                if (contains(previousEvents[uid][key].eventName, events)) {
+                if (previousEvents[uid][key] && contains(previousEvents[uid][key].eventName, events)) {
                     runSafely(function () {
                         func(uid, previousEvents[uid][key]); // changed in vtag.js
                     });
