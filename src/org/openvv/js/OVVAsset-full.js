@@ -1470,9 +1470,16 @@ function OVVGeometryViewabilityCalculator() {
         if (viewPortSize.height == Infinity || viewPortSize.width == Infinity) {
             return { error: 'Failed to determine viewport'};
         }
-        var assetSize = getAssetVisibleDimension(element, contextWindow);
-        var viewablePercentage = getAssetViewablePercentage(assetSize, viewPortSize);
+        var assetRect = element.getBoundingClientRect();
+        var playerArea = assetRect.width * assetRect.height;
 
+        if ((viewPortSize.area / playerArea) < 0.5) {
+            // no position testing requires if viewport is less than half the are of the player
+            viewablePercentage = 100 * viewPortSize.area / playerArea;
+        }else{
+            var assetSize = getAssetVisibleDimension(element, contextWindow);
+            var viewablePercentage = getAssetViewablePercentage(assetSize, viewPortSize);
+        }
         //Get player dimensions:
         var assetRect = element.getBoundingClientRect();
 
@@ -1498,9 +1505,7 @@ function OVVGeometryViewabilityCalculator() {
         }
 
         var frameViewPortSize = getViewPortSize(window);
-        var browserViewPortArea = browserViewPortSize.width * browserViewPortSize.height;
-        var frameViewPortArea = frameViewPortSize.width * frameViewPortSize.height;
-        if (browserViewPortArea < frameViewPortArea){
+        if (browserViewPortSize.area < frameViewPortSize.area){
             return browserViewPortSize;
         }else{
             return frameViewPortSize;
@@ -1514,7 +1519,8 @@ function OVVGeometryViewabilityCalculator() {
     var getViewPortSize = function (contextWindow) {
         var viewPortSize = {
             width: Infinity,
-            height: Infinity
+            height: Infinity,
+            area:Infinity
         };
 
         //document.body  - Handling case where viewport is represented by documentBody
@@ -1544,7 +1550,9 @@ function OVVGeometryViewabilityCalculator() {
         if (!!contextWindow.innerHeight && !isNaN(contextWindow.innerHeight)) {
             viewPortSize.height = Math.min(viewPortSize.height, contextWindow.innerHeight);
         }
-
+        if (!(viewPortSize.height == Infinity || viewPortSize.width == Infinity)){
+            viewPortSize.area = viewPortSize.height * viewPortSize.width;
+        }
         return viewPortSize;
     };
 
@@ -1603,6 +1611,7 @@ function OVVGeometryViewabilityCalculator() {
             var elementRect = element.getBoundingClientRect();
             if (currWindow != parentWindow)
                 resultPosition = getPositionRelativeToViewPort(currWindow.frameElement, parentWindow);
+            else
             resultPosition = {
                 left: elementRect.left + resultPosition.left,
                 right: elementRect.right + resultPosition.left,
