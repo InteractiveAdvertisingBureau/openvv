@@ -195,7 +195,7 @@ package org.openvv {
          */
 	    private var _ad:*;
 
-	        private var _isPaused: Boolean = false;
+        private var _isPaused: Boolean = false;
 		/**
 		 * True if VPAID AdImpression event has been received
 		 */
@@ -223,7 +223,7 @@ package org.openvv {
          * @param interval The number of milliseconds between polls to
          * JavaScript for viewability information. Defaults to 250.
          */
-        public function OVVAsset(beaconSwfUrl:String = null, id:String = null, stage:Stage=null) {
+        public function OVVAsset(beaconSwfUrl:String = null, id:String = null, adRef:DisplayObject=null) {
             if (!externalInterfaceIsAvailable()) {
                 dispatchEvent(new OVVEvent(OVVEvent.OVVError, {
                     "message": "ExternalInterface unavailable"
@@ -232,8 +232,8 @@ package org.openvv {
             }
 
             _id = (id !== null) ? id : "ovv" + Math.floor(Math.random() * 1000000000).toString();
-            _stage = stage;
-
+            _ad = adRef;
+            setStage();
             ExternalInterface.addCallback(_id, flashProbe);
             ExternalInterface.addCallback("onJsReady", onJsReady);
 
@@ -285,11 +285,6 @@ package org.openvv {
 			throw "You must pass an EventDispatcher to init event wiring";
 		registerEventHandler(vpaidEventsDispatcher);
 		_vpaidEventsDispatcher = vpaidEventsDispatcher;
-
-		if ((Object)(vpaidEventsDispatcher).hasOwnProperty('getVPAID') && vpaidEventsDispatcher['getVPAID']  is Function) {
-            _ad = (Object)(_vpaidEventsDispatcher).getVPAID();
-            setStage();
-        }
 	}
 	
 	/**
@@ -331,11 +326,6 @@ package org.openvv {
 
             if (_ad != null && _ad.hasOwnProperty('adVolume')) {
                 results.volume = _ad['adVolume'];
-            }
-
-            if (!_stage)
-            {
-                return results;
             }
 
             var displayState:String = getDisplayState(results);
@@ -457,7 +447,6 @@ package org.openvv {
                     displayState = StageDisplayState.FULL_SCREEN;
                 }
             }
-
             return displayState;
         }
 
