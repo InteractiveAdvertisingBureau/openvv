@@ -27,7 +27,7 @@ package org.openvv {
     import flash.utils.Timer;
     import org.openvv.events.OVVEvent;
     import net.iab.VPAIDEvent;
-
+    import com.tubemogul.util.Debug;
     /**
      * The event dispatched when the asset has been viewable for 5 contiguous seconds
      */
@@ -97,9 +97,9 @@ package org.openvv {
         
         /**
          * The number of consecutive intervals of unmeasurability required before
-         * the UNMEASURABLE_IMPRESSION_ event will be fired (800ms)
+         * the UNMEASURABLE_IMPRESSION_ event will be fired (1 second)
          */
-        public static const UNMEASURABLE_IMPRESSION_THRESHOLD: Number = 4; 
+        public static const UNMEASURABLE_IMPRESSION_THRESHOLD: Number = 5;
 
         /**
          * The number of milliseconds between polling JavaScript for
@@ -110,7 +110,7 @@ package org.openvv {
         /**
          * Hold OVV version. Will past to JavaScript as well $ovv.version
          */
-        public static const RELEASE_VERSION: String = "1.1.0";
+        public static const RELEASE_VERSION: String = "1.2.0";
         
 
         ////////////////////////////////////////////////////////////
@@ -245,6 +245,7 @@ package org.openvv {
 
             ExternalInterface.addCallback(_id, flashProbe);
             ExternalInterface.addCallback("onJsReady", onJsReady);
+            ExternalInterface.addCallback("jsTrace", jsTrace);
 
             _sprite = new Sprite();
             _renderMeter = new OVVRenderMeter(_sprite);
@@ -532,7 +533,6 @@ package org.openvv {
 				if (!externalInterfaceIsAvailable()) {					
 					return;
 				}
-				
 				var injectTag:String =
 					'function () {' +
 					'var tag = document.createElement("script");' +
@@ -650,12 +650,14 @@ package org.openvv {
 		private function raiseImpression(ovvData:*):void
 		{
 			dispatchEvent(new OVVEvent(OVVEvent.OVVImpression, ovvData));
+			//_intervalTimer.removeEventListener(TimerEvent.TIMER, onIntervalCheck);
 			_impressionEventRaised = true;
 		}
 
 		private function raiseImpressionUnmeasurable(ovvData:*):void
 		{
 			dispatchEvent(new OVVEvent(OVVEvent.OVVImpressionUnmeasurable, ovvData));
+			//_intervalTimer.removeEventListener(TimerEvent.TIMER, onIntervalCheck);
 			_impressionUnmeasurableEventRaised = true;
 		}
 
@@ -668,5 +670,9 @@ package org.openvv {
 		{
 			dispatchEvent(new OVVEvent(OVVEvent.OVVError, ovvData));
 		}
+
+        public function jsTrace(arg:Object):void{
+            Debug.traceObj(arg);
+        }
     }
 }
