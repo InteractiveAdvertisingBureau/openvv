@@ -244,7 +244,7 @@ package org.openvv {
             _stage = stage;
 
             ExternalInterface.addCallback(_id, flashProbe);
-            ExternalInterface.addCallback("onJsReady" + _uid, onJsReady);
+            ExternalInterface.addCallback("onJsReady" + _id, onJsReady);
 
             _sprite = new Sprite();
             _renderMeter = new OVVRenderMeter(_sprite);
