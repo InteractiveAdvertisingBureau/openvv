@@ -16,6 +16,7 @@
  */
 package org.openvv {
 
+    import flash.display.DisplayObject;
     import flash.display.Sprite;
     import flash.display.Stage;
     import flash.display.StageDisplayState;
@@ -74,16 +75,6 @@ package org.openvv {
      * </p>
      */
     public class OVVAsset extends EventDispatcher {
-
-        ////////////////////////////////////////////////////////////
-        //EMBEDS 
-        ////////////////////////////////////////////////////////////
-
-        /**
-         * The JavaScript source code
-         */
-        [Embed(source = "js/OVVAsset.js", mimeType = "application/octet-stream")]
-        public static const OVVAssetJSSource: Class;
 
         ////////////////////////////////////////////////////////////
         //   CONSTANTS 
@@ -200,11 +191,11 @@ package org.openvv {
 	
 		private var _vpaidEventsDispatcher:IEventDispatcher = null;
 		/**
-	         * Reference to the vpaid ad
-        	 */
-	        private var _ad:*;
+	     * Reference to the vpaid ad
+         */
+	    private var _ad:*;
 
-	        private var _isPaused: Boolean = false;
+        private var _isPaused: Boolean = false;
 		/**
 		 * True if VPAID AdImpression event has been received
 		 */
@@ -232,7 +223,7 @@ package org.openvv {
          * @param interval The number of milliseconds between polls to
          * JavaScript for viewability information. Defaults to 250.
          */
-        public function OVVAsset(beaconSwfUrl:String = null, id:String = null, stage:Stage=null) {
+        public function OVVAsset(adRef:DisplayObject, beaconSwfUrl:String = null, id:String = null) {
             if (!externalInterfaceIsAvailable()) {
                 dispatchEvent(new OVVEvent(OVVEvent.OVVError, {
                     "message": "ExternalInterface unavailable"
@@ -241,8 +232,8 @@ package org.openvv {
             }
 
             _id = (id !== null) ? id : "ovv" + Math.floor(Math.random() * 1000000000).toString();
-            _stage = stage;
-
+            _ad = adRef;
+            setStage();
             ExternalInterface.addCallback(_id, flashProbe);
             ExternalInterface.addCallback("onJsReady", onJsReady);
             ExternalInterface.addCallback("jsTrace", jsTrace);
@@ -251,7 +242,7 @@ package org.openvv {
             _renderMeter = new OVVRenderMeter(_sprite);
             _sprite.addEventListener(OVVThrottleType.THROTTLE, onThrottleEvent);
 
-            var ovvAssetSource: String = new OVVAssetJSSource().toString();
+            var ovvAssetSource: String = "{{OVVAssetJS}}";
             ovvAssetSource = ovvAssetSource
                                 .replace(/OVVID/g, _id)
                                 .replace(/INTERVAL/g, POLL_INTERVAL)
@@ -295,10 +286,6 @@ package org.openvv {
 			throw "You must pass an EventDispatcher to init event wiring";
 		registerEventHandler(vpaidEventsDispatcher);
 		_vpaidEventsDispatcher = vpaidEventsDispatcher;
-
-		if ((Object)(vpaidEventsDispatcher).hasOwnProperty('getVPAID') && vpaidEventsDispatcher['getVPAID']  is Function) {
-        		_ad = (Object)(_vpaidEventsDispatcher).getVPAID();
-    		}
 	}
 	
 	/**
@@ -342,32 +329,16 @@ package org.openvv {
                 results.volume = _ad['adVolume'];
             }
 
-            if (!_stage)
-            {
-                return results;
-            }
+            var displayState:String = getDisplayState(results);
+            // StageDisplayState.FULL_SCREEN_INTERACTIVE is available >= Flash Player 11.3
+            if (displayState == StageDisplayState.FULL_SCREEN || displayState == 'fullScreenInteractive') {
+                results.displayState = displayState;
+                results.viewabilityState = OVVCheck.VIEWABLE;
+                results.viewabilityStateOverrideReason = OVVCheck.FULLSCREEN;
 
-            try
-            {
-                results.displayState = _stage.displayState;
-
-                switch (_stage.displayState)
-                {
-                    case StageDisplayState.FULL_SCREEN:
-                    case "fullScreenInteractive": // StageDisplayState.FULL_SCREEN_INTERACTIVE is available >= Flash Player 11.3
-                        results.viewabilityState = OVVCheck.VIEWABLE;
-                        results.viewabilityStateOverrideReason = OVVCheck.FULLSCREEN;
-                        break;
-
-                    case StageDisplayState.NORMAL:
-                        // can't be sure, have to rely on other techniques
-                        break;
+                if (results.technique == OVVCheck.GEOMETRY) {
+                    results.percentViewable = 100;
                 }
-            }
-            catch(e:Error)
-            {
-                // Either stage was null or we can't access it due to security
-                // restrictions, either way we can ignore this error
             }
 
             return results;
@@ -439,6 +410,45 @@ package org.openvv {
                 _intervalTimer.addEventListener(TimerEvent.TIMER, onIntervalCheck);
                 _intervalTimer.start();
             }
+    }
+
+        private function setStage(evt:Event = null):void
+        {
+            var ad:DisplayObject = _ad as DisplayObject;
+            if(!ad) return;
+
+            ad.removeEventListener(Event.ADDED_TO_STAGE, setStage);
+            try{
+                _stage = ad.stage;
+            }
+            catch(ignore:Error){
+                //stage is inaccessible
+            }
+            if(!_stage)
+                ad.addEventListener(Event.ADDED_TO_STAGE, setStage);
+        }
+
+        private function getDisplayState(results:OVVCheck):String
+        {
+            var hasStageAccess:Boolean;
+            var displayState:String = StageDisplayState.NORMAL;
+
+            try{
+                displayState   = _stage.displayState;
+                hasStageAccess = true;
+            }
+            catch(ignore:Error){
+                // Either stage was null or we can't access it due to security
+                // restrictions, either way we can ignore this error
+            }
+
+            if(!hasStageAccess && _ad && (_ad is DisplayObject))
+            {
+                if ((_ad.width - (results.objRight - results.objLeft)) > 10 && (_ad.height - (results.objBottom - results.objTop)) > 10) {
+                    displayState = StageDisplayState.FULL_SCREEN;
+                }
+            }
+            return displayState;
         }
 
         ////////////////////////////////////////////////////////////
@@ -536,7 +546,7 @@ package org.openvv {
 				var injectTag:String =
 					'function () {' +
 					'var tag = document.createElement("script");' +
-					'tag.src = "' + tagUrl + '";' +
+					'tag.src = ' + JSON.stringify(tagUrl) + ';' +
 					'tag.type="text/javascript";' +
 					'document.getElementsByTagName("body")[0].appendChild(tag); }';
 				ExternalInterface.call( injectTag );

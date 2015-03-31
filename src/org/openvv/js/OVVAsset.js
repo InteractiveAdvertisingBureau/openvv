@@ -55,86 +55,7 @@ function OVV() {
      */
     this.positionInterval;
 
-    var userAgent = window.testOvvConfig && window.testOvvConfig.userAgent ? window.testOvvConfig.userAgent : navigator.userAgent;
-
-    /**
-     * Returns an object that contains the browser name, version and id {@link OVV#browserIDEnum}
-     * @param {ua} userAgent
-     */
-    function getBrowserDetailsByUserAgent(ua) {
-
-        var getData = function () {
-            var data = { ID: 0, name: '', version: '' };
-            var dataString = ua;
-            for (var i = 0; i < dataBrowsers.length; i++) {
-                // Fill Browser ID
-                if (dataString.match(new RegExp(dataBrowsers[i].brRegex)) != null) {
-                    data.ID = dataBrowsers[i].id;
-                    data.name = dataBrowsers[i].name;
-                    if (dataBrowsers[i].verRegex == null) {
-                        break;
-                    }
-                    //Fill Browser Version
-                    var brverRes = dataString.match(new RegExp(dataBrowsers[i].verRegex + '[0-9]*'));
-                    if (brverRes != null) {
-                        var replaceStr = brverRes[0].match(new RegExp(dataBrowsers[i].verRegex));
-                        data.version = brverRes[0].replace(replaceStr[0], '');
-                    }
-                    break;
-                }
-            }
-            return data;
-        };
-
-        var dataBrowsers = [{
-            id: 4,
-            name: 'Opera',
-            brRegex: 'OPR|Opera',
-            verRegex: '(OPR\/|Version\/)'
-        }, {
-            id: 1,
-            name: 'MSIE',
-            brRegex: 'MSIE|Trident/7.*rv:11|rv:11.*Trident/7',
-            verRegex: '(MSIE |rv:)'
-        }, {
-            id: 2,
-            name: 'Firefox',
-            brRegex: 'Firefox',
-            verRegex: 'Firefox\/'
-        }, {
-            id: 3,
-            name: 'Chrome',
-            brRegex: 'Chrome',
-            verRegex: 'Chrome\/'
-        }, {
-            id: 5,
-            name: 'Safari',
-            brRegex: 'Safari|(OS |OS X )[0-9].*AppleWebKit',
-            verRegex: 'Version\/'
-        }
-        ];
-
-        return getData();
-    };
-
-    this.browserIDEnum = {
-        MSIE: 1,
-        Firefox: 2,
-        Chrome: 3,
-        Opera: 4,
-        safari: 5
-    };
-
-    /**
-     * browser:
-     *	{
-    *		ID: ,
-    *	  	name: '',
-    *	  	version: ''
-    *	};
-     */
-    this.inIFrame
-    this.browser = getBrowserDetailsByUserAgent(userAgent);
+    this.userAgent = window.testOvvConfig && window.testOvvConfig.userAgent ? window.testOvvConfig.userAgent : navigator.userAgent;
 
     this.servingScenarioEnum = { OnPage: 1, SameDomainIframe: 2, CrossDomainIframe: 3 };
 
@@ -151,6 +72,13 @@ function OVV() {
 
     this.servingScenario = getServingScenarioType(this.servingScenarioEnum);
     this.geometrySupported = this.servingScenario !== this.servingScenarioEnum.CrossDomainIframe;
+
+    // To support older versions of OVVAsset
+    var browserData = new OVVBrowser(this.userAgent);
+
+    this.browser = browserData.getBrowser();
+
+    this.browserIDEnum = browserData.getBrowserIDEnum();
 
     /**
      * The interval in which ActionScript will poll OVV for viewability
@@ -568,6 +496,123 @@ OVVCheck.GEOMETRY = 'geometry';
  */
 OVVCheck.CSS_VISIBILITY = 'css_visibility';
 
+function OVVBrowser(userAgent)
+{
+
+    var browserIDEnum = {
+        MSIE: 1,
+        Firefox: 2,
+        Chrome: 3,
+        Opera: 4,
+        safari: 5
+    };
+
+    /**
+     * Returns an object that contains the browser name, version, id and os if applicable
+     * @param {String} ua userAgent
+     */
+    function getBrowserDetailsByUserAgent(ua, t) {
+
+        var getData = function () {
+            var data = { ID: 0, name: '', version: '' };
+            var dataString = ua;
+            for (var i = 0; i < dataBrowsers.length; i++) {
+                // Fill Browser ID
+                if (dataString.match(new RegExp(dataBrowsers[i].brRegex)) != null) {
+                    data.ID = dataBrowsers[i].id;
+                    data.name = dataBrowsers[i].name;
+                    if (dataBrowsers[i].verRegex == null) {
+                        break;
+                    }
+                    //Fill Browser Version
+                    var brverRes = dataString.match(new RegExp(dataBrowsers[i].verRegex + '[0-9]*'));
+                    if (brverRes != null) {
+                        var replaceStr = brverRes[0].match(new RegExp(dataBrowsers[i].verRegex));
+                        data.version = brverRes[0].replace(replaceStr[0], '');
+                    }
+                    var brOSRes = dataString.match(new RegExp(winOSRegex + '[0-9\\.]*'));
+                    if (brOSRes != null) {
+                        data.os = brOSRes[0];
+                    }
+                    break;
+                }
+            }
+            return data;
+        };
+
+        var winOSRegex = '(Windows NT )';
+        var dataBrowsers = [{
+            id: 4,
+            name: 'Opera',
+            brRegex: 'OPR|Opera',
+            verRegex: '(OPR\/|Version\/)'
+        }, {
+            id: 1,
+            name: 'MSIE',
+            brRegex: 'MSIE|Trident/7.*rv:11|rv:11.*Trident/7',
+            verRegex: '(MSIE |rv:)'
+        }, {
+            id: 2,
+            name: 'Firefox',
+            brRegex: 'Firefox',
+            verRegex: 'Firefox\/'
+        }, {
+            id: 3,
+            name: 'Chrome',
+            brRegex: 'Chrome',
+            verRegex: 'Chrome\/'
+        }, {
+            id: 5,
+            name: 'Safari',
+            brRegex: 'Safari|(OS |OS X )[0-9].*AppleWebKit',
+            verRegex: 'Version\/'
+        }
+        ];
+
+        return getData();
+    }
+
+    /**
+    * browser:
+    *	{
+    *		ID: ,
+    *	  	name: '',
+    *	  	version: '',
+    *	    os: ''
+    *	};
+     */
+    var  browser = getBrowserDetailsByUserAgent(userAgent);
+
+    this.getBrowser = function()
+    {
+        return browser;
+    }
+
+    this.getBrowserIDEnum = function()
+    {
+        return browserIDEnum;
+    }
+}
+
+function OVVBeaconSupportCheck()
+{
+    var ovvBrowser = new OVVBrowser($ovv.userAgent);
+
+    var browser = ovvBrowser.getBrowser();
+    var browserIDEnum = ovvBrowser.getBrowserIDEnum();
+
+    this.supportsBeacons = function()
+    {
+        //Windows 8.1 is represented as Windows NT 6.3 in user agent string
+        var WIN_8_1 = 6.3;
+        var isIE = browser.ID == browserIDEnum.MSIE;
+        var isSupportedIEVersion = browser.version >= 11;
+        var ntVersionArr = browser.version ? browser.version.split(' ') : [0];
+        var ntVersion = ntVersionArr[ntVersionArr.length - 1];
+        var isSupportedOSForIE = ntVersion >= WIN_8_1;
+        return !isIE || (isSupportedIEVersion && isSupportedOSForIE);
+    }
+}
 
 /**
  * Represents an Asset which OVV is going to determine the viewability of
@@ -754,6 +799,8 @@ function OVVAsset(uid, dependencies) {
      */
     var getBeaconContainerFunc = function() {return null};
 
+    var beaconSupportCheck = new OVVBeaconSupportCheck();
+
     ///////////////////////////////////////////////////////////////////////////
     // PUBLIC FUNCTIONS
     ///////////////////////////////////////////////////////////////////////////
@@ -808,7 +855,7 @@ function OVVAsset(uid, dependencies) {
 
         // if we're in IE and we're in an cross domain iframe, return unmeasurable
         // We are able to measure for same domain iframe ('friendly iframe')
-        if ($ovv.browser.ID === $ovv.browserIDEnum.MSIE && check.geometrySupported === false) {
+        if (!beaconSupportCheck.supportsBeacons() && check.geometrySupported === false) {
             check.viewabilityState = OVVCheck.UNMEASURABLE;
             if (!$ovv.DEBUG) {
                 return check;
@@ -1054,6 +1101,17 @@ function OVVAsset(uid, dependencies) {
         }
 
         var beacons = check.beacons;
+
+        // when the center is not visible
+        if (beacons[CENTER] === false) {
+            // and 3 corners are visible
+            if((innerCornersVisible >= 3) || (middleCornersVisible >= 3) || (outerCornersVisible >= 3))
+            {
+                return null;
+            }
+            return false;
+        }
+
         // when the center of the player is visible
         if ((beacons[CENTER] === true) &&
             // and 2 adjacent outside corners are visible
@@ -1062,11 +1120,6 @@ function OVVAsset(uid, dependencies) {
                 (beacons[OUTER_TOP_RIGHT] === true && beacons[OUTER_BOTTOM_RIGHT] == true) ||
                 (beacons[OUTER_BOTTOM_LEFT] === true && beacons[OUTER_BOTTOM_RIGHT] == true))
             ) {
-            return true;
-        }
-
-        // when any 3 of the inner corners are visible
-        if (beacons[CENTER] === false && innerCornersVisible >= 3) {
             return true;
         }
 
