@@ -1470,9 +1470,9 @@ function OVVAsset(uid, dependencies) {
     var isInFocus = function () {
         // When running in a Selenium driven Viewability Test Suite (VTA) the browser window
         // cannot always be guaranteed to have focus. In this case, and if the specific test
-        // scenario is not attempting to force the widow out of focus for testing, the VTS can
+        // scenario is not attempting to force the window out of focus for testing, the VTS can
         // create a div, with id="_do_not_expect_focus_" on the test page before starting the
-        // test. If we detect that div here wan safely bypass the inFocus() test.
+        // test. If we detect that div here we can safely bypass the inFocus() test.
         var skipFocusTest = document.getElementById("_do_not_expect_focus_") !== null;
 
         var inFocus = true;
@@ -1483,6 +1483,10 @@ function OVVAsset(uid, dependencies) {
             }
         } else if (document.hasFocus) {
             inFocus = document.hasFocus();
+        }
+
+        if (skipFocusTest){
+            return inFocus;
         }
 
         if ($ovv.IN_IFRAME === false && inFocus === true && document.hasFocus) {
