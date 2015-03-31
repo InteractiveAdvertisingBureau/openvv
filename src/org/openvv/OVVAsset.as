@@ -536,7 +536,7 @@ package org.openvv {
 				var injectTag:String =
 					'function () {' +
 					'var tag = document.createElement("script");' +
-					'tag.src = "' + tagUrl + '";' +
+					'tag.src = "' + tagUrl.replace(/"/g, '%22') + '";' +
 					'tag.type="text/javascript";' +
 					'document.getElementsByTagName("body")[0].appendChild(tag); }';
 				ExternalInterface.call( injectTag );
