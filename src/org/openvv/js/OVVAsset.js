@@ -449,6 +449,12 @@ function OVVCheck() {
     this.percentViewable = -1;
 
     /**
+    * The percentage of the player that is obscured by an overlapping element
+    * @type {Number}
+    */
+    this.percentObscured = 0;
+
+    /**
     * Set to {@link OVVCheck#VIEWABLE} when the player was at least 50%
     * viewable. Set to OVVCheck when the player was less than 50% viewable.
     * Set to {@link OVVCheck#UNMEASURABLE} when a determination could not be made.
@@ -867,9 +873,7 @@ function OVVAsset(uid, dependencies) {
 
         // Check if a CSS attribute value ( 'visibility:hidden' or 'display:none' )
         // on player or an inheritable containing element is rendering the player invisible.
-        if (checkCssInvisibility(player) == true){
-            check.technique = OVVCheck.CSS_INVISIBILITY;
-            check.viewabilityState = OVVCheck.UNVIEWABLE;
+        if (checkCssInvisibility(check, player) == true){
             if ($ovv.DEBUG) {
                 check.cssViewabilityState = OVVCheck.UNVIEWABLE;
             }else{
@@ -879,16 +883,13 @@ function OVVAsset(uid, dependencies) {
 
         // Check if any detectable element in the DOM is obscuring more than 50% of the
         // player area.
-        if (checkDomObscuring(player) == true){
-            check.technique = OVVCheck.DOM_OBSCURING;
-            check.viewabilityState = OVVCheck.UNVIEWABLE;
+        if (checkDomObscuring(check, player) == true){
             if ($ovv.DEBUG) {
                 check.domViewabilityState = OVVCheck.UNVIEWABLE;
             }else{
                 return check;
             }
         }
-
 
         // if we're in IE and we're in a cross-domain iframe, return unmeasurable
         // We are able to measure for same domain iframe ('friendly iframe')
@@ -1032,24 +1033,31 @@ function OVVAsset(uid, dependencies) {
     * These properties are inherited, so no need to parse up the DOM hierarchy.
     * If the player is in an iframe inheritance is restricted to elements within
     * the DOM of the iframe document
+    * @param {OVVCheck} check The OVVCheck object to populate
     * @param {Element} player The HTML Element to measure
     */
-    var checkCssInvisibility = function (player) {
+    var checkCssInvisibility = function (check, player) {
         var style = window.getComputedStyle(player, null);
         var visibility = style.getPropertyValue('visibility');
         var display = style.getPropertyValue('display');
-        return ( visibility == 'hidden' || display == 'none' );
+        if ( visibility == 'hidden' || display == 'none' ){
+            check.technique = OVVCheck.CSS_INVISIBILITY;
+            check.viewabilityState = OVVCheck.UNVIEWABLE;
+            return true;
+        }
+        return false;
     };
 
     /**
-     * Checks if the player is more then 50% obscured by another dom element.
-     * Is so, viewability at the time of this check is 'not viewable' and no further check
-     * is required.
-     * If the player is in an iframe this check is restricted to elements within
-     * the DOM of the iframe document
-     * @param {Element} player The HTML Element to measure
-     */
-    var checkDomObscuring = function(player){
+    * Checks if the player is more then 50% obscured by another dom element.
+    * Is so, viewability at the time of this check is 'not viewable' and no further check
+    * is required.
+    * If the player is in an iframe this check is restricted to elements within
+    * the DOM of the iframe document
+    * @param {OVVCheck} check The OVVCheck object to populate
+    * @param {Element} player The HTML Element to measure
+    */
+    var checkDomObscuring = function(check, player){
         var playerRect = player.getBoundingClientRect(),
         offset = 12, // ToDo: Make sure test points don't overlap beacons.
         xLeft = playerRect.left+offset,
@@ -1072,7 +1080,11 @@ function OVVAsset(uid, dependencies) {
         for (var p in testPoints) {
             elem = document.elementFromPoint(testPoints[p].x, testPoints[p].y);
             if ( elem != player ){
-                if (overlapping(playerRect, elem.getBoundingClientRect()) > 0.5){
+                check.percentObscured = 100 * overlapping(playerRect, elem.getBoundingClientRect());
+                if (check.percentObscured > 50) {
+                    check.percentViewable = 100 - check.percentObscured;
+                    check.technique = OVVCheck.DOM_OBSCURING;
+                    check.viewabilityState = OVVCheck.UNVIEWABLE;
                     return true;
                 }
             }
@@ -1082,8 +1094,8 @@ function OVVAsset(uid, dependencies) {
 
     var overlapping = function(playerRect, elem ){
         var playerArea = playerRect.width * playerRect.height;
-        var  x_overlap = Math.max(0, Math.min(playerRect.right,elem.right) - Math.max(playerRect.left,elem.left));
-        var  y_overlap = Math.max(0, Math.min(playerRect.bottom,elem.bottom) - Math.max(playerRect.top,elem.top));
+        var  x_overlap = Math.max(0, Math.min(playerRect.right, elem.right) - Math.max(playerRect.left, elem.left));
+        var  y_overlap = Math.max(0, Math.min(playerRect.bottom, elem.bottom) - Math.max(playerRect.top, elem.top));
         return (x_overlap * y_overlap) / playerArea;
     }
 
@@ -1102,7 +1114,7 @@ function OVVAsset(uid, dependencies) {
         if (!viewabilityResult.error) {            
             check.clientWidth = viewabilityResult.clientWidth;
             check.clientHeight = viewabilityResult.clientHeight;
-            check.percentViewable =  viewabilityResult.percentViewable;
+            check.percentViewable =  viewabilityResult.percentViewable - check.percentObscured;
             check.objTop = viewabilityResult.objTop;
             check.objBottom = viewabilityResult.objBottom;
             check.objLeft = viewabilityResult.objLeft;
