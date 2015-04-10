@@ -364,13 +364,23 @@ function OVVCheck() {
     this.cssViewabilityState = '';
 
     /**
-     * The technique used to populate OVVCheck.viewabilityState. Will be either
-     * OVV.GEOMETRY when OVV is run in the root page, or OVV.BEACON when OVV is
-     * run in an iframe. When in debug mode, will always remain blank.
+     * The viewability state measured by the dom_obs curing technique. Only populated
+     * when OVV.DEBUG is true.
      * @type {String}
-     * @see {@link OVV#GEOMETRY}
-     * @see {@link OVV#BEACON}
+     * @see {@link isDomObscuring}
+     * @see {@link OVV#DEBUG}
      */
+    this.domViewabilityState = '';
+
+
+    /**
+    * The technique used to populate OVVCheck.viewabilityState. Will be either
+    * OVV.GEOMETRY when OVV is run in the root page, or OVV.BEACON when OVV is
+    * run in an iframe. When in debug mode, will always remain blank.
+    * @type {String}
+    * @see {@link OVV#GEOMETRY}
+    * @see {@link OVV#BEACON}
+    */
     this.technique = '';
 
     /**
@@ -439,15 +449,21 @@ function OVVCheck() {
     this.percentViewable = -1;
 
     /**
-     * Set to {@link OVVCheck#VIEWABLE} when the player was at least 50%
-     * viewable. Set to OVVCheck when the player was less than 50% viewable.
-     * Set to {@link OVVCheck#UNMEASURABLE} when a determination could not be made.
-     * @type {String}
-     * @see {@link OVVCheck.UNMEASURABLE}
-     * @see {@link OVVCheck.VIEWABLE}
-     * @see {@link OVVCheck.UNVIEWABLE}
-     * @see {@link OVVCheck.NOT_READY}
-     */
+    * The percentage of the player that is obscured by an overlapping element
+    * @type {Number}
+    */
+    this.percentObscured = 0;
+
+    /**
+    * Set to {@link OVVCheck#VIEWABLE} when the player was at least 50%
+    * viewable. Set to OVVCheck when the player was less than 50% viewable.
+    * Set to {@link OVVCheck#UNMEASURABLE} when a determination could not be made.
+    * @type {String}
+    * @see {@link OVVCheck.UNMEASURABLE}
+    * @see {@link OVVCheck.VIEWABLE}
+    * @see {@link OVVCheck.UNVIEWABLE}
+    * @see {@link OVVCheck.NOT_READY}
+    */
     this.viewabilityState = '';
 }
 
@@ -490,11 +506,18 @@ OVVCheck.BEACON = 'beacon';
 OVVCheck.GEOMETRY = 'geometry';
 
 /**
- * The value that {@link OVVCheck#technique} will be set to if OVV
- * uses css 'visibility' or 'display' state to determine an unviewable '
- * value for {@link OVVCheck#viewabilityState}
- */
-OVVCheck.CSS_VISIBILITY = 'css_visibility';
+* The value that {@link OVVCheck#technique} will be set to if OVV
+* uses css 'visibility' or 'display' state to determine an unviewable '
+* value for {@link OVVCheck#viewabilityState}
+*/
+OVVCheck.CSS_INVISIBILITY = 'css_invisibility';
+
+/**
+* The value that {@link OVVCheck#technique} will be set to if OVV
+* determines the ad is more than 50% obscured by a floating element in fromt
+* of the player in {@link OVVCheck#viewabilityState}
+*/
+OVVCheck.DOM_OBSCURING = 'dom_obscuring';
 
 function OVVBrowser(userAgent)
 {
@@ -806,29 +829,38 @@ function OVVAsset(uid, dependencies) {
     ///////////////////////////////////////////////////////////////////////////
 
     /**
-     * <p>
-     * Returns an {@link OVVCheck} object populated with information gathered
-     * from the browser. The viewabilityState attribute is populated with
-     * either {@link OVVCheck.VIEWABLE}, {@link OVVCheck.UNVIEWABLE}, or {@link OVVCheck.UNMEASURABLE}
-     * as determined by either css visibility and/or display attributes, beacon technique when in a
-     * cross domain iframe, or the geometry technique otherwise.
-     * </p><p>
-     * The css visibility technique can only prove unviewability. If css elements are not hidden or
-     * collapsed then the other techniques must be used to determine viewability.
-     * </p><p>
-     * The geometry technique compares the bounds of the viewport, taking
-     * scrolling into account, and the bounds of the player.
-     * </p><p>
-     * The beacon technique places a single beacon off-screen and several
-     * on top of the player. It then queries the state of the beacons on top
-     * of the player to determine how much of the player is viewable.
-     * </p>
-     * @returns {OVVCheck}
-     * @see {@link OVVCheck}
-     * @see {@link checkGeometry}
-     * @see {@link checkBeacons}
-     * @see {@link checkCssViewability}
-     */
+    * <p>
+    * Returns an {@link OVVCheck} object populated with information gathered
+    * from the browser. The viewabilityState attribute is populated with
+    * either {@link OVVCheck.VIEWABLE}, {@link OVVCheck.UNVIEWABLE}, or {@link OVVCheck.UNMEASURABLE}
+    * as determined by either css 'visibility' and/or 'display' attribute values, an opaque dom element
+    * obscuring the player, the beacon technique when in a cross domain iframe, or the geometry
+    * technique otherwise.
+    * </p><p>
+    * No technique can definitively prove viewability. Each technique is used in turn to confirm or
+    * rule out unviewability based on its particular method of testing for unviewability.
+    * </p><p>
+    * The css invisibility technique tests the 'visibility' and 'display' style attributes of the player
+    * and its inheritable ancestor elements. A value of visibility:hidden or display:none indicates
+    * unviewability.
+    * </p><p>
+    * The dom obscuring technique tests for an opaque dom element obscuring more than 50% of the player
+    * area.
+    * </p><p>
+    * The geometry technique compares the bounds of the viewport, taking
+    * scrolling into account, and the bounds of the player.
+    * </p><p>
+    * The beacon technique places a single beacon off-screen and several
+    * on top of the player. It then queries the state of the beacons on top
+    * of the player to determine how much of the player is viewable.
+    * </p>
+    * @returns {OVVCheck}
+    * @see {@link OVVCheck}
+    * @see {@link checkCssInvisibility}
+    * @see {@link checkDomObscuring}
+    * @see {@link checkGeometry}
+    * @see {@link checkBeacons}
+    */
     this.checkViewability = function () {
         var check = new OVVCheck();
         check.id = id;
@@ -841,11 +873,9 @@ function OVVAsset(uid, dependencies) {
             return check;
         }
 
-        // Check if a CSS property ( 'visibility:hidden' or 'display:none' )
-        // on player or an inheritable containing element is hiding the player :
-        if (isCssElementInvisible(player)){
-            check.technique = OVVCheck.CSS_VISIBILITY;
-            check.viewabilityState = OVVCheck.UNVIEWABLE;
+        // Check if a CSS attribute value ( 'visibility:hidden' or 'display:none' )
+        // on player or an inheritable containing element is rendering the player invisible.
+        if (checkCssInvisibility(check, player) == true){
             if ($ovv.DEBUG) {
                 check.cssViewabilityState = OVVCheck.UNVIEWABLE;
             }else{
@@ -853,7 +883,17 @@ function OVVAsset(uid, dependencies) {
             }
         }
 
-        // if we're in IE and we're in an cross domain iframe, return unmeasurable
+        // Check if any detectable element in the DOM is obscuring more than 50% of the
+        // player area.
+        if (checkDomObscuring(check, player) == true){
+            if ($ovv.DEBUG) {
+                check.domViewabilityState = OVVCheck.UNVIEWABLE;
+            }else{
+                return check;
+            }
+        }
+
+        // if we're in IE and we're in a cross-domain iframe, return unmeasurable
         // We are able to measure for same domain iframe ('friendly iframe')
         if (!beaconSupportCheck.supportsBeacons() && check.geometrySupported === false) {
             check.viewabilityState = OVVCheck.UNMEASURABLE;
@@ -914,7 +954,7 @@ function OVVAsset(uid, dependencies) {
             check.viewabilityState = OVVCheck.UNMEASURABLE;
         }
 
-        // in debug mode, reconcile the viewability states from both techniques
+        // in debug mode, reconcile the viewability states from all techniques
         if ($ovv.DEBUG) {
             // revert the technique to blank during debug, since both were used
             check.technique = '';
@@ -923,9 +963,11 @@ function OVVAsset(uid, dependencies) {
                 check.cssViewabilityState === null ) {
                 check.viewabilityState = OVVCheck.UNMEASURABLE;
             } else {
+                var cssViewable = (check.cssViewabilityState === OVVCheck.VIEWABLE);
+                var domViewable = (check.domViewabilityState === OVVCheck.VIEWABLE);
                 var beaconViewable = (check.beaconViewabilityState === OVVCheck.VIEWABLE);
                 var geometryViewable = (check.geometryViewabilityState === OVVCheck.VIEWABLE);
-                check.viewabilityState = (beaconViewable || geometryViewable) ? OVVCheck.VIEWABLE : OVVCheck.UNVIEWABLE;
+                check.viewabilityState = (cssViewable || domViewable || beaconViewable || geometryViewable) ? OVVCheck.VIEWABLE : OVVCheck.UNVIEWABLE;
             }
         }
 
@@ -988,20 +1030,95 @@ function OVVAsset(uid, dependencies) {
     ///////////////////////////////////////////////////////////////////////////
 
     /**
-     * Performs the geometry technique to determine viewability. First gathers
-     * information on the viewport and on the player. The compares the two to
-     * determine what percentage, if any, of the player is within the bounds
-     * of the viewport.
-     * @param {OVVCheck} check The OVVCheck object to populate
-     * @param {Element} player The HTML Element to measure
-     */
+    * Checks if the player is made invisible by css attribute 'visibility:hidden'
+    * or 'display:none'.
+    * Is so, viewability at the time of this check is 'not viewable' and no further check
+    * is required.
+    * These properties are inherited, so no need to parse up the DOM hierarchy.
+    * If the player is in an iframe inheritance is restricted to elements within
+    * the DOM of the iframe document
+    * @param {OVVCheck} check The OVVCheck object to populate
+    * @param {Element} player The HTML Element to measure
+    */
+    var checkCssInvisibility = function (check, player) {
+        var style = window.getComputedStyle(player, null);
+        var visibility = style.getPropertyValue('visibility');
+        var display = style.getPropertyValue('display');
+        if ( visibility == 'hidden' || display == 'none' ){
+            check.technique = OVVCheck.CSS_INVISIBILITY;
+            check.viewabilityState = OVVCheck.UNVIEWABLE;
+            return true;
+        }
+        return false;
+    };
+
+    /**
+    * Checks if the player is more then 50% obscured by another dom element.
+    * Is so, viewability at the time of this check is 'not viewable' and no further check
+    * is required.
+    * If the player is in an iframe this check is restricted to elements within
+    * the DOM of the iframe document
+    * @param {OVVCheck} check The OVVCheck object to populate
+    * @param {Element} player The HTML Element to measure
+    */
+    var checkDomObscuring = function(check, player){
+        var playerRect = player.getBoundingClientRect(),
+        offset = 12, // ToDo: Make sure test points don't overlap beacons.
+        xLeft = playerRect.left+offset,
+        xRight = playerRect.right-offset,
+        yTop = playerRect.top+offset,
+        yBottom = playerRect.bottom-offset,
+        xCenter = Math.floor(playerRect.left+playerRect.width/2),
+        yCenter = Math.floor(playerRect.top+playerRect.height/2),
+        testPoints = [
+            { x:xLeft,   y:yTop },
+            { x:xCenter, y:yTop },
+            { x:xRight,  y:yTop },
+            { x:xLeft,   y:yCenter },
+            { x:xCenter, y:yCenter },
+            { x:xRight,  y:yCenter },
+            { x:xLeft,   y:yBottom },
+            { x:xCenter, y:yBottom },
+            { x:xRight,  y:yBottom }
+        ];
+        for (var p in testPoints) {
+            elem = document.elementFromPoint(testPoints[p].x, testPoints[p].y);
+            if ( elem != player ){
+                check.percentObscured = 100 * overlapping(playerRect, elem.getBoundingClientRect());
+                if (check.percentObscured > 50) {
+                    check.percentViewable = 100 - check.percentObscured;
+                    check.technique = OVVCheck.DOM_OBSCURING;
+                    check.viewabilityState = OVVCheck.UNVIEWABLE;
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    var overlapping = function(playerRect, elem ){
+        var playerArea = playerRect.width * playerRect.height;
+        var  x_overlap = Math.max(0, Math.min(playerRect.right, elem.right) - Math.max(playerRect.left, elem.left));
+        var  y_overlap = Math.max(0, Math.min(playerRect.bottom, elem.bottom) - Math.max(playerRect.top, elem.top));
+        return (x_overlap * y_overlap) / playerArea;
+    }
+
+
+    /**
+    * Performs the geometry technique to determine viewability. First gathers
+    * information on the viewport and on the player. The compares the two to
+    * determine what percentage, if any, of the player is within the bounds
+    * of the viewport.
+    * @param {OVVCheck} check The OVVCheck object to populate
+    * @param {Element} player The HTML Element to measure
+    */
     var checkGeometry = function (check, player) {
         var viewabilityResult = geometryViewabilityCalculator.getViewabilityState(player, window);
 
         if (!viewabilityResult.error) {
             check.clientWidth = viewabilityResult.clientWidth;
             check.clientHeight = viewabilityResult.clientHeight;
-            check.percentViewable =  viewabilityResult.percentViewable;
+            check.percentViewable =  viewabilityResult.percentViewable - check.percentObscured;
             check.objTop = viewabilityResult.objTop;
             check.objBottom = viewabilityResult.objBottom;
             check.objLeft = viewabilityResult.objLeft;
@@ -1165,7 +1282,6 @@ function OVVAsset(uid, dependencies) {
      * @see {@link positionBeacons}
      */
     var createBeacons = function (url) {
-
         // double checking that our URL was actually set to something
         // (BEACON_SWF_URL is obfuscated here to prevent it from being
         // String substituted by ActionScript)
@@ -1468,27 +1584,12 @@ function OVVAsset(uid, dependencies) {
     };
 
     var isInFocus = function () {
-        // When running in a Selenium driven Viewability Test Suite (VTA) the browser window
-        // cannot always be guaranteed to have focus. In this case, and if the specific test
-        // scenario is not attempting to force the window out of focus for testing, the VTS can
-        // create a div, with id="_do_not_expect_focus_" on the test page before starting the
-        // test. If we detect that div here we can safely bypass the inFocus() test.
-        var skipFocusTest = document.getElementById("_do_not_expect_focus_") !== null;
-
         var inFocus = true;
         if (typeof document.hidden !== 'undefined') {
             inFocus = window.document.hidden ? false : true;
-            if (skipFocusTest) {
-                return inFocus;
-            }
         } else if (document.hasFocus) {
             inFocus = document.hasFocus();
         }
-
-        if (skipFocusTest){
-            return inFocus;
-        }
-
         if ($ovv.IN_IFRAME === false && inFocus === true && document.hasFocus) {
             inFocus = document.hasFocus();
         }
@@ -1498,9 +1599,8 @@ function OVVAsset(uid, dependencies) {
 
     player = findPlayer();
 
-    // only use the beacons if we're in a cross-domain iframe, but go ahead and add them
-    // during debug mode
-    if ($ovv.geometrySupported == null || $ovv.DEBUG) {
+    // only use the beacons if geometry is not supported, or we we are in DEBUG mode.
+        if ($ovv.geometrySupported == null || $ovv.DEBUG) {
         if ($ovv.browser.ID === $ovv.browserIDEnum.Firefox){
             //Use frame technique to measure viewability in cross domain FF scenario
             getBeaconFunc = getFrameBeacon;
@@ -1686,7 +1786,7 @@ function OVVGeometryViewabilityCalculator() {
      */
     var getAssetViewablePercentage = function (effectiveAssetRect, viewPortSize) {
         // holds the asset viewable surface
-        var assetVisiableHeight = 0, assetVisiableWidth = 0;
+        var assetVisibleHeight = 0, assetVisibleWidth = 0;
 
         var asset = {
             width: effectiveAssetRect.right - effectiveAssetRect.left,
@@ -1708,44 +1808,44 @@ function OVVGeometryViewabilityCalculator() {
         // the asset is partially above the viewport
         if (effectiveAssetRect.top < 0) {
             // take the visible part
-            assetVisiableHeight = asset.height + effectiveAssetRect.top;
+            assetVisibleHeight = asset.height + effectiveAssetRect.top;
             //if the asset height is larger then the viewport height, set the asset height to be the viewport height
-            if (assetVisiableHeight > viewPortSize.height) {
-                assetVisiableHeight = viewPortSize.height;
+            if (assetVisibleHeight > viewPortSize.height) {
+                assetVisibleHeight = viewPortSize.height;
             }
         }
         // the asset is partially below the viewport
         else if (effectiveAssetRect.top + asset.height > viewPortSize.height) {
             // take the visible part
-            assetVisiableHeight = viewPortSize.height - effectiveAssetRect.top;
+            assetVisibleHeight = viewPortSize.height - effectiveAssetRect.top;
         }
         // the asset is in the viewport
         else {
-            assetVisiableHeight = asset.height;
+            assetVisibleHeight = asset.height;
         }
 
         // ---- Handle asset visible width ----
         // the asset is partially left to the viewport
         if (effectiveAssetRect.left < 0) {
             // take the visible part
-            assetVisiableWidth = asset.width + effectiveAssetRect.left;
+            assetVisibleWidth = asset.width + effectiveAssetRect.left;
             //if the asset width is larger then the viewport width, set the asset width to be the viewport width
-            if (assetVisiableWidth > viewPortSize.width) {
-                assetVisiableWidth = viewPortSize.width;
+            if (assetVisibleWidth > viewPortSize.width) {
+                assetVisibleWidth = viewPortSize.width;
             }
         }
         // the asset is partially right to the viewport
         else if (effectiveAssetRect.left + asset.width > viewPortSize.width) {
             // take the visible part
-            assetVisiableWidth = viewPortSize.width - effectiveAssetRect.left;
+            assetVisibleWidth = viewPortSize.width - effectiveAssetRect.left;
         }
         // the asset is in the viewport
         else {
-            assetVisiableWidth = asset.width;
+            assetVisibleWidth = asset.width;
         }
 
         // Divied the visible asset area by the full asset area to the the visible percentage
-        return Math.round((((assetVisiableWidth * assetVisiableHeight)) / (asset.width * asset.height)) * 100);
+        return Math.round((((assetVisibleWidth * assetVisibleHeight)) / (asset.width * asset.height)) * 100);
     };
 }
 
