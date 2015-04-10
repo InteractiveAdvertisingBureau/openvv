@@ -1260,7 +1260,6 @@ function OVVAsset(uid, dependencies) {
     * @see {@link positionBeacons}
     */
     var createBeacons = function (url) {
-
         // double checking that our URL was actually set to something
         // (BEACON_SWF_URL is obfuscated here to prevent it from being
         // String substituted by ActionScript)
@@ -1562,28 +1561,13 @@ function OVVAsset(uid, dependencies) {
         return null;
     };
 
-    // When running in a Selenium driven Viewability Test Suite (VTS) the browser window
-    // cannot always be guaranteed to have focus. In this case, and if the specific test
-    // scenario is not attempting to force the window out of focus for testing, the VTS can
-    // create a div, with id = "_do_not_expect_focus_" on the test page before starting the
-    // test. If we detect that div here we can safely bypass the inFocus() test.
     var isInFocus = function () {
-        var skipFocusTest = document.getElementById("_do_not_expect_focus_") !== null;
-
         var inFocus = true;
         if (typeof document.hidden !== 'undefined') {
             inFocus = window.document.hidden ? false : true;
-            if (skipFocusTest) {
-                return inFocus;
-            }
         } else if (document.hasFocus) {
             inFocus = document.hasFocus();
         }
-
-        if (skipFocusTest){
-            return inFocus;
-        }
-
         if ($ovv.IN_IFRAME === false && inFocus === true && document.hasFocus) {
             inFocus = document.hasFocus();
         }
@@ -1593,9 +1577,8 @@ function OVVAsset(uid, dependencies) {
 
     player = findPlayer();
 
-    // only use the beacons if we're in an iframe, but go ahead and add them
-    // during debug mode
-    if ($ovv.IN_IFRAME || $ovv.DEBUG) {
+    // only use the beacons if geometry is not supported, or we we are in DEBUG mode.
+    if ($ovv.geometrySupported == null || $ovv.DEBUG) {
         if ($ovv.browser.ID === $ovv.browserIDEnum.Firefox){
             //Use frame technique to measure viewability in cross domain FF scenario
             getBeaconFunc = getFrameBeacon;
