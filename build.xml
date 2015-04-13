@@ -69,7 +69,7 @@
 	 	<!-- Time to compile! -->
 		<compc output="${bin.dir}/openvv.swc"
 			   include-classes="org.openvv.OVVAsset org.openvv.OVVCheck org.openvv.OVVRenderMeter org.openvv.OVVThrottleType org.openvv.events.OVVEvent net.iab.IVPAID net.iab.VPAIDEvent org.openvv.OVVVersion">
-			<source-path path-element="${tmp.dir}"/>
+			<source-path path-element="${src.dir}"/>
 		</compc>
 		<!-- Remove the temp dir -->
 		<delete dir="${tmp.dir}" failonerror="false"/>
