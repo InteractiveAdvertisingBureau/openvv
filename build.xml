@@ -36,6 +36,7 @@
 			<arg path="${tmp.dir}/OVVAsset.min.js"/>
 			<arg value="-c"/>
 			<arg value="-m"/>
+			<arg value="evaluate=false"/>
 		</exec>
 	</target>
 
@@ -69,7 +70,7 @@
 	 	<!-- Time to compile! -->
 		<compc output="${bin.dir}/openvv.swc"
                debug="false"
-			   include-classes="com.tubemogul.util.Debug org.openvv.OVVAsset org.openvv.OVVCheck org.openvv.OVVRenderMeter org.openvv.OVVThrottleType org.openvv.events.OVVEvent net.iab.IVPAID net.iab.VPAIDEvent org.openvv.OVVVersion">
+			   include-classes="org.openvv.OVVAsset org.openvv.OVVCheck org.openvv.OVVRenderMeter org.openvv.OVVThrottleType org.openvv.events.OVVEvent net.iab.IVPAID net.iab.VPAIDEvent org.openvv.OVVVersion">
 			<source-path path-element="${tmp.dir}"/>
 		</compc>
 		<!-- Remove the temp dir -->

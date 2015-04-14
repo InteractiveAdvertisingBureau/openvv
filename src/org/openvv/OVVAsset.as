@@ -28,7 +28,6 @@ package org.openvv {
     import flash.utils.Timer;
     import org.openvv.events.OVVEvent;
     import net.iab.VPAIDEvent;
-    import com.tubemogul.util.Debug;
 
     /**
      * The event dispatched when the asset has been viewable for 5 contiguous seconds
