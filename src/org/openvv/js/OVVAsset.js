@@ -1110,11 +1110,8 @@ function OVVAsset(uid, dependencies) {
     * @see {@link positionBeacons}
     */
     var createBeacons = function (url) {
-
         // double checking that our URL was actually set to something
-        // (BEACON_SWF_URL is obfuscated here to prevent it from being
-        // String substituted by ActionScript)
-        if (url === '' || url === ('BEACON' + '_SWF_' + 'URL')) {
+        if (url === '' || url.indexOf('.swf') == -1 ) {
             return;
         }
 
