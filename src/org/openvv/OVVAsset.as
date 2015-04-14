@@ -28,6 +28,7 @@ package org.openvv {
     import flash.utils.Timer;
     import org.openvv.events.OVVEvent;
     import net.iab.VPAIDEvent;
+    import com.tubemogul.util.Debug;
 
     /**
      * The event dispatched when the asset has been viewable for 5 contiguous seconds
@@ -236,6 +237,8 @@ package org.openvv {
             setStage();
             ExternalInterface.addCallback(_id, flashProbe);
             ExternalInterface.addCallback("onJsReady", onJsReady);
+            ExternalInterface.addCallback("onJsReady", onJsReady);
+            ExternalInterface.addCallback("jsTrace", jsTrace);
 
             _sprite = new Sprite();
             _renderMeter = new OVVRenderMeter(_sprite);
@@ -381,15 +384,19 @@ package org.openvv {
          * When the JavaScript portion of OpenVV is ready and the beacons have loaded (if needed),
          * this function is called so that the ad can wait for the beacons to load before dispatching AdLoaded
          */
-		public function onJsReady(): void {
-			jsReady = true;
-			if ( adStarted ) {
-				startImpressionTimer();
-			}
-			raiseReady();
-		}
+        public function onJsReady(): void {
+            trace("JS READY!")
+            jsReady = true;
+            if ( adStarted ) {
+                startImpressionTimer();
+            }
+            raiseReady();
+        }
+        public function jsTrace(obj:String): void {
+            trace(obj);
+        }
 
-		/**
+        /**
 		 * Ready state from the JS code, including beacons.
 		 * @return
 		 */
@@ -678,5 +685,6 @@ package org.openvv {
 		{
 			dispatchEvent(new OVVEvent(OVVEvent.OVVError, ovvData));
 		}
+
     }
 }

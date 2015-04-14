@@ -889,11 +889,14 @@ function OVVAsset(uid, dependencies) {
             }else{
                 return check;
             }
+        }else{
+            player.jsTrace("obscured : " + check.percentObscured.toString());
+            //player.jsTrace({OBSCURED:check.percentObscured});
         }
 
         // if we're in IE and we're in a cross-domain iframe, return unmeasurable
         // We are able to measure for same domain iframe ('friendly iframe')
-        if (!beaconSupportCheck.supportsBeacons() && check.geometrySupported === false) {
+        if (!beaconSupportCheck.supportsBeacons() && check.geometrySupported == false) {
             check.viewabilityState = OVVCheck.UNMEASURABLE;
             if (!$ovv.DEBUG) {
                 return check;
@@ -1058,6 +1061,7 @@ function OVVAsset(uid, dependencies) {
     * @param {Element} player The HTML Element to measure
     */
     var checkDomObscuring = function(check, player){
+        player.jsTrace("checkDomObscuring");
         var playerRect = player.getBoundingClientRect(),
         offset = 12, // ToDo: Make sure test points don't overlap beacons.
         xLeft = playerRect.left+offset,
@@ -1077,15 +1081,23 @@ function OVVAsset(uid, dependencies) {
             { x:xCenter, y:yBottom },
             { x:xRight,  y:yBottom }
         ];
+
         for (var p in testPoints) {
-            elem = document.elementFromPoint(testPoints[p].x, testPoints[p].y);
-            if ( elem != player ){
-                check.percentObscured = 100 * overlapping(playerRect, elem.getBoundingClientRect());
-                if (check.percentObscured > 50) {
-                    check.percentViewable = 100 - check.percentObscured;
-                    check.technique = OVVCheck.DOM_OBSCURING;
-                    check.viewabilityState = OVVCheck.UNVIEWABLE;
-                    return true;
+            if (testPoints[p].x >= 0 && testPoints[p].y >= 0) {
+                elem = document.elementFromPoint(testPoints[p].x, testPoints[p].y);
+                player.jsTrace("checkDomObscuring : elem" + elem.toString());
+
+                if (elem != player) {
+                    overlappingArea = overlapping(playerRect, elem.getBoundingClientRect());
+                    if (overlappingArea > 0) {
+                        check.percentObscured = 100 * overlapping(playerRect, elem.getBoundingClientRect());
+                        if (check.percentObscured > 50) {
+                            check.percentViewable = 100 - check.percentObscured;
+                            check.technique = OVVCheck.DOM_OBSCURING;
+                            check.viewabilityState = OVVCheck.UNVIEWABLE;
+                            return true;
+                        }
+                    }
                 }
             }
         }
