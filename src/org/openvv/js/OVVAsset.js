@@ -358,7 +358,7 @@ function OVVCheck() {
      * The viewability state measured by the css visibility technique. Only populated
      * when OVV.DEBUG is true.
      * @type {String}
-     * @see {@link isCssElementInvisible}
+     * @see {@link checkCssInvisibility}
      * @see {@link OVV#DEBUG}
      */
     this.cssViewabilityState = '';
@@ -367,7 +367,7 @@ function OVVCheck() {
      * The viewability state measured by the dom_obs curing technique. Only populated
      * when OVV.DEBUG is true.
      * @type {String}
-     * @see {@link isDomObscuring}
+     * @see {@link checkDomObscuring}
      * @see {@link OVV#DEBUG}
      */
     this.domViewabilityState = '';
