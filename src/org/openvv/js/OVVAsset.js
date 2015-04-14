@@ -873,7 +873,7 @@ function OVVAsset(uid, dependencies) {
 
         // Check if a CSS attribute value ( 'visibility:hidden' or 'display:none' )
         // on player or an inheritable containing element is rendering the player invisible.
-        if (checkCssInvisibility(check, player) == true){
+        if (checkCssInvisibility(check, player) === true){
             if ($ovv.DEBUG) {
                 check.cssViewabilityState = OVVCheck.UNVIEWABLE;
             }else{
@@ -883,7 +883,7 @@ function OVVAsset(uid, dependencies) {
 
         // Check if any detectable element in the DOM is obscuring more than 50% of the
         // player area.
-        if (checkDomObscuring(check, player) == true){
+        if (checkDomObscuring(check, player) === true){
             if ($ovv.DEBUG) {
                 check.domViewabilityState = OVVCheck.UNVIEWABLE;
             }else{
@@ -1210,10 +1210,10 @@ function OVVAsset(uid, dependencies) {
         // when the center of the player is visible
         if ((beacons[CENTER] === true) &&
         // and 2 adjacent outside corners are visible
-            ((beacons[OUTER_TOP_LEFT] === true && beacons[OUTER_TOP_RIGHT] == true) ||
-            (beacons[OUTER_TOP_LEFT] === true && beacons[OUTER_BOTTOM_LEFT] == true) ||
-            (beacons[OUTER_TOP_RIGHT] === true && beacons[OUTER_BOTTOM_RIGHT] == true) ||
-            (beacons[OUTER_BOTTOM_LEFT] === true && beacons[OUTER_BOTTOM_RIGHT] == true))
+            ((beacons[OUTER_TOP_LEFT] === true && beacons[OUTER_TOP_RIGHT] === true) ||
+            (beacons[OUTER_TOP_LEFT] === true && beacons[OUTER_BOTTOM_LEFT] === true) ||
+            (beacons[OUTER_TOP_RIGHT] === true && beacons[OUTER_BOTTOM_RIGHT] === true) ||
+            (beacons[OUTER_BOTTOM_LEFT] === true && beacons[OUTER_BOTTOM_RIGHT] === true))
         ) {
             return true;
         }
@@ -1263,7 +1263,11 @@ function OVVAsset(uid, dependencies) {
         // double checking that our URL was actually set to something
         // (BEACON_SWF_URL is obfuscated here to prevent it from being
         // String substituted by ActionScript)
-        if (url === '' || url === ('BEACON' + '_SWF_' + 'URL')) {
+        // Dynamically unobfuscate to prevent minify from reconstructing original token string
+        var reversed = "LRU_FWS_NOCAEB";
+        var unreplaced = reversed.split("").reverse().join('');
+
+        if (url == '' || url == unreplaced) {
             return;
         }
 
