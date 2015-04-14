@@ -68,7 +68,7 @@
 	 	<replace file="${tmp.dir}/org/openvv/OVVAsset.as" token="{{OVVAssetJS}}" value="${js-src-esc}" />
 	 	<!-- Time to compile! -->
 		<compc output="${bin.dir}/openvv.swc"
-               debug="true"
+               debug="false"
 			   include-classes="com.tubemogul.util.Debug org.openvv.OVVAsset org.openvv.OVVCheck org.openvv.OVVRenderMeter org.openvv.OVVThrottleType org.openvv.events.OVVEvent net.iab.IVPAID net.iab.VPAIDEvent org.openvv.OVVVersion">
 			<source-path path-element="${tmp.dir}"/>
 		</compc>

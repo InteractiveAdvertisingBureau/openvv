@@ -883,6 +883,7 @@ function OVVAsset(uid, dependencies) {
 
         // Check if any detectable element in the DOM is obscuring more than 50% of the
         // player area.
+
         if (checkDomObscuring(check, player) === true){
             if ($ovv.DEBUG) {
                 check.domViewabilityState = OVVCheck.UNVIEWABLE;
@@ -906,6 +907,7 @@ function OVVAsset(uid, dependencies) {
         if (check.geometrySupported) {
             check.technique = OVVCheck.GEOMETRY;
             checkGeometry(check, player);
+            //player.jsTrace("PercentViewable = " + check.percentViewable.toString());
             check.viewabilityState = (check.percentViewable >= 50) ? OVVCheck.VIEWABLE : OVVCheck.UNVIEWABLE;
 
             if ($ovv.DEBUG) {

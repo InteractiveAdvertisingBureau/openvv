@@ -323,7 +323,7 @@ package org.openvv {
 
             var jsResults: Object = ExternalInterface.call("$ovv.getAssetById('" + _id + "')" + ".checkViewability");
             var results: OVVCheck = new OVVCheck(jsResults);
-            
+
             if (results && !!results.error)
                 raiseError(results);
 
