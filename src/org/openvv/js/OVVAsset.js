@@ -449,9 +449,9 @@ function OVVCheck() {
     this.percentViewable = -1;
 
     /**
-    * The percentage of the player that is obscured by an overlapping element
-    * @type {Number}
-    */
+     * The percentage of the player that is obscured by an overlapping element
+     * @type {Number}
+     */
     this.percentObscured = 0;
 
     /**
@@ -1772,7 +1772,6 @@ function OVVGeometryViewabilityCalculator() {
     var getAssetViewablePercentage = function (effectiveAssetRect, viewPortSize) {
         // holds the asset viewable surface
         var assetVisibleHeight = 0, assetVisibleWidth = 0;
-
         var asset = {
             width: effectiveAssetRect.right - effectiveAssetRect.left,
             height: effectiveAssetRect.bottom - effectiveAssetRect.top
