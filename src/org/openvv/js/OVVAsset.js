@@ -504,17 +504,17 @@ OVVCheck.BEACON = 'beacon';
 OVVCheck.GEOMETRY = 'geometry';
 
 /**
-* The value that {@link OVVCheck#technique} will be set to if OVV
-* uses css 'visibility' or 'display' state to determine an unviewable '
-* value for {@link OVVCheck#viewabilityState}
-*/
+ * The value that {@link OVVCheck#technique} will be set to if OVV
+ * uses css 'visibility' or 'display' state to determine an unviewable '
+ * value for {@link OVVCheck#viewabilityState}
+ */
 OVVCheck.CSS_INVISIBILITY = 'css_invisibility';
 
 /**
-* The value that {@link OVVCheck#technique} will be set to if OVV
-* determines the ad is more than 50% obscured by a floating element in fromt
-* of the player in {@link OVVCheck#viewabilityState}
-*/
+ * The value that {@link OVVCheck#technique} will be set to if OVV
+ * determines the ad is more than 50% obscured by a floating element in fromt
+ * of the player in {@link OVVCheck#viewabilityState}
+ */
 OVVCheck.DOM_OBSCURING = 'dom_obscuring';
 
 function OVVBrowser(userAgent)
@@ -864,13 +864,11 @@ function OVVAsset(uid, dependencies) {
         check.id = id;
         check.inIframe = $ovv.IN_IFRAME;
         check.geometrySupported = $ovv.geometrySupported;
-
         check.focus = isInFocus();
         if (!player) {
             check.error = 'Player not found!';
             return check;
         }
-
         // Check if a CSS attribute value ( 'visibility:hidden' or 'display:none' )
         // on player or an inheritable containing element is rendering the player invisible.
         if (checkCssInvisibility(check, player) === true){
@@ -880,7 +878,6 @@ function OVVAsset(uid, dependencies) {
                 return check;
             }
         }
-
         // Check if any detectable element in the DOM is obscuring more than 50% of the
         // player area.
 
@@ -891,13 +888,12 @@ function OVVAsset(uid, dependencies) {
                 return check;
             }
         }else{
-            player.jsTrace("obscured : " + check.percentObscured.toString());
+            //player.jsTrace("obscured : " + check.percentObscured.toString());
             //player.jsTrace({OBSCURED:check.percentObscured});
         }
-
         // if we're in IE and we're in a cross-domain iframe, return unmeasurable
         // We are able to measure for same domain iframe ('friendly iframe')
-        if (!beaconSupportCheck.supportsBeacons() && check.geometrySupported == false) {
+        if (!beaconSupportCheck.supportsBeacons() && check.geometrySupported === false) {
             check.viewabilityState = OVVCheck.UNMEASURABLE;
             if (!$ovv.DEBUG) {
                 return check;
@@ -907,9 +903,7 @@ function OVVAsset(uid, dependencies) {
         if (check.geometrySupported) {
             check.technique = OVVCheck.GEOMETRY;
             checkGeometry(check, player);
-            //player.jsTrace("PercentViewable = " + check.percentViewable.toString());
             check.viewabilityState = (check.percentViewable >= 50) ? OVVCheck.VIEWABLE : OVVCheck.UNVIEWABLE;
-
             if ($ovv.DEBUG) {
                 // add an additional field when debugging
                 check.geometryViewabilityState = check.viewabilityState;
@@ -919,7 +913,6 @@ function OVVAsset(uid, dependencies) {
         }
         var controlBeacon = getBeacon(0);
         var controlBeaconContainer = getBeaconContainer(0);
-
         // check to make sure the control beacon is found and its callback has been setup
         if (controlBeacon && controlBeacon.isViewable && controlBeaconContainer) {
             // the control beacon should always be off screen and not viewable,
@@ -967,8 +960,11 @@ function OVVAsset(uid, dependencies) {
                 var cssViewable = (check.cssViewabilityState === OVVCheck.VIEWABLE);
                 var domViewable = (check.domViewabilityState === OVVCheck.VIEWABLE);
                 var beaconViewable = (check.beaconViewabilityState === OVVCheck.VIEWABLE);
+                var cssViewable = (check.cssViewabilityState === OVVCheck.VIEWABLE);
+                var domViewable = (check.domViewabilityState === OVVCheck.VIEWABLE);
                 var geometryViewable = (check.geometryViewabilityState === OVVCheck.VIEWABLE);
-                check.viewabilityState = (cssViewable || domViewable || beaconViewable || geometryViewable) ? OVVCheck.VIEWABLE : OVVCheck.UNVIEWABLE;
+                check.viewabilityState = (cssViewable || domViewable || beaconViewable ||
+                    geometryViewable) ? OVVCheck.VIEWABLE : OVVCheck.UNVIEWABLE;
             }
         }
 
@@ -1031,16 +1027,16 @@ function OVVAsset(uid, dependencies) {
     ///////////////////////////////////////////////////////////////////////////
 
     /**
-    * Checks if the player is made invisible by css attribute 'visibility:hidden'
-    * or 'display:none'.
-    * Is so, viewability at the time of this check is 'not viewable' and no further check
-    * is required.
-    * These properties are inherited, so no need to parse up the DOM hierarchy.
-    * If the player is in an iframe inheritance is restricted to elements within
-    * the DOM of the iframe document
-    * @param {OVVCheck} check The OVVCheck object to populate
-    * @param {Element} player The HTML Element to measure
-    */
+     * Checks if the player is made invisible by css attribute 'visibility:hidden'
+     * or 'display:none'.
+     * Is so, viewability at the time of this check is 'not viewable' and no further check
+     * is required.
+     * These properties are inherited, so no need to parse up the DOM hierarchy.
+     * If the player is in an iframe inheritance is restricted to elements within
+     * the DOM of the iframe document
+     * @param {OVVCheck} check The OVVCheck object to populate
+     * @param {Element} player The HTML Element to measure
+     */
     var checkCssInvisibility = function (check, player) {
         var style = window.getComputedStyle(player, null);
         var visibility = style.getPropertyValue('visibility');
@@ -1054,41 +1050,39 @@ function OVVAsset(uid, dependencies) {
     };
 
     /**
-    * Checks if the player is more then 50% obscured by another dom element.
-    * Is so, viewability at the time of this check is 'not viewable' and no further check
-    * is required.
-    * If the player is in an iframe this check is restricted to elements within
-    * the DOM of the iframe document
-    * @param {OVVCheck} check The OVVCheck object to populate
-    * @param {Element} player The HTML Element to measure
-    */
+     * Checks if the player is more then 50% obscured by another dom element.
+     * Is so, viewability at the time of this check is 'not viewable' and no further check
+     * is required.
+     * If the player is in an iframe this check is restricted to elements within
+     * the DOM of the iframe document
+     * @param {OVVCheck} check The OVVCheck object to populate
+     * @param {Element} player The HTML Element to measure
+     */
     var checkDomObscuring = function(check, player){
-        player.jsTrace("checkDomObscuring");
+        //player.jsTrace("checkDomObscuring");
         var playerRect = player.getBoundingClientRect(),
-        offset = 12, // ToDo: Make sure test points don't overlap beacons.
-        xLeft = playerRect.left+offset,
-        xRight = playerRect.right-offset,
-        yTop = playerRect.top+offset,
-        yBottom = playerRect.bottom-offset,
-        xCenter = Math.floor(playerRect.left+playerRect.width/2),
-        yCenter = Math.floor(playerRect.top+playerRect.height/2),
-        testPoints = [
-            { x:xLeft,   y:yTop },
-            { x:xCenter, y:yTop },
-            { x:xRight,  y:yTop },
-            { x:xLeft,   y:yCenter },
-            { x:xCenter, y:yCenter },
-            { x:xRight,  y:yCenter },
-            { x:xLeft,   y:yBottom },
-            { x:xCenter, y:yBottom },
-            { x:xRight,  y:yBottom }
-        ];
-
+            offset = 12, // ToDo: Make sure test points don't overlap beacons.
+            xLeft = playerRect.left+offset,
+            xRight = playerRect.right-offset,
+            yTop = playerRect.top+offset,
+            yBottom = playerRect.bottom-offset,
+            xCenter = Math.floor(playerRect.left+playerRect.width/2),
+            yCenter = Math.floor(playerRect.top+playerRect.height/2),
+            testPoints = [
+                { x:xLeft,   y:yTop },
+                { x:xCenter, y:yTop },
+                { x:xRight,  y:yTop },
+                { x:xLeft,   y:yCenter },
+                { x:xCenter, y:yCenter },
+                { x:xRight,  y:yCenter },
+                { x:xLeft,   y:yBottom },
+                { x:xCenter, y:yBottom },
+                { x:xRight,  y:yBottom }
+            ];
         for (var p in testPoints) {
             if (testPoints[p].x >= 0 && testPoints[p].y >= 0) {
                 elem = document.elementFromPoint(testPoints[p].x, testPoints[p].y);
-                player.jsTrace("checkDomObscuring : elem" + elem.toString());
-
+                //player.jsTrace("checkDomObscuring : elem" + elem.toString());
                 if (elem != player) {
                     overlappingArea = overlapping(playerRect, elem.getBoundingClientRect());
                     if (overlappingArea > 0) {
@@ -1124,8 +1118,7 @@ function OVVAsset(uid, dependencies) {
     */
     var checkGeometry = function (check, player) {
         var viewabilityResult = geometryViewabilityCalculator.getViewabilityState(player, window);
-        
-        if (!viewabilityResult.error) {            
+        if (!viewabilityResult.error) {
             check.clientWidth = viewabilityResult.clientWidth;
             check.clientHeight = viewabilityResult.clientHeight;
             check.percentViewable =  viewabilityResult.percentViewable - check.percentObscured;
@@ -1134,7 +1127,6 @@ function OVVAsset(uid, dependencies) {
             check.objLeft = viewabilityResult.objLeft;
             check.objRight = viewabilityResult.objRight;
         }
-    
         return viewabilityResult;
     };
 
@@ -1280,7 +1272,6 @@ function OVVAsset(uid, dependencies) {
         // Dynamically unobfuscate to prevent minify from reconstructing original token string
         var reversed = "LRU_FWS_NOCAEB";
         var unreplaced = reversed.split("").reverse().join('');
-
         if (url == '' || url == unreplaced) {
             return;
         }
@@ -1596,7 +1587,7 @@ function OVVAsset(uid, dependencies) {
     player = findPlayer();
 
     // only use the beacons if geometry is not supported, or we we are in DEBUG mode.
-    if ($ovv.geometrySupported == null || $ovv.DEBUG) {
+    if ($ovv.geometrySupported == false || $ovv.DEBUG) {
         if ($ovv.browser.ID === $ovv.browserIDEnum.Firefox){
             //Use frame technique to measure viewability in cross domain FF scenario
             getBeaconFunc = getFrameBeacon;
@@ -1625,7 +1616,6 @@ function OVVGeometryViewabilityCalculator() {
         }
         var assetRect = element.getBoundingClientRect();
         var playerArea = assetRect.width * assetRect.height;
-
         if ((viewPortSize.area / playerArea) < 0.5) {
             // no position testing requires if viewport is less than half the are of the player
             viewablePercentage = 100 * viewPortSize.area / playerArea;
@@ -1665,7 +1655,6 @@ function OVVGeometryViewabilityCalculator() {
         }
     }
 
-
     /**
      * Get the viewport size by taking the smallest dimensions
      */
@@ -1674,6 +1663,7 @@ function OVVGeometryViewabilityCalculator() {
             width: Infinity,
             height: Infinity,
             area:Infinity
+
         };
 
         //document.body  - Handling case where viewport is represented by documentBody
@@ -1714,6 +1704,7 @@ function OVVGeometryViewabilityCalculator() {
      * @param {element} The element to get his visible dimension
      * @param {contextWindow} The relative window
      */
+
     var getAssetVisibleDimension = function (element, contextWindow) {
         var currWindow = contextWindow;
         //Set parent window for recursive call
@@ -1771,10 +1762,10 @@ function OVVGeometryViewabilityCalculator() {
                     top: elementRect.top + resultPosition.top,
                     bottom: elementRect.bottom + resultPosition.top
                 };
+            ;
         }
         return resultPosition;
     };
-
     /**
      * Calculate asset viewable percentage given the asset size and the viewport
      * @param {effectiveAssetRect} the asset viewable rect; effectiveAssetRect = {left :, top :,bottom:,right:,}
@@ -1799,7 +1790,6 @@ function OVVGeometryViewabilityCalculator() {
         {
             return 0;
         }
-
         // ---- Handle asset visible height ----
         // the asset is partially above the viewport
         if (effectiveAssetRect.top < 0) {
@@ -1819,7 +1809,6 @@ function OVVGeometryViewabilityCalculator() {
         else {
             assetVisibleHeight = asset.height;
         }
-
         // ---- Handle asset visible width ----
         // the asset is partially left to the viewport
         if (effectiveAssetRect.left < 0) {
@@ -1839,7 +1828,6 @@ function OVVGeometryViewabilityCalculator() {
         else {
             assetVisibleWidth = asset.width;
         }
-
         // Divied the visible asset area by the full asset area to the the visible percentage
         return Math.round((((assetVisibleWidth * assetVisibleHeight)) / (asset.width * asset.height)) * 100);
     };
@@ -1859,7 +1847,6 @@ Function.prototype.memoize = function() {
         return fn.memoized.apply(fn, arguments);
     }
 };
-
 // initialize the OVV object if it doesn't exist
 window.$ovv = window.$ovv || new OVV();
 
