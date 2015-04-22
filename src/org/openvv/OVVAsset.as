@@ -223,7 +223,7 @@ package org.openvv {
          * @param interval The number of milliseconds between polls to
          * JavaScript for viewability information. Defaults to 250.
          */
-        public function OVVAsset(adRef:DisplayObject, beaconSwfUrl:String = null, id:String = null) {
+        public function OVVAsset(adRef:*, beaconSwfUrl:String = null, id:String = null) {
             if (!externalInterfaceIsAvailable()) {
                 dispatchEvent(new OVVEvent(OVVEvent.OVVError, {
                     "message": "ExternalInterface unavailable"
@@ -232,7 +232,7 @@ package org.openvv {
             }
 
             _id = (id !== null) ? id : "ovv" + Math.floor(Math.random() * 1000000000).toString();
-            _ad = adRef;
+            _ad = adRef as DisplayObject;
             setStage();
             ExternalInterface.addCallback(_id, flashProbe);
             ExternalInterface.addCallback("onJsReady", onJsReady);
