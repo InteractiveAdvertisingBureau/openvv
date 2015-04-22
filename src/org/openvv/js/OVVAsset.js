@@ -1771,7 +1771,7 @@ function OVVGeometryViewabilityCalculator() {
      */
     var getAssetViewablePercentage = function (effectiveAssetRect, viewPortSize) {
         // holds the asset viewable surface
-        var assetVisibleHeight = 0, assetVisiableWidth = 0;
+        var assetVisibleHeight = 0, assetVisibleWidth = 0;
         var asset = {
             width: effectiveAssetRect.right - effectiveAssetRect.left,
             height: effectiveAssetRect.bottom - effectiveAssetRect.top
@@ -1810,10 +1810,10 @@ function OVVGeometryViewabilityCalculator() {
         // the asset is partially left to the viewport
         if (effectiveAssetRect.left < 0) {
             // take the visible part
-            assetVisiableWidth = asset.width + effectiveAssetRect.left;
+            assetVisibleWidth = asset.width + effectiveAssetRect.left;
             //if the asset width is larger then the viewport width, set the asset width to be the viewport width
-            if (assetVisiableWidth > viewPortSize.width) {
-                assetVisiableWidth = viewPortSize.width;
+            if (assetVisibleWidth > viewPortSize.width) {
+                assetVisibleWidth = viewPortSize.width;
             }
         }
         // the asset is partially right to the viewport
