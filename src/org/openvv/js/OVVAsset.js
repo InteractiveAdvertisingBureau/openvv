@@ -957,8 +957,6 @@ function OVVAsset(uid, dependencies) {
             if (check.geometryViewabilityState === null && check.beaconViewabilityState === null) {
                 check.viewabilityState = OVVCheck.UNMEASURABLE;
             } else {
-                var cssViewable = (check.cssViewabilityState === OVVCheck.VIEWABLE);
-                var domViewable = (check.domViewabilityState === OVVCheck.VIEWABLE);
                 var beaconViewable = (check.beaconViewabilityState === OVVCheck.VIEWABLE);
                 var cssViewable = (check.cssViewabilityState === OVVCheck.VIEWABLE);
                 var domViewable = (check.domViewabilityState === OVVCheck.VIEWABLE);
