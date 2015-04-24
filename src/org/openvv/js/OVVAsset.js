@@ -1119,7 +1119,7 @@ function OVVAsset(uid, dependencies) {
         if (!viewabilityResult.error) {
             check.clientWidth = viewabilityResult.clientWidth;
             check.clientHeight = viewabilityResult.clientHeight;
-            check.percentViewable =  viewabilityResult.percentViewable - check.percentObscured;
+            check.percentViewable =  ( viewabilityResult.percentViewable - check.percentObscured) * 100;
             check.objTop = viewabilityResult.objTop;
             check.objBottom = viewabilityResult.objBottom;
             check.objLeft = viewabilityResult.objLeft;
@@ -1383,7 +1383,7 @@ function OVVAsset(uid, dependencies) {
         var playerLocation = player.getClientRects()[0];
 
         // when we don't have an initial position, or the position hasn't changed 
-        if (lastPlayerLocation && (lastPlayerLocation.left === playerLocation.left && lastPlayerLocation.right === playerLocation.right && lastPlayerLocation.top === playerLocation.top && lastPlayerLocation.bottom === playerLocation.bottom)) {
+        if (!!lastPlayerLocation && !!playerLocation && (lastPlayerLocation.left === playerLocation.left && lastPlayerLocation.right === playerLocation.right && lastPlayerLocation.top === playerLocation.top && lastPlayerLocation.bottom === playerLocation.bottom)) {
             // no need to update positions
             return;
         }
@@ -1608,22 +1608,42 @@ function OVVAsset(uid, dependencies) {
 function OVVGeometryViewabilityCalculator() {
 
     this.getViewabilityState = function (element, contextWindow) {
-        var viewPortSize = getMinViewPortSize();
-        if (viewPortSize.height == Infinity || viewPortSize.width == Infinity) {
+        var minViewPortSize = getMinViewPortSize(),
+            viewablePercentage;
+        if (minViewPortSize.height == Infinity || minViewPortSize.width == Infinity) {
             return { error: 'Failed to determine viewport'};
         }
         var assetRect = element.getBoundingClientRect();
         var playerArea = assetRect.width * assetRect.height;
-        if ((viewPortSize.area / playerArea) < 0.5) {
+        if ((minViewPortSize.area / playerArea) < 0.5) {
             // no position testing requires if viewport is less than half the are of the player
             viewablePercentage = 100 * viewPortSize.area / playerArea;
         }else{
-            var assetSize = getAssetVisibleDimension(element, contextWindow);
-            var viewablePercentage = getAssetViewablePercentage(assetSize, viewPortSize);
+            var viewPortSize = getViewPortSize(window.top),
+                visibleAssetSize = getAssetVisibleDimension(element, contextWindow);
+            //var viewablePercentage = getAssetViewablePercentage(assetSize, viewPortSize);
+            //Height within viewport:
+            if ( visibleAssetSize.bottom > viewPortSize.height ) {
+                //Partially below the bottom
+                visibleAssetSize.height -= (visibleAssetSize.bottom - viewPortSize.height);
+            }
+            if ( visibleAssetSize.top < 0 ) {
+                //Partially above the top
+                visibleAssetSize.height += visibleAssetSize.top;
+            }
+            if ( visibleAssetSize.left < 0 ) {
+                visibleAssetSize.width += visibleAssetSize.left;
+            }
+            if ( visibleAssetSize.right > viewPortSize.width ) {
+                visibleAssetSize.width -= ( visibleAssetSize.right - viewPortSize.width );
+            }
+            // Viewable percentage is the portion of the ad that's visible divided by the size of the ad
+            viewablePercentage = ( visibleAssetSize.width * visibleAssetSize.height ) / playerArea;
         }
+        /*
         //Get player dimensions:
         var assetRect = element.getBoundingClientRect();
-
+        */
         return {
             clientWidth: viewPortSize.width,
             clientHeight: viewPortSize.height,
@@ -1751,16 +1771,16 @@ function OVVGeometryViewabilityCalculator() {
 
         if (element) {
             var elementRect = element.getBoundingClientRect();
-            if (currWindow != parentWindow)
+            if (currWindow != parentWindow) {
                 resultPosition = getPositionRelativeToViewPort(currWindow.frameElement, parentWindow);
-            else
+            } else {
                 resultPosition = {
                     left: elementRect.left + resultPosition.left,
                     right: elementRect.right + resultPosition.left,
                     top: elementRect.top + resultPosition.top,
                     bottom: elementRect.bottom + resultPosition.top
                 };
-            ;
+            }
         }
         return resultPosition;
     };
