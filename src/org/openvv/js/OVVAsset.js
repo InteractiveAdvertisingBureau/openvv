@@ -1616,8 +1616,8 @@ function OVVGeometryViewabilityCalculator() {
         var assetRect = element.getBoundingClientRect();
         var playerArea = assetRect.width * assetRect.height;
         if ((minViewPortSize.area / playerArea) < 0.5) {
-            // no position testing requires if viewport is less than half the are of the player
-            viewablePercentage = 100 * viewPortSize.area / playerArea;
+            // no position testing required if viewport is less than half the area of the player
+            viewablePercentage = 100 * minViewPortSize.area / playerArea;
         }else{
             var viewPortSize = getViewPortSize(window.top),
                 visibleAssetSize = getAssetVisibleDimension(element, contextWindow);
@@ -1638,7 +1638,7 @@ function OVVGeometryViewabilityCalculator() {
                 visibleAssetSize.width -= ( visibleAssetSize.right - viewPortSize.width );
             }
             // Viewable percentage is the portion of the ad that's visible divided by the size of the ad
-            viewablePercentage = ( visibleAssetSize.width * visibleAssetSize.height ) / playerArea;
+            viewablePercentage = Math100 * ( visibleAssetSize.width * visibleAssetSize.height ) / playerArea;
         }
         /*
         //Get player dimensions:
