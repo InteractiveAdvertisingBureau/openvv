@@ -1119,7 +1119,7 @@ function OVVAsset(uid, dependencies) {
         if (!viewabilityResult.error) {
             check.clientWidth = viewabilityResult.clientWidth;
             check.clientHeight = viewabilityResult.clientHeight;
-            check.percentViewable =  ( viewabilityResult.percentViewable - check.percentObscured) * 100;
+            check.percentViewable = viewabilityResult.percentViewable - check.percentObscured;
             check.objTop = viewabilityResult.objTop;
             check.objBottom = viewabilityResult.objBottom;
             check.objLeft = viewabilityResult.objLeft;
@@ -1638,7 +1638,7 @@ function OVVGeometryViewabilityCalculator() {
                 visibleAssetSize.width -= ( visibleAssetSize.right - viewPortSize.width );
             }
             // Viewable percentage is the portion of the ad that's visible divided by the size of the ad
-            viewablePercentage = Math100 * ( visibleAssetSize.width * visibleAssetSize.height ) / playerArea;
+            viewablePercentage = Math.floor( 100 * ( visibleAssetSize.width * visibleAssetSize.height ) / playerArea );
         }
         /*
         //Get player dimensions:
