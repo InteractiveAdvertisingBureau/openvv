@@ -891,6 +891,7 @@ function OVVAsset(uid, dependencies) {
             //player.jsTrace("obscured : " + check.percentObscured.toString());
             //player.jsTrace({OBSCURED:check.percentObscured});
         }
+
         // if we're in IE and we're in a cross-domain iframe, return unmeasurable
         // We are able to measure for same domain iframe ('friendly iframe')
         if (!beaconSupportCheck.supportsBeacons() && check.geometrySupported === false) {
@@ -1057,7 +1058,6 @@ function OVVAsset(uid, dependencies) {
      * @param {Element} player The HTML Element to measure
      */
     var checkDomObscuring = function(check, player){
-        //player.jsTrace("checkDomObscuring");
         var playerRect = player.getBoundingClientRect(),
             offset = 12, // ToDo: Make sure test points don't overlap beacons.
             xLeft = playerRect.left+offset,
@@ -1080,8 +1080,7 @@ function OVVAsset(uid, dependencies) {
         for (var p in testPoints) {
             if (testPoints[p].x >= 0 && testPoints[p].y >= 0) {
                 elem = document.elementFromPoint(testPoints[p].x, testPoints[p].y);
-                //player.jsTrace("checkDomObscuring : elem" + elem.toString());
-                if (elem != player) {
+                if (elem != null && elem != player) {
                     overlappingArea = overlapping(playerRect, elem.getBoundingClientRect());
                     if (overlappingArea > 0) {
                         check.percentObscured = 100 * overlapping(playerRect, elem.getBoundingClientRect());
@@ -1108,7 +1107,7 @@ function OVVAsset(uid, dependencies) {
 
     /**
     * Performs the geometry technique to determine viewability. First gathers
-    * information on the viewport and on the player. The compares the two to
+    * information on the viewport and on the player. Then compares the two to
     * determine what percentage, if any, of the player is within the bounds
     * of the viewport.
     * @param {OVVCheck} check The OVVCheck object to populate
@@ -1610,14 +1609,14 @@ function OVVGeometryViewabilityCalculator() {
     this.getViewabilityState = function (element, contextWindow) {
         var minViewPortSize = getMinViewPortSize(),
             viewablePercentage;
-        if (minViewPortSize.height == Infinity || minViewPortSize.width == Infinity) {
+        if (minViewPortSize.area == Infinity) {
             return { error: 'Failed to determine viewport'};
         }
         var assetRect = element.getBoundingClientRect();
         var playerArea = assetRect.width * assetRect.height;
         if ((minViewPortSize.area / playerArea) < 0.5) {
             // no position testing required if viewport is less than half the area of the player
-            viewablePercentage = 100 * minViewPortSize.area / playerArea;
+            viewablePercentage = Math.floor(100 * minViewPortSize.area / playerArea);
         }else{
             var viewPortSize = getViewPortSize(window.top),
                 visibleAssetSize = getAssetVisibleDimension(element, contextWindow);
@@ -1659,19 +1658,23 @@ function OVVGeometryViewabilityCalculator() {
     // PRIVATE FUNCTIONS
     ///////////////////////////////////////////////////////////////////////////
 
-    var getMinViewPortSize = function () {
-        var browserViewPortSize = getViewPortSize(window.top);
-        if (!$ovv.IN_IFRAME){
-            return browserViewPortSize;
-        }
+    // Check nested iframes
+    var getMinViewPortSize = function (){
+        var minViewPortSize = getViewPortSize(window),
+            minViewPortArea = minViewPortSize.area,
+            currentWindow = window;
 
-        var frameViewPortSize = getViewPortSize(window);
-        if (browserViewPortSize.area < frameViewPortSize.area){
-            return browserViewPortSize;
-        }else{
-            return frameViewPortSize;
+        while (currentWindow != window.top){
+            currentWindow = currentWindow.parent;
+            viewPortSize = getViewPortSize(currentWindow);
+            if (viewPortSize.area < minViewPortArea){
+                minViewPortArea = viewPortSize.area;
+                minViewPortSize = viewPortSize;
+            }
         }
+        return minViewPortSize;
     }
+
 
     /**
      * Get the viewport size by taking the smallest dimensions
@@ -1681,7 +1684,6 @@ function OVVGeometryViewabilityCalculator() {
             width: Infinity,
             height: Infinity,
             area:Infinity
-
         };
 
         //document.body  - Handling case where viewport is represented by documentBody
@@ -1711,9 +1713,7 @@ function OVVGeometryViewabilityCalculator() {
         if (!!contextWindow.innerHeight && !isNaN(contextWindow.innerHeight)) {
             viewPortSize.height = Math.min(viewPortSize.height, contextWindow.innerHeight);
         }
-        if (!(viewPortSize.height == Infinity || viewPortSize.width == Infinity)){
-            viewPortSize.area = viewPortSize.height * viewPortSize.width;
-        }
+        viewPortSize.area = viewPortSize.height * viewPortSize.width;
         return viewPortSize;
     };
 
