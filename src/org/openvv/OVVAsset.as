@@ -195,7 +195,7 @@ package org.openvv {
          */
 	    private var _ad:*;
 
-	        private var _isPaused: Boolean = false;
+        private var _isPaused: Boolean = false;
 		/**
 		 * True if VPAID AdImpression event has been received
 		 */
@@ -223,7 +223,7 @@ package org.openvv {
          * @param interval The number of milliseconds between polls to
          * JavaScript for viewability information. Defaults to 250.
          */
-        public function OVVAsset(beaconSwfUrl:String = null, id:String = null, stage:Stage=null) {
+        public function OVVAsset(adRef:*, beaconSwfUrl:String = null, id:String = null) {
             if (!externalInterfaceIsAvailable()) {
                 dispatchEvent(new OVVEvent(OVVEvent.OVVError, {
                     "message": "ExternalInterface unavailable"
@@ -232,8 +232,8 @@ package org.openvv {
             }
 
             _id = (id !== null) ? id : "ovv" + Math.floor(Math.random() * 1000000000).toString();
-            _stage = stage;
-
+            _ad = adRef as DisplayObject;
+            setStage();
             ExternalInterface.addCallback(_id, flashProbe);
             ExternalInterface.addCallback("onJsReady", onJsReady);
 
@@ -285,11 +285,6 @@ package org.openvv {
 			throw "You must pass an EventDispatcher to init event wiring";
 		registerEventHandler(vpaidEventsDispatcher);
 		_vpaidEventsDispatcher = vpaidEventsDispatcher;
-
-		if ((Object)(vpaidEventsDispatcher).hasOwnProperty('getVPAID') && vpaidEventsDispatcher['getVPAID']  is Function) {
-            _ad = (Object)(_vpaidEventsDispatcher).getVPAID();
-            setStage();
-        }
 	}
 	
 	/**
@@ -325,17 +320,12 @@ package org.openvv {
 
             var jsResults: Object = ExternalInterface.call("$ovv.getAssetById('" + _id + "')" + ".checkViewability");
             var results: OVVCheck = new OVVCheck(jsResults);
-            
+
             if (results && !!results.error)
                 raiseError(results);
 
             if (_ad != null && _ad.hasOwnProperty('adVolume')) {
                 results.volume = _ad['adVolume'];
-            }
-
-            if (!_stage)
-            {
-                return results;
             }
 
             var displayState:String = getDisplayState(results);
@@ -391,15 +381,19 @@ package org.openvv {
          * When the JavaScript portion of OpenVV is ready and the beacons have loaded (if needed),
          * this function is called so that the ad can wait for the beacons to load before dispatching AdLoaded
          */
-		public function onJsReady(): void {
-			jsReady = true;
-			if ( adStarted ) {
-				startImpressionTimer();
-			}
-			raiseReady();
-		}
+        public function onJsReady(): void {
+            trace("JS READY!")
+            jsReady = true;
+            if ( adStarted ) {
+                startImpressionTimer();
+            }
+            raiseReady();
+        }
+        public function jsTrace(obj:String): void {
+            trace(obj);
+        }
 
-		/**
+        /**
 		 * Ready state from the JS code, including beacons.
 		 * @return
 		 */
@@ -457,7 +451,6 @@ package org.openvv {
                     displayState = StageDisplayState.FULL_SCREEN;
                 }
             }
-
             return displayState;
         }
 
@@ -557,7 +550,7 @@ package org.openvv {
 				var injectTag:String =
 					'function () {' +
 					'var tag = document.createElement("script");' +
-					'tag.src = ' + JSON.stringify(tagUrl) + ';' +
+                    'tag.src = "' + tagUrl.replace(/"/g, '%22') + '";' +
 					'tag.type="text/javascript";' +
 					'document.getElementsByTagName("body")[0].appendChild(tag); }';
 				ExternalInterface.call( injectTag );

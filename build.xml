@@ -36,6 +36,7 @@
 			<arg path="${tmp.dir}/OVVAsset.min.js"/>
 			<arg value="-c"/>
 			<arg value="-m"/>
+			<arg value="evaluate=false"/>
 		</exec>
 	</target>
 
