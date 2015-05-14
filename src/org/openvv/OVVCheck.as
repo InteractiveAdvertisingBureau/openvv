@@ -50,6 +50,14 @@ package org.openvv {
         public static const GEOMETRY: String = "geometry";
 
         /**
+         * OVVCheck.technique is set to CSS_VISIBILITY when a property value of
+         * 'visibility:hidden' or 'display:none' on the player's embed object,
+         * or on any containing element in the same javascript domain (page or iframe)
+         * is used to determine that viewability state is OVVCheck.UNVIEWABLE
+         */
+        public static const CSS_VISIBILITY: String = "css_visibility";
+
+        /**
          * OpenVV was unable to determine whether the asset was viewable or not
          */
         public static const UNMEASURABLE: String = 'unmeasurable';
@@ -63,6 +71,12 @@ package org.openvv {
          * At least 50% of the asset is viewable within the viewport
          */
         public static const VIEWABLE: String = 'viewable';
+
+        /**
+         * The value that {@link OVVCheck#viewabilityState} will be set to if the beacons
+         * are not ready to determine the viewability state
+         */
+        public static const NOT_READY: String = "not_ready";
 
         ////////////////////////////////////////////////////////////
         //   ATTRIBUTES 
