@@ -1229,7 +1229,7 @@ function OVVID_OVVAsset(uid, dependencies) {
         // // when top left and bottom right corners are visible
         if ((beacons[OUTER_TOP_LEFT] && beacons[OUTER_BOTTOM_RIGHT]) &&
             // and any of their diagonals are covered
-            (!beacons[MIDDLE_TOP_LEFT] || ![INNER_TOP_LEFT] || !beacons[CENTER] || beacons[INNER_BOTTOM_RIGHT] || beacons[MIDDLE_BOTTOM_RIGHT])
+            (!beacons[MIDDLE_TOP_LEFT] || !beacons[INNER_TOP_LEFT] || !beacons[CENTER] || !beacons[INNER_BOTTOM_RIGHT] || !beacons[MIDDLE_BOTTOM_RIGHT])
         ) {
             return null;
         }
