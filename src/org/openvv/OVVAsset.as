@@ -28,6 +28,7 @@ package org.openvv {
     import flash.utils.Timer;
     import org.openvv.events.OVVEvent;
     import net.iab.VPAIDEvent;
+
     /**
      * The event dispatched when the asset has been viewable for 5 contiguous seconds
      */
@@ -222,7 +223,7 @@ package org.openvv {
          * @param interval The number of milliseconds between polls to
          * JavaScript for viewability information. Defaults to 250.
          */
-        public function OVVAsset(adRef:DisplayObject, beaconSwfUrl:String = null, id:String = null) {
+        public function OVVAsset(adRef:*, beaconSwfUrl:String = null, id:String = null) {
             if (!externalInterfaceIsAvailable()) {
                 dispatchEvent(new OVVEvent(OVVEvent.OVVError, {
                     "message": "ExternalInterface unavailable"
@@ -231,7 +232,7 @@ package org.openvv {
             }
 
             _id = (id !== null) ? id : "ovv" + Math.floor(Math.random() * 1000000000).toString();
-            _ad = adRef;
+            _ad = adRef as DisplayObject;
             setStage();
             ExternalInterface.addCallback(_id, flashProbe);
             ExternalInterface.addCallback("onJsReady", onJsReady);
@@ -319,7 +320,7 @@ package org.openvv {
 
             var jsResults: Object = ExternalInterface.call("$ovv.getAssetById('" + _id + "')" + ".checkViewability");
             var results: OVVCheck = new OVVCheck(jsResults);
-            
+
             if (results && !!results.error)
                 raiseError(results);
 
@@ -380,15 +381,19 @@ package org.openvv {
          * When the JavaScript portion of OpenVV is ready and the beacons have loaded (if needed),
          * this function is called so that the ad can wait for the beacons to load before dispatching AdLoaded
          */
-		public function onJsReady(): void {
-			jsReady = true;
-			if ( adStarted ) {
-				startImpressionTimer();
-			}
-			raiseReady();
-		}
+        public function onJsReady(): void {
+            trace("JS READY!")
+            jsReady = true;
+            if ( adStarted ) {
+                startImpressionTimer();
+            }
+            raiseReady();
+        }
+        public function jsTrace(obj:String): void {
+            trace(obj);
+        }
 
-		/**
+        /**
 		 * Ready state from the JS code, including beacons.
 		 * @return
 		 */
@@ -541,10 +546,11 @@ package org.openvv {
 				if (!externalInterfaceIsAvailable()) {					
 					return;
 				}
+				
 				var injectTag:String =
 					'function () {' +
 					'var tag = document.createElement("script");' +
-					'tag.src = ' + tagUrl + ';' +
+                    'tag.src = "' + tagUrl.replace(/"/g, '%22') + '";' +
 					'tag.type="text/javascript";' +
 					'document.getElementsByTagName("body")[0].appendChild(tag); }';
 				ExternalInterface.call( injectTag );
@@ -658,14 +664,12 @@ package org.openvv {
 		private function raiseImpression(ovvData:*):void
 		{
 			dispatchEvent(new OVVEvent(OVVEvent.OVVImpression, ovvData));
-			//_intervalTimer.removeEventListener(TimerEvent.TIMER, onIntervalCheck);
 			_impressionEventRaised = true;
 		}
 
 		private function raiseImpressionUnmeasurable(ovvData:*):void
 		{
 			dispatchEvent(new OVVEvent(OVVEvent.OVVImpressionUnmeasurable, ovvData));
-			//_intervalTimer.removeEventListener(TimerEvent.TIMER, onIntervalCheck);
 			_impressionUnmeasurableEventRaised = true;
 		}
 
