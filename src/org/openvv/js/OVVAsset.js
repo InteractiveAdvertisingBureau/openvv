@@ -1089,7 +1089,7 @@ function OVVAsset(uid, dependencies) {
         var playerLocation = player.getClientRects()[0];
 
         // when we don't have an initial position, or the position hasn't changed 
-        if (lastPlayerLocation && (lastPlayerLocation.left === playerLocation.left && lastPlayerLocation.right === playerLocation.right && lastPlayerLocation.top === playerLocation.top && lastPlayerLocation.bottom === playerLocation.bottom)) {
+        if (lastPlayerLocation && playerLocation && (lastPlayerLocation.left === playerLocation.left && lastPlayerLocation.right === playerLocation.right && lastPlayerLocation.top === playerLocation.top && lastPlayerLocation.bottom === playerLocation.bottom)) {
             // no need to update positions
             return;
         }
