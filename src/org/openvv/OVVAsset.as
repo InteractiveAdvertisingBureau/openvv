@@ -325,8 +325,8 @@ package org.openvv {
             if (results && !!results.error)
                 raiseError(results);
 
-            if (_ad != null && _ad.hasOwnProperty('adVolume')) {
-                results.volume = _ad['adVolume'];
+            if (_vpaidEventsDispatcher != null && _vpaidEventsDispatcher.hasOwnProperty('adVolume')) {
+                results.volume = _vpaidEventsDispatcher['adVolume'];
             }
 
             var displayState:String = getDisplayState(results);
