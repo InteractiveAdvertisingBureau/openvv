@@ -296,6 +296,7 @@ package org.openvv {
         }
 	}
 
+
 	/**
 	 * Add a JavaScript resource upon reciveing a given vpaidEvent
 	 * @param	vpaidEvent The name of the VPAID event to add the JavaScript resource upon recived
