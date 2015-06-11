@@ -192,9 +192,13 @@ package org.openvv {
 
 		private var _vpaidEventsDispatcher:IEventDispatcher = null;
 		/**
-	     * Reference to the vpaid ad
+	     * Reference to the ad
          */
 	    private var _ad:*;
+        /**
+         * Reference to the vpaid ad
+         */
+        private var _vpaidAd:*;
 
         private var _isPaused: Boolean = false;
 		/**
@@ -295,8 +299,7 @@ package org.openvv {
 		_vpaidEventsDispatcher = vpaidEventsDispatcher;
 
         if ((Object)(vpaidEventsDispatcher).hasOwnProperty('getVPAID') && vpaidEventsDispatcher['getVPAID']  is Function) {
-            _ad = (Object)(_vpaidEventsDispatcher).getVPAID();
-            setStage();
+            _vpaidAd = (Object)(_vpaidEventsDispatcher).getVPAID();
         }
 	}
 
@@ -338,8 +341,9 @@ package org.openvv {
             if (results && !!results.error)
                 raiseError(results);
 
-            if (_ad != null && _ad.hasOwnProperty('adVolume')) {
-                results.volume = _ad['adVolume'];
+            if (_vpaidAd != null && _vpaidAd.hasOwnProperty('adVolume')) {
+
+                results.volume = _vpaidAd['adVolume'];
             }
 
             var displayState:String = getDisplayState(results);
