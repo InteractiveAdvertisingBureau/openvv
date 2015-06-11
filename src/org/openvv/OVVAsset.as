@@ -234,10 +234,14 @@ package org.openvv {
             }
 
             _id = (id !== null) ? id : "ovv" + Math.floor(Math.random() * 1000000000).toString();
-//            if ( !!adRef ) {
-//                _ad = adRef as DisplayObject;
-//            }
-//            setStage();
+
+            ////////  ????  ///////////////
+            if ( !!adRef ) {
+                _ad = adRef as DisplayObject;
+            }
+            setStage();
+            ////////  ????  ///////////////
+
             ExternalInterface.addCallback(_id, flashProbe);
             ExternalInterface.addCallback("onJsReady" + _id, onJsReady);
 
@@ -455,6 +459,7 @@ package org.openvv {
                 // restrictions, either way we can ignore this error
             }
 
+
             if(!hasStageAccess && _ad && (_ad is DisplayObject))
             {
                 if ((_ad.width - (results.objRight - results.objLeft)) > 10 && (_ad.height - (results.objBottom - results.objTop)) > 10) {
@@ -478,7 +483,6 @@ package org.openvv {
          *
          */
         private function onIntervalCheck(event: TimerEvent): void {
-            ExternalInterface.call("console.log","onIntervalCheck");
             var results: Object = checkViewability();
 			raiseLog(results);
 
