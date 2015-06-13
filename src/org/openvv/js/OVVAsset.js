@@ -1080,7 +1080,7 @@ function OVVAsset(uid, dependencies) {
         for (var p in testPoints) {
             if (testPoints[p].x >= 0 && testPoints[p].y >= 0) {
                 elem = document.elementFromPoint(testPoints[p].x, testPoints[p].y);
-                if (elem != null && elem != player) {
+                if (elem != null && elem != player && !player.contains(elem)) {
                     overlappingArea = overlapping(playerRect, elem.getBoundingClientRect());
                     if (overlappingArea > 0) {
                         check.percentObscured = 100 * overlapping(playerRect, elem.getBoundingClientRect());
