@@ -189,7 +189,7 @@ function OVV() {
 
         if (getPreviousEvents) {
             for (key in previousEvents[uid]) {
-                if (contains(previousEvents[uid][key].eventName, events)) {
+                if (previousEvents[uid][key] && contains(previousEvents[uid][key].eventName, events)) {
                     runSafely(function () {
                         func(uid, previousEvents[uid][key]);
                     });
@@ -988,7 +988,7 @@ function OVV_OVVID_Asset(uid, dependencies) {
         beaconsStarted++;
 
         if (beaconsReady()) {
-            player.onJsReady();
+            player['onJsReady' + uid]();
         }
     };
 
@@ -1081,7 +1081,7 @@ function OVV_OVVID_Asset(uid, dependencies) {
         for (var p in testPoints) {
             if (testPoints[p].x >= 0 && testPoints[p].y >= 0) {
                 elem = document.elementFromPoint(testPoints[p].x, testPoints[p].y);
-                if (elem != null && elem != player) {
+                if (elem != null && elem != player && !player.contains(elem)) {
                     overlappingArea = overlapping(playerRect, elem.getBoundingClientRect());
                     if (overlappingArea > 0) {
                         check.percentObscured = 100 * overlapping(playerRect, elem.getBoundingClientRect());
@@ -1599,8 +1599,8 @@ function OVV_OVVID_Asset(uid, dependencies) {
             createBeacons.bind(this)('BEACON_SWF_URL');
         }
     } else if (player && player.onJsReady) {
-        // since we don't have to wait for beacons to be ready, we're ready now
-        setTimeout( function(){ player.onJsReady() }, 5 ); //Use a tiny timeout to keep this async like the beacons
+		// since we don't have to wait for beacons to be ready, we're ready now
+		setTimeout( function(){ player['onJsReady' + uid]() }, 5 ); //Use a tiny timeout to keep this async like the beacons
     }
 }
 

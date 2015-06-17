@@ -101,8 +101,9 @@ package org.openvv {
         /**
          * Hold OVV version. Will past to JavaScript as well $ovv.version
          */
+
         public static const RELEASE_VERSION: String = "1.2.0";
-        
+
 
         ////////////////////////////////////////////////////////////
         //   ATTRIBUTES 
@@ -235,7 +236,7 @@ package org.openvv {
             _ad = adRef as DisplayObject;
             setStage();
             ExternalInterface.addCallback(_id, flashProbe);
-            ExternalInterface.addCallback("onJsReady", onJsReady);
+            ExternalInterface.addCallback("onJsReady" + _id, onJsReady);
 
             _sprite = new Sprite();
             _renderMeter = new OVVRenderMeter(_sprite);
