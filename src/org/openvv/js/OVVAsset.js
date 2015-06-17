@@ -71,9 +71,12 @@ function OVV() {
     };
 
     this.servingScenario = getServingScenarioType(this.servingScenarioEnum);
-    this.geometrySupported = this.servingScenario !== this.servingScenarioEnum.CrossDomainIframe;
+    this.IN_XD_IFRAME =  (this.servingScenario == this.servingScenarioEnum.CrossDomainIframe);
 
-    // To support older versions of OVV_OVVID_Asset
+	// Temporarily restore beacon testing for same-domain iframes: Iframe geometry calculation is broken
+	this.geometrySupported = !this.IN_IFRAME;
+
+	// To support older versions of OVVAsset
     var browserData = new OVVBrowser(this.userAgent);
 
     this.browser = browserData.getBrowser();
@@ -1569,17 +1572,27 @@ function OVV_OVVID_Asset(uid, dependencies) {
     };
 
     var isInFocus = function () {
-        var inFocus = true;
-        if (typeof document.hidden !== 'undefined') {
-            inFocus = window.document.hidden ? false : true;
-        } else if (document.hasFocus) {
-            inFocus = document.hasFocus();
-        }
-        if ($ovv.IN_IFRAME === false && inFocus === true && document.hasFocus) {
-            inFocus = document.hasFocus();
-        }
+	    if (document.hidden !== 'undefined'){
+	        if (document.hidden === true){
+			    // Either the browser window is minified or the page is on an inactive tab.
+			    // Ad cannot be visible. No need to test document.hasFocus()
+			    return false;
+		    }
+	    }
 
-        return inFocus;
+	    // Un-minified, active tab (or 'document.hidden' not supported). Are we in the active window? ...
+	    if ($ovv.IN_XD_IFRAME) {
+			//Cannot be determined : Give benefit of the doubt.
+		    return true;
+	    }
+
+	    // If in same-domain iframe (or not in iframe at all)  :
+	    if (window.top.document.hasFocus) {
+		    return window.top.document.hasFocus();
+	    }
+
+		//Cannot be determined : Give benefit of the doubt.
+	    return true;
     };
 
     player = findPlayer();
