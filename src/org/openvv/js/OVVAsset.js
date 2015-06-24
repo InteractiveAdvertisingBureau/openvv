@@ -1597,7 +1597,7 @@ function OVVAsset(uid, dependencies) {
             // 'BEACON_SWF_URL' is String substituted from ActionScript
             createBeacons.bind(this)('BEACON_SWF_URL');
         }
-    } else if (player && player.onJsReady) {
+    } else if (player && player['onJsReady' + uid]) {
 		// since we don't have to wait for beacons to be ready, we're ready now
 		setTimeout( function(){ player['onJsReady' + uid]() }, 5 ); //Use a tiny timeout to keep this async like the beacons
     }
