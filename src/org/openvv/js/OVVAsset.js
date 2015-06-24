@@ -71,6 +71,9 @@ function OVV() {
     };
 
     this.servingScenario = getServingScenarioType(this.servingScenarioEnum);
+	// For use in enhanced "isInFocus()" test
+	this.IN_XD_IFRAME =  (this.servingScenario == this.servingScenarioEnum.CrossDomainIframe);
+
     this.geometrySupported = this.servingScenario !== this.servingScenarioEnum.CrossDomainIframe;
 
     // To support older versions of OVVAsset
@@ -1568,17 +1571,31 @@ function OVVAsset(uid, dependencies) {
     };
 
     var isInFocus = function () {
-        var inFocus = true;
-        if (typeof document.hidden !== 'undefined') {
-            inFocus = window.document.hidden ? false : true;
-        } else if (document.hasFocus) {
-            inFocus = document.hasFocus();
-        }
-        if ($ovv.IN_IFRAME === false && inFocus === true && document.hasFocus) {
-            inFocus = document.hasFocus();
+        if (document.hidden !== 'undefined'){
+            if (document.hidden === true){
+                // Either the browser window is minified or the page is on an inactive tab.
+                // Ad cannot be visible. No need to test document.hasFocus()
+                return false;
+            }
         }
 
-        return inFocus;
+        // Either we are on an unminified, active tab or 'document.hidden' is not supported).
+        // Are we in the active window? ...
+        if ($ovv.IN_XD_IFRAME) {
+            // Active browser window cannot be determined, and document.hasFocus()
+            // fails if player iframe does not have focus within its containing page
+            // Give the benefit of the doubt.
+            return true;
+        }
+
+        // We are in a same-domain iframe (or not in iframe at all)
+        // Active browser window can be determined by widow.top.document.hasFocus():
+        if (window.top.document.hasFocus) {
+            return window.top.document.hasFocus();
+        }
+
+        //Cannot be determined : Give the benefit of the doubt.
+        return true;
     };
 
     player = findPlayer();
@@ -1598,7 +1615,7 @@ function OVVAsset(uid, dependencies) {
             createBeacons.bind(this)('BEACON_SWF_URL');
         }
     } else if (player && player['onJsReady' + uid]) {
-		// since we don't have to wait for beacons to be ready, we're ready now
+	    // since we don't have to wait for beacons to be ready, we're ready now
 		setTimeout( function(){ player['onJsReady' + uid]() }, 5 ); //Use a tiny timeout to keep this async like the beacons
     }
 }
