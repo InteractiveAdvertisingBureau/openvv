@@ -1081,9 +1081,9 @@ function OVVAsset(uid, dependencies) {
                 { x:xRight,  y:yBottom }
             ];
         for (var p in testPoints) {
-            if (testPoints[p].x >= 0 && testPoints[p].y >= 0) {
+            if (testPoints[p] && testPoints[p].x >= 0 && testPoints[p].y >= 0) {
                 elem = document.elementFromPoint(testPoints[p].x, testPoints[p].y);
-                if (elem != null && elem != player) {
+                if (elem != null && elem != player && !player.contains(elem)) {
                     overlappingArea = overlapping(playerRect, elem.getBoundingClientRect());
                     if (overlappingArea > 0) {
                         check.percentObscured = 100 * overlapping(playerRect, elem.getBoundingClientRect());
@@ -1098,14 +1098,14 @@ function OVVAsset(uid, dependencies) {
             }
         }
         return false;
-    }
+    };
 
     var overlapping = function(playerRect, elem ){
         var playerArea = playerRect.width * playerRect.height;
         var  x_overlap = Math.max(0, Math.min(playerRect.right, elem.right) - Math.max(playerRect.left, elem.left));
         var  y_overlap = Math.max(0, Math.min(playerRect.bottom, elem.bottom) - Math.max(playerRect.top, elem.top));
         return (x_overlap * y_overlap) / playerArea;
-    }
+    };
 
 
     /**
