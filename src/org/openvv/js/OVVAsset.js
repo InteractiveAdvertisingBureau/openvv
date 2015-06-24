@@ -71,10 +71,10 @@ function OVV() {
     };
 
     this.servingScenario = getServingScenarioType(this.servingScenarioEnum);
-	// For use in enhanced "isInFocus()" test
-	this.IN_XD_IFRAME =  (this.servingScenario == this.servingScenarioEnum.CrossDomainIframe);
+    // For use in enhanced "isInFocus()" test
+    this.IN_XD_IFRAME =  (this.servingScenario == this.servingScenarioEnum.CrossDomainIframe);
 
-    this.geometrySupported = this.servingScenario !== this.servingScenarioEnum.CrossDomainIframe;
+    this.geometrySupported = !this.IN_IFRAME;
 
     // To support older versions of OVVAsset
     var browserData = new OVVBrowser(this.userAgent);
