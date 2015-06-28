@@ -1081,8 +1081,7 @@ function OVVAsset(uid, dependencies) {
             ];
 
         for (var p in testPoints) {
-            if (testPoints[p] && testPoints[p].x >= 0 && testPoints[p].y >= 0) { // testPoints[p] in if for ember support
-
+            if (testPoints[p] && testPoints[p].x >= 0 && testPoints[p].y >= 0) {
                 elem = document.elementFromPoint(testPoints[p].x, testPoints[p].y);
 
                 if (elem != null && elem != player && !player.contains(elem)) {
