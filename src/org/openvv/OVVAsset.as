@@ -105,6 +105,8 @@ package org.openvv {
         public static const RELEASE_VERSION: String = "1.2.1";
 
 
+        protected var ovvAssetSource: String = "{{OVVAssetJS}}";
+
         ////////////////////////////////////////////////////////////
         //   ATTRIBUTES
         ////////////////////////////////////////////////////////////
@@ -253,7 +255,6 @@ package org.openvv {
             _renderMeter = new OVVRenderMeter(_sprite);
             _sprite.addEventListener(OVVThrottleType.THROTTLE, onThrottleEvent);
 
-            var ovvAssetSource: String = "{{OVVAssetJS}}";
             ovvAssetSource = ovvAssetSource
                                 .replace(/OVVID/g, _id)
                                 .replace(/INTERVAL/g, POLL_INTERVAL)
