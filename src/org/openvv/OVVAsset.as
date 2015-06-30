@@ -231,7 +231,7 @@ package org.openvv {
          * to determine full-screen status when player's stage is not available.
          * Optional only for backwards compatibility.
          */
-        public function OVVAsset( beaconSwfUrl:String = null, id:String = null, adRef:* = null ) {
+        public function OVVAsset( beaconSwfUrl:String = null, id:String = null, adRef:* = null) {
             if (!externalInterfaceIsAvailable()) {
                 dispatchEvent(new OVVEvent(OVVEvent.OVVError, {
                     "message": "ExternalInterface unavailable"

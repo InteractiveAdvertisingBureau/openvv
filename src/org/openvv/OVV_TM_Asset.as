@@ -26,19 +26,15 @@ package org.openvv {
         ////////////////////////////////////////////////////////////
 
         public function OVV_TM_Asset(beaconSwfUrl:String = null, id:String = null,  adRef:* = null) {
+            // Disable and store javascript "eval" function so we ca make additional changes to
+            // the OVVAsset.js javascript embedded in 'ovvAssetSource' before evaluating it.
+            ExternalInterface.call("function(){window.top.tm_eval = eval; eval = null}");
             super();
-            /*
-            // Disable javascript "eval" function to give us opportunity to make further string
-            // replacements in the javascripts embedded from OVVAsset.js before evaluating it.
-            ExternalInterface.call("function(){var tm_js_eval = eval}");
-            super(beaconSwfUrl, id, adRef );
             this.ovvAssetSource = this.ovvAssetSource
-                    .replace(/OVVAsset/g, "OVV_TM_Asset")
+                    .replace(/OVVAsset\(/g, "OVV_TM_Asset(")
                     .replace(/OVVGeometryViewabilityCalculator/g, "OVV_TM_GeometryViewabilityCalculator");
-            // Reset javascript "eval" function
-            ExternalInterface.call("function(){eval = tm_js_eval; tm_js_eval = null;}");
+            ExternalInterface.call("function(){eval = window.top.tm_eval; window.top.tm_eval = null}");
             ExternalInterface.call("eval", this.ovvAssetSource);
-            */
         }
     }
 }
