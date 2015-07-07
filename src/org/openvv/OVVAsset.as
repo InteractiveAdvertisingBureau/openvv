@@ -102,9 +102,10 @@ package org.openvv {
          * Hold OVV version. Will past to JavaScript as well $ovv.version
          */
 
-        public static const RELEASE_VERSION: String = "1.2.1";
+        public static const RELEASE_VERSION: String = "1.2.2";
 
-
+        // Moved declaration out of constructor and made 'protected'
+        // to allow access by subclass, if required.
         protected var ovvAssetSource: String = "{{OVVAssetJS}}";
 
         ////////////////////////////////////////////////////////////

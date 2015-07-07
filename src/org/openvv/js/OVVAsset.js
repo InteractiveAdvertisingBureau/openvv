@@ -1889,4 +1889,3 @@ window.$ovv = window.$ovv || new OVV();
 
 // 'OVVID' is String substituted from AS
 window.$ovv.addAsset(new OVVAsset('OVVID', { geometryViewabilityCalculator: new OVVGeometryViewabilityCalculator() }));
-
