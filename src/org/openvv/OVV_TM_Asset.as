@@ -30,8 +30,8 @@ package org.openvv {
             // the OVVAsset.js javascript embedded in 'ovvAssetSource' before evaluating it.
             ExternalInterface.call("function(){window.top.tm_eval = eval; eval = null}");
             super();
-            //this.ovvAssetSource = this.ovvAssetSource
-            //        .replace(/OVVAsset\(/g, "OVV_TM_Asset(")
+            // this.ovvAssetSource = this.ovvAssetSource
+            //        .replace(/OVVAsset\(/g, "OVV_TM_Asset(");
             //        .replace(/OVVGeometryViewabilityCalculator/g, "OVV_TM_GeometryViewabilityCalculator");
             ExternalInterface.call("function(){eval = window.top.tm_eval; window.top.tm_eval = null}");
             ExternalInterface.call("eval", this.ovvAssetSource);
