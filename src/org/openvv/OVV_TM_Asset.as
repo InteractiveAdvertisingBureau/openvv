@@ -29,8 +29,8 @@ package org.openvv {
             // Disable and store javascript "eval" function so we ca make additional changes to
             // the OVVAsset.js javascript embedded in 'ovvAssetSource' before evaluating it.
             ExternalInterface.call("function(){window.top.tm_eval = eval; eval = null}");
-            super();
-            this.ovvAssetSource = this.ovvAssetSource.replace(/OVV/g, "OVV_"+id+"_");
+            super(beaconSwfUrl, id,  adRef);
+            this.ovvAssetSource = this.ovvAssetSource.replace(/OVV([^B])/g, "OVV_"+id+"_$1");
             ExternalInterface.call("function(){eval = window.top.tm_eval; window.top.tm_eval = null}");
             ExternalInterface.call("eval", this.ovvAssetSource);
         }
