@@ -26,12 +26,18 @@ package org.openvv {
         ////////////////////////////////////////////////////////////
 
         public function OVV_TM_Asset(beaconSwfUrl:String = null, id:String = null,  adRef:* = null) {
-            // Disable and store javascript "eval" function so we ca make additional changes to
+            // Disable and store javascript "eval" function so we can make additional changes to
             // the OVVAsset.js javascript embedded in 'ovvAssetSource' before evaluating it.
-            ExternalInterface.call("function(){window.top.tm_eval = eval; eval = null}");
+            ExternalInterface.call("function(){window.tm_eval = eval; eval = function(){return null}");
             super(beaconSwfUrl, id,  adRef);
-            this.ovvAssetSource = this.ovvAssetSource.replace(/OVV([^B])/g, "OVV_"+id+"_$1");
-            ExternalInterface.call("function(){eval = window.top.tm_eval; window.top.tm_eval = null}");
+            var namespace:String = String(Math.floor(Math.random()*10000000));
+            this.ovvAssetSource = this.ovvAssetSource
+                      .replace(/OVV\(/g, "OVV"+namespace+"(")
+                      .replace(/OVVAsset\(/g, "OVVAsset"+namespace+"(")
+                      .replace(/OVVBrowser\(/g, "OVVBrowser"+namespace+"(")
+                      .replace(/OVVBeaconSupportCheck\(/g, "OVVBeaconSupportCheck"+namespace+"(")
+                      .replace(/OVVGeometryViewabilityCalculator\(/g, "OVVGeometryViewabilityCalculator"+namespace+"(");
+            ExternalInterface.call("function(){eval = window.tm_eval; window.tm_eval = null}");
             ExternalInterface.call("eval", this.ovvAssetSource);
         }
     }
