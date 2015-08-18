@@ -289,6 +289,9 @@ package org.openvv {
             return isEIAvailable;
         }
 
+        protected function get _ovvAssetSource():String {
+            return "{{OVVAssetJS}}";
+        }
 	/**
 	 * Register to the vpaidEventsDispatcher VPAID's events and allows 3rd parties to more easily provide video viewability measurement
 	 * by exposing the VPAID data as well as the viewability data via a JavaScript API.
