@@ -1345,22 +1345,25 @@ function OVVAsset(uid, dependencies) {
                 'setTimeout(function() {setInterval(' +
                     'function() { ' +
                         'ad1 = document.getElementById("ad1");' +
-                        'ad1.innerHTML = window.mozPaintCount > cnt ? "In View" : "Out of View";' +
-                        'var paintCount = window.mozPaintCount; ' +
-                        'window.isInView = (paintCount>cnt); ' +
-                        'cnt = paintCount; ' +
-                        'if (parent.$ovv.DEBUG == true) {' +
-                            'if(window.isInView === true){' +
-                                'document.body.style.background = "green";' +
-                            '} else {' +
-                                'document.body.style.background = "red";' +
+	                    'if (ad1 != null && document.body != null){'+
+                            'ad1.innerHTML = window.mozPaintCount > cnt ? "In View" : "Out of View";' +
+                            'var paintCount = window.mozPaintCount; ' +
+                            'window.isInView = (paintCount>cnt); ' +
+                            'cnt = paintCount; ' +
+                            'if (parent.$ovv.DEBUG == true) {' +
+                                'if(window.isInView === true){' +
+                                    'document.body.style.background = "green";' +
+                                '} else {' +
+                                    'document.body.style.background = "red";' +
+                                '}' +
                             '}' +
-                        '}' +
-                        'if (window.started === false) {' +
-                            'parent.$ovv.getAssetById("'+id+'")' + '.beaconStarted(window.index);' +
-                            'window.started = true;' +
-                        '}' +
-                    '}, 500)},400);';
+                            'if (window.started === false) {' +
+                                'parent.$ovv.getAssetById("'+id+'")' + '.beaconStarted(window.index);' +
+                                'window.started = true;' +
+                            '}' +
+	                    '}' +
+                    '}, 500)' +
+	            '},400);';
 
             document.body.insertBefore(iframe, document.body.firstChild);
         }

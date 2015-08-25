@@ -433,7 +433,7 @@ package org.openvv {
                 _intervalTimer.addEventListener(TimerEvent.TIMER, onIntervalCheck);
                 _intervalTimer.start();
             }
-    }
+        }
 
         private function setStage(evt:Event = null):void
         {
@@ -621,13 +621,15 @@ package org.openvv {
 			switch(event.type){
 				case VPAIDEvent.AdVideoComplete:
 					// stop time on ad completion
-					_intervalTimer.stop();
-					_intervalTimer.removeEventListener(TimerEvent.TIMER, onIntervalCheck);
-					_intervalTimer = null;
+                    if (_intervalTimer != null) {
+                        _intervalTimer.stop();
+                        _intervalTimer.removeEventListener(TimerEvent.TIMER, onIntervalCheck);
+                        _intervalTimer = null;
+                    }
 					break;
 				case VPAIDEvent.AdImpression:
 					adStarted = true;
-					if ( jsReady ) {
+					if ( jsReady  ) {
 						startImpressionTimer();
 					}
 					break;
