@@ -1081,8 +1081,9 @@ function OVV_OVVID_Asset(uid, dependencies) {
                 { x:xCenter, y:yBottom },
                 { x:xRight,  y:yBottom }
             ];
+
         for (var p in testPoints) {
-            if (testPoints[p].x >= 0 && testPoints[p].y >= 0) {
+            if (testPoints[p] && testPoints[p].x >= 0 && testPoints[p].y >= 0) {
                 elem = document.elementFromPoint(testPoints[p].x, testPoints[p].y);
                 if (elem != null && elem != player && !player.contains(elem)) {
                     overlappingArea = overlapping(playerRect, elem.getBoundingClientRect());
@@ -1242,7 +1243,7 @@ function OVV_OVVID_Asset(uid, dependencies) {
         if ((beacons[OUTER_BOTTOM_LEFT] && beacons[OUTER_TOP_RIGHT]) &&
             // and any of their diagonals are covered
             (!beacons[MIDDLE_BOTTOM_LEFT] || !beacons[INNER_BOTTOM_LEFT] || !beacons[CENTER] || !beacons[INNER_TOP_RIGHT] || !beacons[MIDDLE_TOP_RIGHT])
-            ) {
+        ) {
             return null;
         }
 
@@ -1572,27 +1573,31 @@ function OVV_OVVID_Asset(uid, dependencies) {
     };
 
     var isInFocus = function () {
-	    if (document.hidden !== 'undefined'){
-	        if (document.hidden === true){
-			    // Either the browser window is minified or the page is on an inactive tab.
-			    // Ad cannot be visible. No need to test document.hasFocus()
-			    return false;
-		    }
-	    }
+        if (document.hidden !== 'undefined'){
+            if (document.hidden === true){
+                // Either the browser window is minified or the page is on an inactive tab.
+                // Ad cannot be visible. No need to test document.hasFocus()
+                return false;
+            }
+        }
 
-	    // Un-minified, active tab (or 'document.hidden' not supported). Are we in the active window? ...
-	    if ($ovv.IN_XD_IFRAME) {
-			//Cannot be determined : Give benefit of the doubt.
-		    return true;
-	    }
+        // Either we are on an unminified, active tab or 'document.hidden' is not supported).
+        // Are we in the active window? ...
+        if ($ovv.IN_XD_IFRAME) {
+            // Active browser window cannot be determined, and document.hasFocus()
+            // fails if player iframe does not have focus within its containing page
+            // Give the benefit of the doubt.
+            return true;
+        }
 
-	    // If in same-domain iframe (or not in iframe at all)  :
-	    if (window.top.document.hasFocus) {
-		    return window.top.document.hasFocus();
-	    }
+        // We are in a same-domain iframe (or not in iframe at all)
+        // Active browser window can be determined by widow.top.document.hasFocus():
+        if (window.top.document.hasFocus) {
+            return window.top.document.hasFocus();
+        }
 
-		//Cannot be determined : Give benefit of the doubt.
-	    return true;
+        //Cannot be determined : Give the benefit of the doubt.
+        return true;
     };
 
     player = findPlayer();
@@ -1611,9 +1616,11 @@ function OVV_OVVID_Asset(uid, dependencies) {
             // 'BEACON_SWF_URL' is String substituted from ActionScript
             createBeacons.bind(this)('BEACON_SWF_URL');
         }
-    } else if (player && player.onJsReady) {
-		// since we don't have to wait for beacons to be ready, we're ready now
-		setTimeout( function(){ player['onJsReady' + uid]() }, 5 ); //Use a tiny timeout to keep this async like the beacons
+    } else if (player && player['onJsReady' + uid]) {
+        // since we don't have to wait for beacons to be ready, we're ready now
+        setTimeout(function () {
+            player['onJsReady' + uid]()
+        }, 5); //Use a tiny timeout to keep this async like the beacons
     }
 }
 
