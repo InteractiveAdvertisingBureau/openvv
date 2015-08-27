@@ -26,6 +26,7 @@ package org.openvv {
     import flash.events.TimerEvent;
     import flash.external.ExternalInterface;
     import flash.utils.Timer;
+    import org.openvv.OVVConfig;
     import org.openvv.events.OVVEvent;
     import net.iab.VPAIDEvent;
 
@@ -77,32 +78,30 @@ package org.openvv {
     public class OVVAsset extends EventDispatcher {
 
         ////////////////////////////////////////////////////////////
-        //   CONSTANTS
+        //   CONSTANTS NOT COVERED IN OVVConfig
         ////////////////////////////////////////////////////////////
 
         /**
-         * The number of consecutive intervals of viewability required before
-         * the VIEWABLE_IMPRESSION event will be fired (2 seconds)
+         * The Viewability Standard to be applied. Currently only "MRC" and "GROUPM" supported.
          */
-        public static const VIEWABLE_IMPRESSION_THRESHOLD: Number = 10;
+        private static var standard:String = "MRC"; // initialize to default standard
+
+        /**
+         * The number of 'checkViewability()' polls, returning a result with viewableState == VIEWABLE
+         * required before the 'OVVImpression' event will be dispatched (varies depending on standard)
+         */
+        public static var VIEWABLE_IMPRESSION_THRESHOLD: Number = NaN; // initialize to NaN so standards requiring a percentage of duration can adjust when duration is reported.
 
         /**
          * The number of consecutive intervals of unmeasurability required before
-         * the UNMEASURABLE_IMPRESSION_ event will be fired (1 second)
+         * the 'OVVImpressionUnmeasurable' event will be fired (1 second)
          */
         public static const UNMEASURABLE_IMPRESSION_THRESHOLD: Number = 5;
 
         /**
-         * The number of milliseconds between polling JavaScript for
-         * viewability information
-         */
-        public static const POLL_INTERVAL:int = 200;
-
-        /**
          * Hold OVV version. Will past to JavaScript as well $ovv.version
          */
-
-        public static const RELEASE_VERSION: String = "1.2.2";
+        public static const RELEASE_VERSION: String = "1.3.0";
 
         // Moved declaration out of constructor and made 'protected'
         // to allow access by subclass, if required.
@@ -113,7 +112,7 @@ package org.openvv {
         ////////////////////////////////////////////////////////////
 
         /**
-         * Holds repositoy latest commit number
+         * Holds repository latest commit number
          */
         private var _buildVersion: String = OVVVersion.getVersion();
 
@@ -231,14 +230,19 @@ package org.openvv {
          * @param adRef A reference to the top DisplayObject of the ad; used
          * to determine full-screen status when player's stage is not available.
          * Optional only for backwards compatibility.
+         * @param viewabilityStandard /the viewability Standard to be applied to
+         * determine if a Viewable Impression should be fired.
+         * (Currently only 'MRC' and 'GROUPM' supported).
          */
-        public function OVVAsset( beaconSwfUrl:String = null, id:String = null, adRef:* = null) {
+        public function OVVAsset( beaconSwfUrl:String = null, id:String = null, adRef:* = null, viewabilityStandard:String = "MRC") {
             if (!externalInterfaceIsAvailable()) {
                 dispatchEvent(new OVVEvent(OVVEvent.OVVError, {
                     "message": "ExternalInterface unavailable"
                 }));
                 return;
             }
+
+            standard = viewabilityStandard;
 
             _id = (id !== null) ? id : "ovv" + Math.floor(Math.random() * 1000000000).toString();
 
@@ -258,7 +262,8 @@ package org.openvv {
 
             ovvAssetSource = ovvAssetSource
                                 .replace(/OVVID/g, _id)
-                                .replace(/INTERVAL/g, POLL_INTERVAL)
+                                .replace(/INTERVAL/g, OVVConfig.viewability[standard].poll_interval_ms)
+                                .replace(/MIN_VIEW_AREA_PC/g, OVVConfig.viewability[standard].min_viewable_area_pc)
                                 .replace(/OVVBUILDVERSION/g, _buildVersion)
 								.replace(/OVVRELEASEVERSION/g, RELEASE_VERSION);
 
@@ -289,6 +294,9 @@ package org.openvv {
             return isEIAvailable;
         }
 
+        protected function get _ovvAssetSource():String {
+            return "{{OVVAssetJS}}";
+        }
 	/**
 	 * Register to the vpaidEventsDispatcher VPAID's events and allows 3rd parties to more easily provide video viewability measurement
 	 * by exposing the VPAID data as well as the viewability data via a JavaScript API.
@@ -299,11 +307,28 @@ package org.openvv {
 			throw "You must pass an EventDispatcher to init event wiring";
 		registerEventHandler(vpaidEventsDispatcher);
 		_vpaidEventsDispatcher = vpaidEventsDispatcher;
+        trace("XXX _vpaidEventsDispatcher" , _vpaidEventsDispatcher);
 
         if ((Object)(vpaidEventsDispatcher).hasOwnProperty('getVPAID') && vpaidEventsDispatcher['getVPAID']  is Function) {
             _vpaidAd = (Object)(_vpaidEventsDispatcher).getVPAID();
+        }else if ((Object)(vpaidEventsDispatcher).hasOwnProperty('handshakeVersion') && vpaidEventsDispatcher['handshakeVersion']  is Function) {
+            _vpaidAd = _vpaidEventsDispatcher;
+        }
+
+        if ( OVVConfig.viewability[standard].min_viewable_time_sec != null ){
+            VIEWABLE_IMPRESSION_THRESHOLD = Math.floor(1000 * OVVConfig.viewability[standard].min_viewable_time_sec / OVVConfig.viewability[standard].poll_interval_ms );
         }
 	}
+
+    private function updateThresholdByPercentDuration():void{
+
+        var duration:int = ( _vpaidAd.adDuration > 0 ) ? _vpaidAd.adDuration : 15;
+
+        // Min viewable for a standard must be specified in seconds OR as a percentage of adDuration...
+        var min_time_sec:int = Math.floor(duration * OVVConfig.viewability[standard].min_viewable_time_pc / 100);
+
+        VIEWABLE_IMPRESSION_THRESHOLD = Math.floor(1000 * min_time_sec / OVVConfig.viewability[standard].poll_interval_ms);
+    }
 
 
 	/**
@@ -429,9 +454,18 @@ package org.openvv {
                 _intervalsInView = 0;
                 _intervalsUnMeasurable = 0;
 
-                _intervalTimer = new Timer(POLL_INTERVAL);
+                _intervalTimer = new Timer(OVVConfig.POLL_INTERVAL);
                 _intervalTimer.addEventListener(TimerEvent.TIMER, onIntervalCheck);
                 _intervalTimer.start();
+            }
+        }
+
+        public function stopImpressionTimer(): void {
+            // stop time on ad completion
+            if (_intervalTimer != null) {
+                _intervalTimer.stop();
+                _intervalTimer.removeEventListener(TimerEvent.TIMER, onIntervalCheck);
+                _intervalTimer = null;
             }
         }
 
@@ -481,9 +515,8 @@ package org.openvv {
 
         /**
          * Every INTERVAL ms, check to see if asset is visible. If the asset
-         * is viewable for DISCERNIBLE_IMPRESSION_THRESHOLD or
-         * VIEWABLE_IMPRESSION_THRESHOLD intervals, dispatch the associated
-         * event.
+         * is viewable for VIEWABLE_IMPRESSION_THRESHOLD intervals, dispatch
+         * the Viewable Impression Event.
          *
          * @param event The TimerEvent which signals the end of this interval
          *
@@ -493,20 +526,47 @@ package org.openvv {
 			raiseLog(results);
 
             if (_isPaused == false) {
-                _intervalsUnMeasurable = (results.viewabilityState == OVVCheck.UNMEASURABLE)
-                                            ? _intervalsUnMeasurable + 1 : 0;
-                _intervalsInView = (results.viewabilityState == OVVCheck.VIEWABLE &&
-                                    ( results.focus == true ||
-                                        results.viewabilityStateOverrideReason == OVVCheck.FULLSCREEN) )
-                                    ? _intervalsInView + 1 : 0;
+                if ( OVVConfig.viewability[standard].min_viewable_time_pc != null ) {
+                    // May change during the course of the ad so update with each poll.
+                    updateThresholdByPercentDuration();
+                }
+
+                var unmeasurable:Boolean = results.viewabilityState == OVVCheck.UNMEASURABLE;
+
+                var viewable:Boolean =  results.viewabilityState == OVVCheck.VIEWABLE &&
+                                        volumeOk(results) &&
+                                        focusOk(results);
+
+                _intervalsUnMeasurable = unmeasurable ? _intervalsUnMeasurable + 1 : 0;
+
+                if (viewable) {
+                    _intervalsInView += 1;
+                }else if (OVVConfig.viewability[standard].viewable_polls_consecutive){
+                    _intervalsInView = 0;
+                }
 
                 if (_impressionEventRaised == false && _intervalsInView >= VIEWABLE_IMPRESSION_THRESHOLD) {
                     raiseImpression(results);
-                }
-                else if (_impressionUnmeasurableEventRaised == false &&
+                }else if (_impressionUnmeasurableEventRaised == false &&
                             _intervalsUnMeasurable >= UNMEASURABLE_IMPRESSION_THRESHOLD) {
                     raiseImpressionUnmeasurable(results);
                 }
+            }
+        }
+
+        private function volumeOk(results:Object):Boolean {
+            if (OVVConfig.viewability[standard].volume_required){
+                return results.volume > 0;
+            }else{
+                return true;
+            }
+        }
+
+        private function focusOk(results:Object):Boolean {
+            if (results.viewabilityStateOverrideReason == OVVCheck.FULLSCREEN){
+                return true;
+            }else{
+                return results.focus == true;
             }
         }
 
@@ -610,7 +670,7 @@ package org.openvv {
 
 		/**
 		 * Handle VPAID event by publishing it to JavaScript.
-		 * In case when the event is AdVideoStart the internal interval that measures the asset will be started
+		 * In case when the event is AdImpression the internal interval that measures the asset will be started
 		 * In case when the event is AdVideoComplete the internal interval that measures the asset will be stopped
 		 * @param	event the VPAID event to handle
 		 */
@@ -620,12 +680,7 @@ package org.openvv {
 
 			switch(event.type){
 				case VPAIDEvent.AdVideoComplete:
-					// stop time on ad completion
-                    if (_intervalTimer != null) {
-                        _intervalTimer.stop();
-                        _intervalTimer.removeEventListener(TimerEvent.TIMER, onIntervalCheck);
-                        _intervalTimer = null;
-                    }
+                    stopImpressionTimer();
 					break;
 				case VPAIDEvent.AdImpression:
 					adStarted = true;

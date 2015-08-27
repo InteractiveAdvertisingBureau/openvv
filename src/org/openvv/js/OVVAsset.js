@@ -824,6 +824,7 @@ function OVVAsset(uid, dependencies) {
 
     var beaconSupportCheck = new OVVBeaconSupportCheck();
 
+	var minViewableAreaPc = MIN_VIEW_AREA_PC;
     ///////////////////////////////////////////////////////////////////////////
     // PUBLIC FUNCTIONS
     ///////////////////////////////////////////////////////////////////////////
@@ -906,7 +907,7 @@ function OVVAsset(uid, dependencies) {
         if (check.geometrySupported) {
             check.technique = OVVCheck.GEOMETRY;
             checkGeometry(check, player);
-            check.viewabilityState = (check.percentViewable >= 50) ? OVVCheck.VIEWABLE : OVVCheck.UNVIEWABLE;
+            check.viewabilityState = (check.percentViewable >= minViewableAreaPc) ? OVVCheck.VIEWABLE : OVVCheck.UNVIEWABLE;
             if ($ovv.DEBUG) {
                 // add an additional field when debugging
                 check.geometryViewabilityState = check.viewabilityState;
@@ -1088,11 +1089,11 @@ function OVVAsset(uid, dependencies) {
                     overlappingArea = overlapping(playerRect, elem.getBoundingClientRect());
                     if (overlappingArea > 0) {
                         check.percentObscured = 100 * overlapping(playerRect, elem.getBoundingClientRect());
-                        if (check.percentObscured > 50) {
-                            check.percentViewable = 100 - check.percentObscured;
-                            check.technique = OVVCheck.DOM_OBSCURING;
-                            check.viewabilityState = OVVCheck.UNVIEWABLE;
-                            return true;
+                        if (check.percentObscured > 100 - minViewableAreaPc) {
+                              check.percentViewable = 100 - check.percentObscured;
+                              check.technique = OVVCheck.DOM_OBSCURING;
+                              check.viewabilityState = OVVCheck.UNVIEWABLE;
+                              return true;
                         }
                     }
                 }
@@ -1133,8 +1134,8 @@ function OVVAsset(uid, dependencies) {
 
     /**
     * Performs the beacon technique. Queries the state of each beacon and
-    * attempts to make a determination of whether at least 50% of the player
-    * is within the viewport.
+    * attempts to make a determination of whether the minimum required
+    * percentage of the player area is within the viewport.
     * @param {OVVCheck} check The OVVCheck object to populate
     */
     var checkBeacons = function (check) {
@@ -1200,53 +1201,59 @@ function OVVAsset(uid, dependencies) {
         // when all points are visible
         if (beaconsVisible === TOTAL_BEACONS) {
             return true;
+        }else if ( minViewableAreaPc == 100 ){
+		        return false;
+	    }else if ( minViewableAreaPc == 50 ) {
+	        // The original MRC standard ...
+	        var beacons = check.beacons;
+
+	        // when the center is not visible
+	        if (beacons[CENTER] === false) {
+		        // and 3 corners are visible
+		        if ((innerCornersVisible >= 3) || (middleCornersVisible >= 3) || (outerCornersVisible >= 3)) {
+			        return null;
+		        }
+		        return false;
+	        }
+
+	        // when the center of the player is visible
+	        if ((beacons[CENTER] === true) &&
+		        // and 2 adjacent outside corners are visible
+		        ((beacons[OUTER_TOP_LEFT] === true && beacons[OUTER_TOP_RIGHT] === true) ||
+			        (beacons[OUTER_TOP_LEFT] === true && beacons[OUTER_BOTTOM_LEFT] === true) ||
+			        (beacons[OUTER_TOP_RIGHT] === true && beacons[OUTER_BOTTOM_RIGHT] === true) ||
+			        (beacons[OUTER_BOTTOM_LEFT] === true && beacons[OUTER_BOTTOM_RIGHT] === true))
+		        ) {
+		        return true;
+	        }
+
+	        // when the center and all of the middle corners are visible
+	        if (beacons[CENTER] === true && middleCornersVisible == 4) {
+		        return true;
+	        }
+
+	        // // when top left and bottom right corners are visible
+	        if ((beacons[OUTER_TOP_LEFT] && beacons[OUTER_BOTTOM_RIGHT]) &&
+		        // and any of their diagonals are covered
+		        (!beacons[MIDDLE_TOP_LEFT] || !beacons[INNER_TOP_LEFT] || !beacons[CENTER] || beacons[INNER_BOTTOM_RIGHT] || beacons[MIDDLE_BOTTOM_RIGHT])
+		        ) {
+		        return null;
+	        }
+
+	        // when bottom left and top right corners are visible
+	        if ((beacons[OUTER_BOTTOM_LEFT] && beacons[OUTER_TOP_RIGHT]) &&
+		        // and any of their diagonals are covered
+		        (!beacons[MIDDLE_BOTTOM_LEFT] || !beacons[INNER_BOTTOM_LEFT] || !beacons[CENTER] || !beacons[INNER_TOP_RIGHT] || !beacons[MIDDLE_TOP_RIGHT])
+		        ) {
+		        return null;
+	        }
+
+	        return false;
+        }else{
+	        // ToDo : Currently only MRC (50%) and GROUPM (100%) supported.
+	        // ToDo : Accommodate minimum viewable area of percentages other than 50% & 100%
+	        return null;
         }
-
-        var beacons = check.beacons;
-
-        // when the center is not visible
-        if (beacons[CENTER] === false) {
-            // and 3 corners are visible
-            if((innerCornersVisible >= 3) || (middleCornersVisible >= 3) || (outerCornersVisible >= 3))
-            {
-                return null;
-            }
-            return false;
-        }
-
-        // when the center of the player is visible
-        if ((beacons[CENTER] === true) &&
-        // and 2 adjacent outside corners are visible
-            ((beacons[OUTER_TOP_LEFT] === true && beacons[OUTER_TOP_RIGHT] === true) ||
-            (beacons[OUTER_TOP_LEFT] === true && beacons[OUTER_BOTTOM_LEFT] === true) ||
-            (beacons[OUTER_TOP_RIGHT] === true && beacons[OUTER_BOTTOM_RIGHT] === true) ||
-            (beacons[OUTER_BOTTOM_LEFT] === true && beacons[OUTER_BOTTOM_RIGHT] === true))
-        ) {
-            return true;
-        }
-
-        // when the center and all of the middle corners are visible
-        if (beacons[CENTER] === true && middleCornersVisible == 4) {
-            return true;
-        }
-
-        // // when top left and bottom right corners are visible
-        if ((beacons[OUTER_TOP_LEFT] && beacons[OUTER_BOTTOM_RIGHT]) &&
-                // and any of their diagonals are covered
-            (!beacons[MIDDLE_TOP_LEFT] || !beacons[INNER_TOP_LEFT] || !beacons[CENTER] || beacons[INNER_BOTTOM_RIGHT] || beacons[MIDDLE_BOTTOM_RIGHT])
-        ) {
-            return null;
-        }
-
-        // when bottom left and top right corners are visible
-        if ((beacons[OUTER_BOTTOM_LEFT] && beacons[OUTER_TOP_RIGHT]) &&
-            // and any of their diagonals are covered
-            (!beacons[MIDDLE_BOTTOM_LEFT] || !beacons[INNER_BOTTOM_LEFT] || !beacons[CENTER] || !beacons[INNER_TOP_RIGHT] || !beacons[MIDDLE_TOP_RIGHT])
-        ) {
-            return null;
-        }
-
-        return false;
     };
 
     /**
