@@ -234,15 +234,18 @@ package org.openvv {
          * determine if a Viewable Impression should be fired.
          * (Currently only 'MRC' and 'GROUPM' supported).
          */
-        public function OVVAsset( beaconSwfUrl:String = null, id:String = null, adRef:* = null, viewabilityStandard:String = "MRC") {
+        public function OVVAsset( beaconSwfUrl:String = null, id:String = null, adRef:* = null, viewabilityStandard:String = null) {
             if (!externalInterfaceIsAvailable()) {
                 dispatchEvent(new OVVEvent(OVVEvent.OVVError, {
                     "message": "ExternalInterface unavailable"
                 }));
                 return;
             }
-
-            standard = viewabilityStandard;
+            if (viewabilityStandard == null) {
+                standard = "MRC";
+            }else{
+                standard = viewabilityStandard;
+            }
 
             _id = (id !== null) ? id : "ovv" + Math.floor(Math.random() * 1000000000).toString();
 
@@ -267,7 +270,7 @@ package org.openvv {
                                 .replace(/OVVBUILDVERSION/g, _buildVersion)
 								.replace(/OVVRELEASEVERSION/g, RELEASE_VERSION);
 
-			if (beaconSwfUrl)
+		    if (beaconSwfUrl)
 			{
 				ovvAssetSource = ovvAssetSource.replace(/BEACON_SWF_URL/g, beaconSwfUrl);
 			}
