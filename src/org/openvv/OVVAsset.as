@@ -242,7 +242,7 @@ package org.openvv {
                 return;
             }
             if (viewabilityStandard == null) {
-                standard = "MRC";
+                standard = OVVConfig.viewability[standard].default_standard;
             }else{
                 standard = viewabilityStandard;
             }
@@ -457,7 +457,7 @@ package org.openvv {
                 _intervalsInView = 0;
                 _intervalsUnMeasurable = 0;
 
-                _intervalTimer = new Timer(OVVConfig.POLL_INTERVAL);
+                _intervalTimer = new Timer(OVVConfig.viewability[standard].poll_interval_ms);
                 _intervalTimer.addEventListener(TimerEvent.TIMER, onIntervalCheck);
                 _intervalTimer.start();
             }
