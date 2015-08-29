@@ -825,6 +825,7 @@ function OVV_OVVID_Asset(uid, dependencies) {
 
     var beaconSupportCheck = new OVVBeaconSupportCheck();
 
+	var minViewableAreaPc = MIN_VIEW_AREA_PC;
     ///////////////////////////////////////////////////////////////////////////
     // PUBLIC FUNCTIONS
     ///////////////////////////////////////////////////////////////////////////
@@ -908,7 +909,7 @@ function OVV_OVVID_Asset(uid, dependencies) {
         if (check.geometrySupported) {
             check.technique = OVV_OVVID_Check.GEOMETRY;
             checkGeometry(check, player);
-            check.viewabilityState = (check.percentViewable >= 50) ? OVV_OVVID_Check.VIEWABLE : OVV_OVVID_Check.UNVIEWABLE;
+            check.viewabilityState = (check.percentViewable >= minViewableAreaPc) ? OVVCheck.VIEWABLE : OVVCheck.UNVIEWABLE;
             if ($ovv.DEBUG) {
                 // add an additional field when debugging
                 check.geometryViewabilityState = check.viewabilityState;
@@ -1089,11 +1090,11 @@ function OVV_OVVID_Asset(uid, dependencies) {
                     overlappingArea = overlapping(playerRect, elem.getBoundingClientRect());
                     if (overlappingArea > 0) {
                         check.percentObscured = 100 * overlapping(playerRect, elem.getBoundingClientRect());
-                        if (check.percentObscured > 50) {
-                            check.percentViewable = 100 - check.percentObscured;
-                            check.technique = OVV_OVVID_Check.DOM_OBSCURING;
-                            check.viewabilityState = OVV_OVVID_Check.UNVIEWABLE;
-                            return true;
+                        if (check.percentObscured > 100 - minViewableAreaPc) {
+                              check.percentViewable = 100 - check.percentObscured;
+                              check.technique = OVVCheck.DOM_OBSCURING;
+                              check.viewabilityState = OVVCheck.UNVIEWABLE;
+                              return true;
                         }
                     }
                 }
@@ -1134,9 +1135,9 @@ function OVV_OVVID_Asset(uid, dependencies) {
 
     /**
     * Performs the beacon technique. Queries the state of each beacon and
-    * attempts to make a determination of whether at least 50% of the player
-    * is within the viewport.
-    * @param {OVV_OVVID_Check} check The OVV_OVVID_Check object to populate
+    * attempts to make a determination of whether the minimum required
+    * percentage of the player area is within the viewport.
+    * @param {OVVCheck} check The OVVCheck object to populate
     */
     var checkBeacons = function (check) {
         if (!beaconsReady()) {
@@ -1201,53 +1202,59 @@ function OVV_OVVID_Asset(uid, dependencies) {
         // when all points are visible
         if (beaconsVisible === TOTAL_BEACONS) {
             return true;
+        }else if ( minViewableAreaPc == 100 ){
+		        return false;
+	    }else if ( minViewableAreaPc == 50 ) {
+	        // The original MRC standard ...
+	        var beacons = check.beacons;
+
+	        // when the center is not visible
+	        if (beacons[CENTER] === false) {
+		        // and 3 corners are visible
+		        if ((innerCornersVisible >= 3) || (middleCornersVisible >= 3) || (outerCornersVisible >= 3)) {
+			        return null;
+		        }
+		        return false;
+	        }
+
+	        // when the center of the player is visible
+	        if ((beacons[CENTER] === true) &&
+		        // and 2 adjacent outside corners are visible
+		        ((beacons[OUTER_TOP_LEFT] === true && beacons[OUTER_TOP_RIGHT] === true) ||
+			        (beacons[OUTER_TOP_LEFT] === true && beacons[OUTER_BOTTOM_LEFT] === true) ||
+			        (beacons[OUTER_TOP_RIGHT] === true && beacons[OUTER_BOTTOM_RIGHT] === true) ||
+			        (beacons[OUTER_BOTTOM_LEFT] === true && beacons[OUTER_BOTTOM_RIGHT] === true))
+		        ) {
+		        return true;
+	        }
+
+	        // when the center and all of the middle corners are visible
+	        if (beacons[CENTER] === true && middleCornersVisible == 4) {
+		        return true;
+	        }
+
+	        // // when top left and bottom right corners are visible
+	        if ((beacons[OUTER_TOP_LEFT] && beacons[OUTER_BOTTOM_RIGHT]) &&
+		        // and any of their diagonals are covered
+		        (!beacons[MIDDLE_TOP_LEFT] || !beacons[INNER_TOP_LEFT] || !beacons[CENTER] || beacons[INNER_BOTTOM_RIGHT] || beacons[MIDDLE_BOTTOM_RIGHT])
+		        ) {
+		        return null;
+	        }
+
+	        // when bottom left and top right corners are visible
+	        if ((beacons[OUTER_BOTTOM_LEFT] && beacons[OUTER_TOP_RIGHT]) &&
+		        // and any of their diagonals are covered
+		        (!beacons[MIDDLE_BOTTOM_LEFT] || !beacons[INNER_BOTTOM_LEFT] || !beacons[CENTER] || !beacons[INNER_TOP_RIGHT] || !beacons[MIDDLE_TOP_RIGHT])
+		        ) {
+		        return null;
+	        }
+
+	        return false;
+        }else{
+	        // ToDo : Currently only MRC (50%) and GROUPM (100%) supported.
+	        // ToDo : Accommodate minimum viewable area of percentages other than 50% & 100%
+	        return null;
         }
-
-        var beacons = check.beacons;
-
-        // when the center is not visible
-        if (beacons[CENTER] === false) {
-            // and 3 corners are visible
-            if((innerCornersVisible >= 3) || (middleCornersVisible >= 3) || (outerCornersVisible >= 3))
-            {
-                return null;
-            }
-            return false;
-        }
-
-        // when the center of the player is visible
-        if ((beacons[CENTER] === true) &&
-        // and 2 adjacent outside corners are visible
-            ((beacons[OUTER_TOP_LEFT] === true && beacons[OUTER_TOP_RIGHT] === true) ||
-            (beacons[OUTER_TOP_LEFT] === true && beacons[OUTER_BOTTOM_LEFT] === true) ||
-            (beacons[OUTER_TOP_RIGHT] === true && beacons[OUTER_BOTTOM_RIGHT] === true) ||
-            (beacons[OUTER_BOTTOM_LEFT] === true && beacons[OUTER_BOTTOM_RIGHT] === true))
-        ) {
-            return true;
-        }
-
-        // when the center and all of the middle corners are visible
-        if (beacons[CENTER] === true && middleCornersVisible == 4) {
-            return true;
-        }
-
-        // // when top left and bottom right corners are visible
-        if ((beacons[OUTER_TOP_LEFT] && beacons[OUTER_BOTTOM_RIGHT]) &&
-            // and any of their diagonals are covered
-            (!beacons[MIDDLE_TOP_LEFT] || !beacons[INNER_TOP_LEFT] || !beacons[CENTER] || !beacons[INNER_BOTTOM_RIGHT] || !beacons[MIDDLE_BOTTOM_RIGHT])
-        ) {
-            return null;
-        }
-
-        // when bottom left and top right corners are visible
-        if ((beacons[OUTER_BOTTOM_LEFT] && beacons[OUTER_TOP_RIGHT]) &&
-            // and any of their diagonals are covered
-            (!beacons[MIDDLE_BOTTOM_LEFT] || !beacons[INNER_BOTTOM_LEFT] || !beacons[CENTER] || !beacons[INNER_TOP_RIGHT] || !beacons[MIDDLE_TOP_RIGHT])
-        ) {
-            return null;
-        }
-
-        return false;
     };
 
     /**
@@ -1344,24 +1351,27 @@ function OVV_OVVID_Asset(uid, dependencies) {
                 'document.body.insertBefore(span, document.body.firstChild);' +
                 '},300);' +
                 'setTimeout(function() {setInterval(' +
-                'function() { ' +
-                'ad1 = document.getElementById("ad1");' +
-                'ad1.innerHTML = window.mozPaintCount > cnt ? "In View" : "Out of View";' +
-                'var paintCount = window.mozPaintCount; ' +
-                'window.isInView = (paintCount>cnt); ' +
-                'cnt = paintCount; ' +
-                'if (parent.$ovv.DEBUG == true) {' +
-                'if(window.isInView === true){' +
-                'document.body.style.background = "green";' +
-                '} else {' +
-                'document.body.style.background = "red";' +
-                '}' +
-                '}' +
-                'if (window.started === false) {' +
-                'parent.$ovv.getAssetById("'+id+'")' + '.beaconStarted(window.index);' +
-                'window.started = true;' +
-                '}' +
-                '}, 500)},400);';
+                    'function() { ' +
+                        'ad1 = document.getElementById("ad1");' +
+	                    'if (ad1 != null && document.body != null){'+
+                            'ad1.innerHTML = window.mozPaintCount > cnt ? "In View" : "Out of View";' +
+                            'var paintCount = window.mozPaintCount; ' +
+                            'window.isInView = (paintCount>cnt); ' +
+                            'cnt = paintCount; ' +
+                            'if (parent.$ovv.DEBUG == true) {' +
+                                'if(window.isInView === true){' +
+                                    'document.body.style.background = "green";' +
+                                '} else {' +
+                                    'document.body.style.background = "red";' +
+                                '}' +
+                            '}' +
+                            'if (window.started === false) {' +
+                                'parent.$ovv.getAssetById("'+id+'")' + '.beaconStarted(window.index);' +
+                                'window.started = true;' +
+                            '}' +
+	                    '}' +
+                    '}, 500)' +
+	            '},400);';
 
             document.body.insertBefore(iframe, document.body.firstChild);
         }
