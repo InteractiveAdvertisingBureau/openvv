@@ -242,7 +242,7 @@ package org.openvv {
                 return;
             }
             if (viewabilityStandard == null) {
-                standard = OVVConfig.viewability[standard].default_standard;
+                standard = OVVConfig.default_standard;
             }else{
                 standard = viewabilityStandard;
             }

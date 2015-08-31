@@ -1644,8 +1644,8 @@ function OVVGeometryViewabilityCalculator() {
         }
         var assetRect = element.getBoundingClientRect();
         var playerArea = assetRect.width * assetRect.height;
-        if ((minViewPortSize.area / playerArea) < 0.5) {
-            // no position testing required if viewport is less than half the area of the player
+        if ((minViewPortSize.area / playerArea) < (minViewableAreaPc / 100)) {
+            // no position testing required if viewport is less than the required percentage of the player
             viewablePercentage = Math.floor(100 * minViewPortSize.area / playerArea);
         }else{
             var viewPortSize = getViewPortSize(window.top),

@@ -12,9 +12,9 @@ package org.openvv {
             "MRC":    {min_viewable_area_pc: 50,  volume_required: false, poll_interval_ms: 200, viewable_polls_consecutive: true,  min_viewable_time_sec: 2,    min_viewable_time_pc: null }
         };
 
-        /* The default Viewability Standard to use is no viewability_standard
-         * argument is passed in the OVVAsset constructor.
+        /* The default Viewability Standard to be used if no viewability_standard
+         * argument is passed in the OVVAsset constructor or if the argument passed is null.
          */
-        private static const default_standard:String = "MRC";
+        public static const default_standard:String = "MRC";
     }
 }
