@@ -825,7 +825,6 @@ function OVV_OVVID_Asset(uid, dependencies) {
 
     var beaconSupportCheck = new OVVBeaconSupportCheck();
 
-	var minViewableAreaPc = MIN_VIEW_AREA_PC;
     ///////////////////////////////////////////////////////////////////////////
     // PUBLIC FUNCTIONS
     ///////////////////////////////////////////////////////////////////////////
@@ -909,7 +908,7 @@ function OVV_OVVID_Asset(uid, dependencies) {
         if (check.geometrySupported) {
             check.technique = OVV_OVVID_Check.GEOMETRY;
             checkGeometry(check, player);
-            check.viewabilityState = (check.percentViewable >= minViewableAreaPc) ? OVVCheck.VIEWABLE : OVVCheck.UNVIEWABLE;
+            check.viewabilityState = (check.percentViewable >= MIN_VIEW_AREA_PC) ? OVVCheck.VIEWABLE : OVVCheck.UNVIEWABLE;
             if ($ovv.DEBUG) {
                 // add an additional field when debugging
                 check.geometryViewabilityState = check.viewabilityState;
@@ -1090,7 +1089,7 @@ function OVV_OVVID_Asset(uid, dependencies) {
                     overlappingArea = overlapping(playerRect, elem.getBoundingClientRect());
                     if (overlappingArea > 0) {
                         check.percentObscured = 100 * overlapping(playerRect, elem.getBoundingClientRect());
-                        if (check.percentObscured > 100 - minViewableAreaPc) {
+                        if (check.percentObscured > 100 - MIN_VIEW_AREA_PC) {
                               check.percentViewable = 100 - check.percentObscured;
                               check.technique = OVVCheck.DOM_OBSCURING;
                               check.viewabilityState = OVVCheck.UNVIEWABLE;
@@ -1202,9 +1201,9 @@ function OVV_OVVID_Asset(uid, dependencies) {
         // when all points are visible
         if (beaconsVisible === TOTAL_BEACONS) {
             return true;
-        }else if ( minViewableAreaPc == 100 ){
+        }else if ( MIN_VIEW_AREA_PC == 100 ){
 		        return false;
-	    }else if ( minViewableAreaPc == 50 ) {
+	    }else if ( MIN_VIEW_AREA_PC == 50 ) {
 	        // The original MRC standard ...
 	        var beacons = check.beacons;
 
@@ -1645,8 +1644,8 @@ function OVV_OVVID_GeometryViewabilityCalculator() {
         }
         var assetRect = element.getBoundingClientRect();
         var playerArea = assetRect.width * assetRect.height;
-        if ((minViewPortSize.area / playerArea) < 0.5) {
-            // no position testing required if viewport is less than half the area of the player
+        if ((minViewPortSize.area / playerArea) < (MIN_VIEW_AREA_PC / 100)) {
+            // no position testing required if viewport is less than the required percentage of the player
             viewablePercentage = Math.floor(100 * minViewPortSize.area / playerArea);
         }else{
             var viewPortSize = getViewPortSize(window.top),
