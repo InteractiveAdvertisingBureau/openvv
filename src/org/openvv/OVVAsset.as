@@ -101,7 +101,7 @@ package org.openvv {
         /**
          * Hold OVV version. Will past to JavaScript as well $ovv.version
          */
-        public static const RELEASE_VERSION: String = "1.3.1"; //
+        public static const RELEASE_VERSION: String = "1.3.2"; //
 
         // Moved declaration out of constructor and made 'protected'
         // to allow access by subclass, if required.
@@ -114,7 +114,7 @@ package org.openvv {
         /**
          * Holds repository latest commit number
          */
-        private var _buildVersion: String = OVVVersion.getVersion();
+        public static var _buildVersion: String = OVVVersion.getVersion();
 
 		/**
          * Whether the asset has dispatched the DISCERNABLE_IMPRESSION event
