@@ -469,7 +469,7 @@ package org.openvv {
             raiseReady();
         }
         public function jsTrace(obj:Object): void {
-            Debug.traceObj(obj);
+            // Debug.traceObj(obj);
         }
 
         /**
