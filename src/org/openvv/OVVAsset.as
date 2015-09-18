@@ -80,6 +80,16 @@ package org.openvv {
         ////////////////////////////////////////////////////////////
         //   CONSTANTS NOT COVERED IN OVVConfig
         ////////////////////////////////////////////////////////////
+        /**
+         * Hold OVV version. Will pass to JavaScript as well as $ovv.version
+         */
+        public static const RELEASE_VERSION: String = "1.3.3";
+        /** Changes in v1.3.3 :
+         -  Support VPAID 1.x (use first valid value of 'adRemainingTime' instead of adDuration
+            to calculate minimum viewable time as a percentage of total ad duration.)
+         -  Added workaround for 3rd party proxied VPAID ads that do not implement VPAID.adVolume correctly (eg Innovid)
+         -  Initialized check.percentObscured to 0 for use in check.percentViewable calculation, if no obscuring element
+            is detected.
 
         /**
          * The Viewability Standard to be applied. Currently only "MRC" and "GROUPM" supported.
@@ -98,11 +108,6 @@ package org.openvv {
          */
         public static const UNMEASURABLE_IMPRESSION_THRESHOLD: Number = 5;
 
-        /**
-         * Hold OVV version. Will past to JavaScript as well $ovv.version
-         */
-        public static const RELEASE_VERSION: String = "1.3.2"; //
-
         // Moved declaration out of constructor and made 'protected'
         // to allow access by subclass, if required.
         protected var ovvAssetSource: String = "{{OVVAssetJS}}";
@@ -120,6 +125,13 @@ package org.openvv {
          * Whether the asset has dispatched the DISCERNABLE_IMPRESSION event
          */
         private var _hasDispatchedDImp: Boolean = false;
+
+        /**
+         * Variable to flag when a valid duration has been reported and used in the calculation of
+         * VIEWABLE_IMPRESSION_THRESHOLD, when the viewability standard specifies minimum viewable
+         * time as a percentage of the ad duration.
+         * */
+        private var _validDurationReported:Boolean = false;
 
         /**
          * The randomly generated unique identifier of this asset
@@ -258,6 +270,7 @@ package org.openvv {
 
             ExternalInterface.addCallback(_id, flashProbe);
             ExternalInterface.addCallback("onJsReady" + _id, onJsReady);
+            ExternalInterface.addCallback("trace", jsTrace);
 
             _sprite = new Sprite();
             _renderMeter = new OVVRenderMeter(_sprite);
@@ -324,10 +337,24 @@ package org.openvv {
 	}
 
     private function updateThresholdByPercentDuration():void{
+        // Called from onIntervalCheck(), when min viewable time is specified as
+        // a percentage of ad duration, until a valid duration is calculated.
 
-        var duration:int = ( _vpaidAd.adDuration > 0 ) ? _vpaidAd.adDuration : 15;
+        var duration:int = 15; // Use a default value of 15s until the actual duration is determined.
+        if (_vpaidAd.hasOwnProperty("adDuration") && _vpaidAd.adDuration != -2) {
+            // vpaid 2.x
+            if ( _vpaidAd.adDuration > 0 ) {
+                duration = _vpaidAd.adDuration;
+                _validDurationReported = true;
+            }
+        }else{
+            //vpaid 1.x
 
-        // Min viewable for a standard must be specified in seconds OR as a percentage of adDuration...
+            if ( _vpaidAd.adRemainingTime > 0 ){
+                duration = _vpaidAd.adRemainingTime;
+                _validDurationReported = true;
+            }
+        }
         var min_time_sec:int = Math.floor(duration * OVVConfig.viewability[standard].min_viewable_time_pc / 100);
 
         VIEWABLE_IMPRESSION_THRESHOLD = Math.floor(1000 * min_time_sec / OVVConfig.viewability[standard].poll_interval_ms);
@@ -335,7 +362,7 @@ package org.openvv {
 
 
 	/**
-	 * Add a JavaScript resource upon reciveing a given vpaidEvent
+	 * Add a JavaScript resource upon receiving a given vpaidEvent
 	 * @param	vpaidEvent The name of the VPAID event to add the JavaScript resource upon recived
 	 * @param	tagUrl The JavaScript tag url
 	 */
@@ -371,9 +398,13 @@ package org.openvv {
             if (results && !!results.error)
                 raiseError(results);
 
-            if (_vpaidAd != null && _vpaidAd.hasOwnProperty('adVolume')) {
-
-                results.volume = _vpaidAd['adVolume'];
+            results.volume = 1; // default to 1, in case not implemented or not available (eg in Innovid VPAID)
+            if (_vpaidAd != null){
+                if ( _vpaidAd.hasOwnProperty('adVolume') && !isNaN(_vpaidAd['adVolume']) ){
+                    if (_vpaidAd['adVolume'] > -1){
+                        results.volume = _vpaidAd['adVolume'];
+                    }
+                }
             }
 
             var displayState:String = getDisplayState(results);
@@ -437,8 +468,8 @@ package org.openvv {
             }
             raiseReady();
         }
-        public function jsTrace(obj:String): void {
-            trace(obj);
+        public function jsTrace(obj:Object): void {
+            Debug.traceObj(obj);
         }
 
         /**
@@ -526,10 +557,11 @@ package org.openvv {
          */
         private function onIntervalCheck(event: TimerEvent): void {
             var results: Object = checkViewability();
+
 			raiseLog(results);
 
             if (_isPaused == false) {
-                if ( OVVConfig.viewability[standard].min_viewable_time_pc != null ) {
+                if ( OVVConfig.viewability[standard].min_viewable_time_pc != null && _validDurationReported == false ) {
                     // May change during the course of the ad so update with each poll.
                     updateThresholdByPercentDuration();
                 }
@@ -541,7 +573,6 @@ package org.openvv {
                                         focusOk(results);
 
                 _intervalsUnMeasurable = unmeasurable ? _intervalsUnMeasurable + 1 : 0;
-
                 if (viewable) {
                     _intervalsInView += 1;
                 }else if (OVVConfig.viewability[standard].viewable_polls_consecutive){
@@ -680,7 +711,6 @@ package org.openvv {
 		public function handleVpaidEvent(event:Event):void
 		{
 			var ovvData:OVVCheck = checkViewability();
-
 			switch(event.type){
 				case VPAIDEvent.AdVideoComplete:
                     stopImpressionTimer();

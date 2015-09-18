@@ -892,8 +892,7 @@ function OVVAsset(uid, dependencies) {
                 return check;
             }
         }else{
-            //player.jsTrace("obscured : " + check.percentObscured.toString());
-            //player.jsTrace({OBSCURED:check.percentObscured});
+	        check.percentObscured = 0;
         }
 
         // if we're in IE and we're in a cross-domain iframe, return unmeasurable
@@ -1626,22 +1625,21 @@ function OVVAsset(uid, dependencies) {
 
 function OVVGeometryViewabilityCalculator() {
 
-    this.getViewabilityState = function (element, contextWindow) {
+    this.getViewabilityState = function (player, contextWindow) {
         var minViewPortSize = getMinViewPortSize(),
             viewablePercentage;
-        if (minViewPortSize.area == Infinity) {
+	    if (minViewPortSize.area == Infinity) {
             return { error: 'Failed to determine viewport'};
         }
-        var assetRect = element.getBoundingClientRect();
+        var assetRect = player.getBoundingClientRect();
         var playerArea = assetRect.width * assetRect.height;
         if ((minViewPortSize.area / playerArea) < (MIN_VIEW_AREA_PC / 100)) {
             // no position testing required if viewport is less than the required percentage of the player
             viewablePercentage = Math.floor(100 * minViewPortSize.area / playerArea);
         }else{
             var viewPortSize = getViewPortSize(window.top),
-                visibleAssetSize = getAssetVisibleDimension(element, contextWindow);
-            //var viewablePercentage = getAssetViewablePercentage(assetSize, viewPortSize);
-            //Height within viewport:
+                visibleAssetSize = getAssetVisibleDimension(player, contextWindow);
+            // Height visible in viewport:
             if ( visibleAssetSize.bottom > viewPortSize.height ) {
                 //Partially below the bottom
                 visibleAssetSize.height -= (visibleAssetSize.bottom - viewPortSize.height);
@@ -1650,6 +1648,7 @@ function OVVGeometryViewabilityCalculator() {
                 //Partially above the top
                 visibleAssetSize.height += visibleAssetSize.top;
             }
+	        // Width visible in viewport:
             if ( visibleAssetSize.left < 0 ) {
                 visibleAssetSize.width += visibleAssetSize.left;
             }
@@ -1659,11 +1658,7 @@ function OVVGeometryViewabilityCalculator() {
             // Viewable percentage is the portion of the ad that's visible divided by the size of the ad
             viewablePercentage = Math.floor( 100 * ( visibleAssetSize.width * visibleAssetSize.height ) / playerArea );
         }
-        /*
-        //Get player dimensions:
-        var assetRect = element.getBoundingClientRect();
-        */
-        return {
+        var result = {
             clientWidth: viewPortSize.width,
             clientHeight: viewPortSize.height,
             objTop: assetRect.top,
@@ -1672,6 +1667,7 @@ function OVVGeometryViewabilityCalculator() {
             objRight: assetRect.right,
             percentViewable: viewablePercentage
         };
+	    return result;
     };
 
     ///////////////////////////////////////////////////////////////////////////
