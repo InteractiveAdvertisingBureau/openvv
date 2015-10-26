@@ -630,7 +630,7 @@ function OVVBeaconSupportCheck()
         var WIN_8_1 = 6.3;
         var isIE = browser.ID == browserIDEnum.MSIE;
         var isSupportedIEVersion = browser.version >= 11;
-        var ntVersionArr = browser.os ? browser.os.split(' ') : [0];
+        var ntVersionArr = browser.version ? browser.version.split(' ') : [0];
         var ntVersion = ntVersionArr[ntVersionArr.length - 1];
         var isSupportedOSForIE = ntVersion >= WIN_8_1;
         return !isIE || (isSupportedIEVersion && isSupportedOSForIE);
@@ -1233,15 +1233,15 @@ function OVVAsset(uid, dependencies) {
         // // when top left and bottom right corners are visible
         if ((beacons[OUTER_TOP_LEFT] && beacons[OUTER_BOTTOM_RIGHT]) &&
                 // and any of their diagonals are covered
-            (!(beacons[MIDDLE_TOP_LEFT] && beacons[INNER_TOP_LEFT] && beacons[CENTER] && beacons[INNER_BOTTOM_RIGHT] && beacons[MIDDLE_BOTTOM_RIGHT]))
+            (!beacons[MIDDLE_TOP_LEFT] || !beacons[INNER_TOP_LEFT] || !beacons[CENTER] || beacons[INNER_BOTTOM_RIGHT] || beacons[MIDDLE_BOTTOM_RIGHT])
         ) {
             return null;
         }
 
         // when bottom left and top right corners are visible
         if ((beacons[OUTER_BOTTOM_LEFT] && beacons[OUTER_TOP_RIGHT]) &&
-                // and any of their diagonals are covered
-            (!(beacons[MIDDLE_BOTTOM_LEFT] && beacons[INNER_BOTTOM_LEFT] && beacons[CENTER] && beacons[INNER_TOP_RIGHT] && beacons[MIDDLE_TOP_RIGHT]))
+            // and any of their diagonals are covered
+            (!beacons[MIDDLE_BOTTOM_LEFT] || !beacons[INNER_BOTTOM_LEFT] || !beacons[CENTER] || !beacons[INNER_TOP_RIGHT] || !beacons[MIDDLE_TOP_RIGHT])
         ) {
             return null;
         }
@@ -1884,15 +1884,8 @@ Function.prototype.memoize = function() {
         return fn.memoized.apply(fn, arguments);
     }
 };
-var newOVV = new OVV();
 // initialize the OVV object if it doesn't exist
-window.$ovv = window.$ovv || newOVV;
-for(var i in newOVV)
-{
-    if(!$ovv.hasOwnProperty(i)){
-        $ovv[i] = newOVV[i];
-    }
-}
+window.$ovv = window.$ovv || new OVV();
 
 // 'OVVID' is String substituted from AS
 window.$ovv.addAsset(new OVVAsset('OVVID', { geometryViewabilityCalculator: new OVVGeometryViewabilityCalculator() }));
