@@ -635,7 +635,7 @@ package org.openvv {
 			switch(event.type){
 				case VPAIDEvent.AdVideoComplete:
 					// stop time on ad completion
-					if (_intervalTimer) {
+					if(_intervalTimer != null){
 						_intervalTimer.stop();
 						_intervalTimer.removeEventListener(TimerEvent.TIMER, onIntervalCheck);
 						_intervalTimer = null;

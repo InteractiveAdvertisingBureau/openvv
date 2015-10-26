@@ -13,3 +13,4 @@ jsdoc/
 obj/
 .flexLibProperties
 src/org/openvv/OVVVersion.as
+/node_modules
