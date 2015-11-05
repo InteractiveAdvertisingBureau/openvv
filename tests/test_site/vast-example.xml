@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<VAST version="2.0">
+  <Ad id="1">
+    <InLine>
+      <AdSystem>2.0</AdSystem>
+      <AdTitle>VPAID Example</AdTitle>
+	  <Impression>http://example.com/pixel.gif</Impression>
+      <Creatives>
+        <Creative>
+	      <Linear>
+            <Duration>00:00:30</Duration> 
+            <MediaFiles>
+              <MediaFile delivery="progressive" apiFramework="VPAID" width="480" height="360" type="application/x-shockwave-flash">
+				<![CDATA[ad/DVVpaidWrapper.swf]]>
+              </MediaFile>	
+            </MediaFiles>			 
+          </Linear>
+        </Creative>
+      </Creatives>
+    </InLine>
+  </Ad>
+</VAST>
