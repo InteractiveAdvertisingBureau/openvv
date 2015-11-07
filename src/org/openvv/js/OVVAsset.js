@@ -1602,8 +1602,8 @@ function OVVAsset(uid, dependencies) {
 
     // only use the beacons if geometry is not supported, or we we are in DEBUG mode.
     if ($ovv.geometrySupported == false || $ovv.DEBUG) {
-        if (!!window.mozPaintCount){
-            //Use frame technique to measure viewability in cross domain FF scenario
+	    if (typeof(window.mozPaintCount)=='number'){
+	        //Use frame technique to measure viewability in cross domain FF scenario
             getBeaconFunc = getFrameBeacon;
             getBeaconContainerFunc = getFrameBeaconContainer;
             createFrameBeacons.bind(this)();

@@ -84,6 +84,9 @@ package org.openvv {
          * Hold OVV version. Will pass to JavaScript as well as $ovv.version
          */
         public static const RELEASE_VERSION: String = "1.3.4";
+        /** Changes in v1.3.4 :
+         - AD-1786 : Firefox Browser detection was failing : Test for valid window.mozPaintCount instead of Browser ID
+         */
         /** Changes in v1.3.3 :
          -  Support VPAID 1.x (use first valid value of 'adRemainingTime' instead of adDuration
             to calculate minimum viewable time as a percentage of total ad duration.)
