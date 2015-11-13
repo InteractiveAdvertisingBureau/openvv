@@ -18,7 +18,7 @@
 			return true;
 		}
 	}
-	
+		
 	var valOutput = [
 	{ key: 'adHeight', type: 'calc', prop : 'objBottom - objTop'},
 	{ key: 'adWidth', type: 'calc', prop : 'objRight - objLeft'},
@@ -32,12 +32,43 @@
 	{ key: 'percentViewable', type: 'val', prop : 'percentViewable', format: '{0}%'}
 	];
 	
+	/**
+	* Information window about current viewability
+	// id="ovvParamValues" 
+	*/
+	var infoBox = {
+		viewabilityInfoMarkup :
+'<div class="chip chip_shadow ovvParamBox dragbox"> \
+<button type="button" class="close">&times;</button> \
+<h2>OVV Viewability data</h2> \
+###DETAILS### \
+<hr class="light" /> \
+###SUMMARY### \
+</div> ',
+
+		lineMarkup: '<div><label>##label##</label> <span data-ovv="##ovv##"></span></div>',
+
+		detailDef: [
+			{label: 'Ad Width', ovv: 'adWidth'},
+			{label: 'Ad Height', ovv: 'adHeight'},
+			{label: 'Viewport Width', ovv: 'viewportWidth'},
+			{label: 'Viewport Height', ovv: 'viewportHeight'}
+		],
+			
+		summaryDef: [
+			{label: 'Viewable', ovv: 'percentViewable'},
+			{label: 'Window Focus', ovv: 'windowActive'}
+		]
+	}
+
 	
 	// Options
 	var opts = {
 		debug: true,
 		logListener: noop,
 		displayOvvValues: true,
+		buildInfoBox: false,
+		infoBoxTarget: null,
 		valuesOutputElem: null
 	};
 	
@@ -102,6 +133,77 @@
 	}
 	
 	/**
+	* openvvtest.util object definition
+	*/
+	var util = {
+		getEl: function(elemOrId){
+			var id, el;
+			
+			if(elemOrId == null){
+				throw "Null identifier to find elem";
+			}
+			
+			if(typeof(elemOrId === 'String')){
+				id = elemOrId;
+				if(id.substr(0,1) == '#'){
+					id = id.substr(1);
+				}
+				return document.getElementById(id);
+			}
+			else if(typeof(elemOrId === 'Object')){
+				return elemOrId;
+			}
+		}
+	}
+	
+	/**
+	* Method to build the info window at the target location
+	*/
+	function buildInfoWindow(elemOrId){
+		var el = util.getEl(elemOrId);
+		var html = infoBox.viewabilityInfoMarkup;
+		var line, tp = infoBox.lineMarkup;
+		var i, k, d;
+		var sumbuf = [], detbuf = []
+		
+		var id;
+		
+		id = el.getAttribute('id');
+		if(id != null){		
+			ovvtest.setOptions({ valuesOutputElem: id});
+		}
+		else{
+			ovvtest.setOptions({ valuesOutputElem: el});
+		}
+		
+		for(i=0;i<infoBox.detailDef.length;i++){
+			d = infoBox.detailDef[i];
+			line = tp.replace('##label##', d.label).replace('##ovv##', d.ovv);
+			detbuf.push(line);
+		}
+		for(i=0;i<infoBox.summaryDef.length;i++){
+			d = infoBox.summaryDef[i];
+			line = tp.replace('##label##', d.label).replace('##ovv##', d.ovv);
+			sumbuf.push(line);
+		}
+		
+		html = html.replace('###DETAILS###', detbuf.join(''));
+		html = html.replace('###SUMMARY###', sumbuf.join(''));
+		
+		el.innerHTML = html;
+
+
+		var closeBtn = el.querySelector('button.close');
+		if(closeBtn != null){
+			closeBtn.addEventListener('click', function(evt){
+				var box = document.getElementById('ovvParamValues');
+				box.style.display = 'none';
+			});
+		}
+	}
+	
+	
+	/**
 	* Static implementation object for ovvtest
 	*/
 	var impl = {
@@ -121,6 +223,8 @@
 				}
 			}			
 		},
+		
+		buildInfoWindow: buildInfoWindow,
 		
 		log: function(message, data){
 			if(opts.debug){
@@ -150,6 +254,8 @@
 		}
 		
 	}
+	
+	impl.util = util;
 	
 	win['ovvtest'] = impl;
 
