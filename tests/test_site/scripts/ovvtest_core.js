@@ -30,6 +30,8 @@
 	{ key: 'adBottom', type: 'val', prop : 'objBottom'},
 	{ key: 'inIframe', type: 'val', prop : 'inIframe'},
 	{ key: 'windowActive', type: 'val', prop : 'focus'},
+	{ key: 'measureTechnique', type: 'val', prop : 'technique'},
+	{ key: 'viewabilityState', type: 'val', prop : 'viewabilityState'},
 	{ key: 'percentViewable', type: 'val', prop : 'percentViewable', format: '{0}%'}
 	];
 	
@@ -53,13 +55,15 @@
 			{label: 'Ad Width', ovv: 'adWidth'},
 			{label: 'Ad Height', ovv: 'adHeight'},
 			{label: 'Viewport Width', ovv: 'viewportWidth'},
-			{label: 'Viewport Height', ovv: 'viewportHeight'}
+			{label: 'Viewport Height', ovv: 'viewportHeight'},
+			{label: 'Viewable', ovv: 'percentViewable'},
+			{label: 'Window Focus', ovv: 'windowActive'}
 		],
 			
 		summaryDef: [
 			{label: 'IFramed', ovv: 'inIframe'},
-			{label: 'Viewable', ovv: 'percentViewable'},
-			{label: 'Window Focus', ovv: 'windowActive'}
+			{label: 'Measurement By', ovv: 'measureTechnique'},
+			{label: 'OVV State', ovv: 'viewabilityState'}
 		]
 	}
 
