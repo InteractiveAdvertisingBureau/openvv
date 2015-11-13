@@ -7,7 +7,7 @@
     <script src="flowplayer/flowplayer-3.2.13.min.js"></script>
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.4/jquery.min.js"></script>
 
-    <script src="scripts/viewability.js" type="text/javascript"></script>
+    <script src="scripts/dv_sample_viewability_shim.js" type="text/javascript"></script>
     <script src="scripts/purl.js" type="text/javascript"></script>
 
     <title>OpenVV Viewability Test</title>
@@ -63,56 +63,8 @@
 
 </div>
 
+<div id='chip_events' class='chip_section'> </div>
 
-<div id='chip' class='xchip chip_shadow' style="display:none;"> <span class='chip_title'>VIEWABILITY</span>
-    <div id='chip_events' class='chip_section'> </div>
-    <div class='chip_section'>
-        <table width="100%" align="center" cellpadding="3" cellspacing="0" class="chip_stats">
-            <tr>
-                <td class="chip_stat_title">Ad Width:</td>
-                <td class="chip_stat_number" id="chip_adWidth">---</td>
-                <td>&nbsp;</td>
-                <td class="chip_stat_title">objTop:</td>
-                <td class="chip_stat_number" id="chip_objTop">---</td>
-            </tr>
-            <tr>
-                <td class="chip_stat_title">Ad Height:</td>
-                <td class="chip_stat_number" id="chip_adHeight">---</td>
-                <td>&nbsp;</td>
-                <td class="chip_stat_title">objLeft:</td>
-                <td class="chip_stat_number" id="chip_objLeft">---</td>
-            </tr>
-            <tr>
-                <td class="chip_stat_title">Viewport Width:</td>
-                <td class="chip_stat_number"id="chip_viewportWidth">---</td>
-                <td>&nbsp;</td>
-                <td class="chip_stat_title">objRight:</td>
-                <td class="chip_stat_number" id="chip_objRight">---</td>
-            </tr>
-            <tr>
-                <td class="chip_stat_title">Viewport Height:</td>
-                <td class="chip_stat_number"id="chip_viewportHeight">---</td>
-                <td>&nbsp;</td>
-                <td class="chip_stat_title">objBottom:</td>
-                <td class="chip_stat_number" id="chip_objBottom">---</td>
-            </tr>
-            <tr>
-                <td class="chip_stat_title">Window Active:</td>
-                <td class="chip_stat_number"id="chip_windowActive">---</td>
-                <td>&nbsp;</td>
-                <td class="chip_stat_title">IFrame:</td>
-                <td class="chip_stat_number" id="chip_iFrame">---</td>
-            </tr>
-            <tr>
-                <td class="chip_stat_title">Muted:</td>
-                <td class="chip_stat_number"id="chip_isMuted">---</td>
-                <td>&nbsp;</td>
-                <td class="chip_stat_title">Viewability:</td>
-                <td class="chip_stat_number" id="chip_view">---</td>
-            </tr>
-        </table>
-    </div>
-</div>
 
 <button type="button" class="close"></button>
 <!-- https://youtu.be/YE7VzlLtp-4 -->
