@@ -28,6 +28,7 @@
 	{ key: 'adLeft', type: 'val', prop : 'objLeft'},
 	{ key: 'adRight', type: 'val', prop : 'objRight'},
 	{ key: 'adBottom', type: 'val', prop : 'objBottom'},
+	{ key: 'inIframe', type: 'val', prop : 'inIframe'},
 	{ key: 'windowActive', type: 'val', prop : 'focus'},
 	{ key: 'percentViewable', type: 'val', prop : 'percentViewable', format: '{0}%'}
 	];
@@ -56,6 +57,7 @@
 		],
 			
 		summaryDef: [
+			{label: 'IFramed', ovv: 'inIframe'},
 			{label: 'Viewable', ovv: 'percentViewable'},
 			{label: 'Window Focus', ovv: 'windowActive'}
 		]

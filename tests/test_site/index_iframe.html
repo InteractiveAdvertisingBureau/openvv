@@ -4,31 +4,21 @@
     <link rel="stylesheet" href="includes/css/main.css" type="text/css" media="screen" />
     <link rel="stylesheet" href="includes/css/viewability.css" type="text/css" />
 	
-    <script src="flowplayer/flowplayer-3.2.13.min.js"></script>
-<script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.4/jquery.min.js"></script>
-
-    <script src="scripts/dv_sample_viewability_shim.js" type="text/javascript"></script>
-    <script src="scripts/purl.js" type="text/javascript"></script>
-
-    <title>OpenVV Viewability Test</title>
+    <title>IFramed - Same Domain :OpenVV Viewability Test</title>
 </head>
-<body>
-<h1>On Page Video</h1>
 
-<div id="wrapper">
-    <div id="player"></div>
-<div id='chip_events' style="margin-top:120px;" class='chip_section'> </div>
-	
-</div>
+<body>
+
+<h1>Video Ad embedded in an IFrame</h1>
+
+<iframe id="videoFrame" 
+src="ad_framed.html"
+style="margin-left:30px;border:1px solid blue;width:700px;height:800px;background:green;"></iframe>
 
 
 <div id="ovvParamValues"></div>
 
-
-
-
-<!-- https://youtu.be/YE7VzlLtp-4 -->
-
+<!--
 <script src="scripts/ovvtest_core.js" type="text/javascript"></script>
 <script src="scripts/ovvtest_player.js" type="text/javascript"></script>
 <script  type="text/javascript">
@@ -53,6 +43,7 @@
 
 
 </script>
+-->
 
 </body>
 </html>
