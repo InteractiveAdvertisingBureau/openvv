@@ -1,11 +1,4 @@
 
-(function(){
-	window.addEventListener("load", function load(event){
-		window.removeEventListener("load", load, false); //remove listener, no longer needed
-//		positionPlayer();
-		if (typeof(buildPlayer) === 'function') buildPlayer();
-	},false);
-})();
 
 var $gl = function(id){
 	if(id.substr(0,1) == '#'){
@@ -32,7 +25,7 @@ function displayEvent(eventName, eventPercent, active ) {
 	var chipHDVL = "";
 	chipHDVL += "<table border='0' cellpadding='0' cellspacing='0' class='chip_bubble "+viewableID+"_color'>";
     chipHDVL += "  <tr>";
-    chipHDVL += "    <td width='34'><img src='images/"+viewableID+".png' width='34' height='30' class='chip_bubble_image'></td>";
+    chipHDVL += "    <td width='34'><img src='includes/images/"+viewableID+".png' width='34' height='30' class='chip_bubble_image'></td>";
     chipHDVL += "    <td width='' class='chip_bubble_title'>"+eventName+"</td>";
     if (eventPercent >= 0 && eventPercent <= 100 ) {
 			chipHDVL += "    <td width='50' class='chip_bubble_percent'>"+eventPercent+"%</td>";

@@ -119,8 +119,17 @@
 
 <script>
     function buildPlayer() {
-        //Configuration="Api=0|Blocked=0|Unknown=1|BlockingServiceTimeout=5000|AllowIfTimeout=true|MovieLength=10|MovieURL=http://video.doubleverify.com/Big-Buck-Bunny-animation-1080p-HD.mp4|LoadOVV=false"
-Configuration="Api=0|Blocked=0|Unknown=1|BlockingServiceTimeout=5000|AllowIfTimeout=true|MovieLength=10|MovieURL=http://video.doubleverify.com/Big-Buck-Bunny-animation-1080p-HD.mp4|LoadOVV=false|Tag=ctx=1462413&cmp=2400648&sid=ernstandyoung&plc=1234567&num=&tagformat=2&advid=1313986&adsrv=20&region=30&btreg=&btadsrv=&crt=&crtname=&chnl=&unit=&pid=&uid=&tagtype=video&dvtagver=6.1.src|VpaidUrl=''"
+        // http://download.blender.org/peach/bigbuckbunny_movies/BigBuckBunny_320x180.mp4
+		// http://video.doubleverify.com/Big-Buck-Bunny-animation-1080p-HD.mp4
+		
+		var contentVidUrl = 'http://download.blender.org/peach/bigbuckbunny_movies/BigBuckBunny_320x180.mp4'
+		
+		//Configuration="Api=0|Blocked=0|Unknown=1|BlockingServiceTimeout=5000|AllowIfTimeout=true|MovieLength=10|MovieURL=http://video.doubleverify.com/Big-Buck-Bunny-animation-1080p-HD.mp4|LoadOVV=false"
+Configuration="Api=0|Blocked=0|Unknown=1|BlockingServiceTimeout=5000|AllowIfTimeout=true|MovieLength=10|MovieURL="
++ contentVidUrl
++ '|LoadOVV=false|Tag=ctx=1462413&cmp=2400648&sid=ernstandyoung&plc=1234567&num=&tagformat=2&advid=1313986&adsrv=20'
++ "&region=30&btreg=&btadsrv=&crt=&crtname=&chnl=&unit=&pid=&uid=&tagtype=video&dvtagver=6.1.src|VpaidUrl=''"
+
         var autoPlay = getParameterByName('autoPlay');
         if (autoPlay != "") {
             autoPlay = autoPlay.toLowerCase().indexOf( 'f' ) == -1?true:false;
@@ -165,7 +174,8 @@ Configuration="Api=0|Blocked=0|Unknown=1|BlockingServiceTimeout=5000|AllowIfTime
 </script>
 
 <script src="scripts/ovvtest_core.js" type="text/javascript"></script>
-<script>
+<script src="scripts/ovvtest_player.js" type="text/javascript"></script>
+<script  type="text/javascript">
 ovvtest.setOptions({ valuesOutputElem: 'ovvParamValues'});
 
 (function(){
@@ -175,8 +185,22 @@ ovvtest.setOptions({ valuesOutputElem: 'ovvParamValues'});
 		var box = document.getElementById('ovvParamValues');
 		box.style.display = 'none';
 	});
-
 })();
+
+// init things
+(function(){
+	window.addEventListener("load", function load(event){
+		window.removeEventListener("load", load, false); //remove listener, no longer needed
+//		positionPlayer();
+		// if (typeof(buildPlayer) === 'function') buildPlayer();
+		
+		ovvtest.player.setPlayer('flowplayer');
+		ovvtest.player.initPlayer('player');
+		
+		
+	},false);
+})();
+
 
 </script>
 
