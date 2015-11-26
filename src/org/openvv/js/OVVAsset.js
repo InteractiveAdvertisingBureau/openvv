@@ -62,21 +62,17 @@ function OVV() {
      function getServingScenarioType(servingScenarioEnum) {
         try {
 			if (window.top === window) {
-                return servingScenarioEnum.OnPage;
+				return servingScenarioEnum.OnPage;
 			}
-			
-			var curWin=window;			
-			
-			while(curWin.parent != curWin){
+			var curWin=window;	
+			var level=0;			
+			while(curWin.parent != curWin  && level<1000){
 				 if (curWin.parent.document.domain != curWin.document.domain) {
 					return servingScenarioEnum.CrossDomainIframe;
 				 }
 				 curWin = curWin.parent;
 			}
-			
-			 return servingScenarioEnum.SameDomainIframe;
-						
-        
+			return servingScenarioEnum.SameDomainIframe;
         } catch (e) { }
         return servingScenarioEnum.CrossDomainIframe;
     };
