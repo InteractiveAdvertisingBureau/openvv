@@ -630,7 +630,7 @@ function OVVBeaconSupportCheck()
         var WIN_8_1 = 6.3;
         var isIE = browser.ID == browserIDEnum.MSIE;
         var isSupportedIEVersion = browser.version >= 11;
-        var ntVersionArr = browser.version ? browser.version.split(' ') : [0];
+        var ntVersionArr = browser.os ? browser.os.split(' ') : [0];
         var ntVersion = ntVersionArr[ntVersionArr.length - 1];
         var isSupportedOSForIE = ntVersion >= WIN_8_1;
         return !isIE || (isSupportedIEVersion && isSupportedOSForIE);
