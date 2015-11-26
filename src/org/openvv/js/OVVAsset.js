@@ -1884,8 +1884,14 @@ Function.prototype.memoize = function() {
         return fn.memoized.apply(fn, arguments);
     }
 };
+var newOVV = new OVV();		
 // initialize the OVV object if it doesn't exist
-window.$ovv = window.$ovv || new OVV();
+window.$ovv = window.$ovv || newOVV;		
+for(var i in newOVV){		
+    if(!$ovv.hasOwnProperty(i)){		
+        $ovv[i] = newOVV[i];		
+   }		
+}
 
 // 'OVVID' is String substituted from AS
 window.$ovv.addAsset(new OVVAsset('OVVID', { geometryViewabilityCalculator: new OVVGeometryViewabilityCalculator() }));
