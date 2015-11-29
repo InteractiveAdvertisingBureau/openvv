@@ -38,11 +38,7 @@ function OVV() {
     */
     this.DEBUG = false;
 
-    /**
-    * Whether OpenVV is running within an iframe or not.
-    * @type {Boolean}
-    */
-    this.IN_IFRAME = (window.top !== window.self);
+
 
     /**
     * The last asset added to OVV. Useful for easy access from the
@@ -61,7 +57,7 @@ function OVV() {
 
      function getServingScenarioType(servingScenarioEnum) {
         try {
-			if (window.top === window) {
+			if (window.top == window) {
 				return servingScenarioEnum.OnPage;
 			}
 			var curWin=window;	
@@ -77,6 +73,13 @@ function OVV() {
         return servingScenarioEnum.CrossDomainIframe;
     };
 
+	
+	/**
+    * Whether OpenVV is running within an iframe or not.
+    * @type {Boolean}
+    */
+    this.IN_IFRAME = this.servingScenario == this.servingScenarioEnum.SameDomainIframe);
+	
     this.servingScenario = getServingScenarioType(this.servingScenarioEnum);
     this.IN_XD_IFRAME =  (this.servingScenario == this.servingScenarioEnum.CrossDomainIframe);
     this.geometrySupported = !this.IN_XD_IFRAME;
