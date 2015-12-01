@@ -78,9 +78,9 @@ function OVV() {
     * Whether OpenVV is running within an iframe or not.
     * @type {Boolean}
     */
-    this.IN_IFRAME = this.servingScenario == this.servingScenarioEnum.SameDomainIframe);
-	
+    
     this.servingScenario = getServingScenarioType(this.servingScenarioEnum);
+	this.IN_IFRAME = (this.servingScenario != this.servingScenarioEnum.OnPage);
     this.IN_XD_IFRAME =  (this.servingScenario == this.servingScenarioEnum.CrossDomainIframe);
     this.geometrySupported = !this.IN_XD_IFRAME;
 
