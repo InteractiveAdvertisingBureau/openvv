@@ -1577,8 +1577,7 @@ function OVVAsset(uid, dependencies) {
                 return objs[i];
             }
         }
-
-        return null;
+        return document.getElementById(id);
     };
 
     var isInFocus = function () {
