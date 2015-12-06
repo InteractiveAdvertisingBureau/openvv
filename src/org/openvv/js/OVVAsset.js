@@ -1118,6 +1118,7 @@ function OVVAsset(uid, dependencies) {
     * @param {Element} player The HTML Element to measure
     */
     var checkGeometry = function (check, player) {
+		check.percentObscured = check.percentObscured || 0; // support override of OVVCheck by previous version  
         var viewabilityResult = geometryViewabilityCalculator.getViewabilityState(player, window);
         if (!viewabilityResult.error) {
             check.clientWidth = viewabilityResult.clientWidth;
