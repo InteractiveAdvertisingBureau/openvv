@@ -39,12 +39,6 @@ function OVV() {
     this.DEBUG = false;
 
     /**
-    * Whether OpenVV is running within an iframe or not.
-    * @type {Boolean}
-    */
-    this.IN_IFRAME = (window.top !== window.self);
-
-    /**
     * The last asset added to OVV. Useful for easy access from the
     * JavaScript console.
     * @type {OVVAsset}
@@ -59,22 +53,29 @@ function OVV() {
 
     this.servingScenarioEnum = { OnPage: 1, SameDomainIframe: 2, CrossDomainIframe: 3 };
 
-    function getServingScenarioType(servingScenarioEnum) {
+     function getServingScenarioType(servingScenarioEnum) {
         try {
-            if (window.top == window) {
-                return servingScenarioEnum.OnPage;
-            } else if (window.top.document.domain == window.document.domain) {
-                return servingScenarioEnum.SameDomainIframe;
-            }
+			if (window.top == window) {
+				return servingScenarioEnum.OnPage;
+			}
+			var curWin=window;	
+			var level=0;			
+			while(curWin.parent != curWin  && level<1000){
+				 if (curWin.parent.document.domain != curWin.document.domain) {
+					return servingScenarioEnum.CrossDomainIframe;
+				 }
+				 curWin = curWin.parent;
+			}
+			return servingScenarioEnum.SameDomainIframe;
         } catch (e) { }
         return servingScenarioEnum.CrossDomainIframe;
     };
-
+	
     this.servingScenario = getServingScenarioType(this.servingScenarioEnum);
+    this.IN_IFRAME = (this.servingScenario != this.servingScenarioEnum.OnPage);
     this.IN_XD_IFRAME =  (this.servingScenario == this.servingScenarioEnum.CrossDomainIframe);
-    this.geometrySupported = !this.IN_IFRAME;
-
-
+    this.geometrySupported = !this.IN_XD_IFRAME;
+	
     // To support older versions of OVVAsset
     var browserData = new OVVBrowser(this.userAgent);
 
@@ -1794,14 +1795,13 @@ function OVVGeometryViewabilityCalculator() {
             var elementRect = element.getBoundingClientRect();
             if (currWindow != parentWindow) {
                 resultPosition = getPositionRelativeToViewPort(currWindow.frameElement, parentWindow);
-            } else {
+			}
                 resultPosition = {
                     left: elementRect.left + resultPosition.left,
                     right: elementRect.right + resultPosition.left,
                     top: elementRect.top + resultPosition.top,
                     bottom: elementRect.bottom + resultPosition.top
                 };
-            }
         }
         return resultPosition;
     };
