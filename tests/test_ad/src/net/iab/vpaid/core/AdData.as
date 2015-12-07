@@ -22,7 +22,8 @@ package net.iab.vpaid.core
 			var url:String = escape("http://services.mediamind.com/instream/IAB/videos/ad-video-canal.mp4");
 			_params.advideo = unescape(url);
 			_params.skipOffset = 5;
-			_params.ovvBeaconURL = "http://localhost/iab/OVVBeacon.swf";
+			//_params.ovvBeaconURL = "http://localhost/iab/OVVBeacon.swf";
+			_params.ovvBeaconURL = "/ad/OVVBeacon.swf";
 			this.params = params;
 		}
 		
