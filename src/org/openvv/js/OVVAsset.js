@@ -38,8 +38,6 @@ function OVV() {
     */
     this.DEBUG = false;
 
-
-
     /**
     * The last asset added to OVV. Useful for easy access from the
     * JavaScript console.
@@ -73,17 +71,10 @@ function OVV() {
         return servingScenarioEnum.CrossDomainIframe;
     };
 
-	
-	/**
-    * Whether OpenVV is running within an iframe or not.
-    * @type {Boolean}
-    */
-    
     this.servingScenario = getServingScenarioType(this.servingScenarioEnum);
 	this.IN_IFRAME = (this.servingScenario != this.servingScenarioEnum.OnPage);
-    this.IN_XD_IFRAME =  (this.servingScenario == this.servingScenarioEnum.CrossDomainIframe);
-    this.geometrySupported = !this.IN_XD_IFRAME;
-
+	this.IN_XD_IFRAME =  (this.servingScenario == this.servingScenarioEnum.CrossDomainIframe);
+	this.geometrySupported = !this.IN_XD_IFRAME;
 
     // To support older versions of OVVAsset
     var browserData = new OVVBrowser(this.userAgent);
