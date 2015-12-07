@@ -11,7 +11,7 @@
             <Duration>00:00:30</Duration> 
             <MediaFiles>
               <MediaFile delivery="progressive" apiFramework="VPAID" width="480" height="360" type="application/x-shockwave-flash">
-				<![CDATA[ad/DVVpaidWrapper.swf]]>
+				<![CDATA[ad/IAB-VPAID-Ad.swf]]>
               </MediaFile>	
             </MediaFiles>			 
           </Linear>

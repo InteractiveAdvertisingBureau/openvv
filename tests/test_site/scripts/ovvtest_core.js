@@ -215,9 +215,17 @@
 	var impl = {
 		
 		handleOvvEvent: function(event, data){
+			var dataObj;
+			if(data.ovvData != null){
+				dataObj = data.ovvData;
+			}
+			else{
+				dataObj = data;
+			}
+					
 			// ovvtest.log(event, data);
 			if(opts.displayOvvValues){
-				displayViewableData(data.ovvData);
+				displayViewableData(dataObj);
 			}			
 		},
 		

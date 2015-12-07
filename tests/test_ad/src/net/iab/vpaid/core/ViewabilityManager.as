@@ -101,6 +101,16 @@ package net.iab.vpaid.core
 				log.push(prefix, prop, "=", data[prop]);
 			}
 			consoleLog(log.join(" "));
+			
+			try {
+				var eventObj:Object = {
+					currentTarget: "IAB_FLASH_AD"
+				};
+				ExternalInterface.call("ovvtest.handleOvvEvent", eventObj, data);
+			}
+			catch (ex:Error) {
+				consoleLog(ex.message)
+			}
 		}
 		
 		private function consoleLog(params:String):void
