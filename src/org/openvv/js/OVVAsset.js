@@ -70,12 +70,12 @@ function OVV() {
         } catch (e) { }
         return servingScenarioEnum.CrossDomainIframe;
     };
-
-    this.servingScenario = getServingScenarioType(this.servingScenarioEnum);
+	
+	this.servingScenario = getServingScenarioType(this.servingScenarioEnum);
 	this.IN_IFRAME = (this.servingScenario != this.servingScenarioEnum.OnPage);
 	this.IN_XD_IFRAME =  (this.servingScenario == this.servingScenarioEnum.CrossDomainIframe);
 	this.geometrySupported = !this.IN_XD_IFRAME;
-
+	
     // To support older versions of OVVAsset
     var browserData = new OVVBrowser(this.userAgent);
 
