@@ -7,7 +7,7 @@
 	<property name="src.dir" value="..\..\src" />
 	<property name="libs.dir" value="..\..\libs" />
 	<property name="bin.dir" value="..\..\bin" />
-	<property name="localserver.dir" value="C:\xampp\htdocs\iab" />
+	<property name="localserver.dir" value="../../../test_site/ad" />
 	
 	<taskdef resource="flexTasks.tasks" classpath="${FLEX_HOME}/ant/lib/flexTasks.jar"/>
 	

@@ -9,6 +9,8 @@
 	<property name="src.dir" value="src" />
 	<property name="bin.dir" value="bin" />
 	<property name="tmp.dir" value="tmp" />
+	<property name="test.dir" value="tests" />
+	<property name="test_ad.dir" value="${test.dir}/test_ad" />
 	<property name="asdoc.dir" value="asdoc" />
 
 	<condition property="uglifyjs" value="uglifyjs.cmd" else="uglifyjs">
@@ -17,7 +19,9 @@
 
 	<taskdef resource="flexTasks.tasks" classpath="${FLEX_HOME}/ant/lib/flexTasks.jar"/>
 
-	<target name="compile-all" depends="clean, compile-beacon, compile-lib"/>
+	<target name="compile-all" depends="clean, compile-beacon, minify-js, compile-lib"/>
+
+	<target name="compile-debug" depends="clean, compile-beacon, copy-js, compile-lib"/>
 		
 	<target name="sign-version">
 		<sequential>
@@ -30,6 +34,7 @@
 
 	<target name="minify-js">
 		<mkdir dir="${tmp.dir}"/>
+		 
 		<exec executable="${uglifyjs}">
 			<arg path="${src.dir}/org/openvv/js/OVVAsset.js"/>
 			<arg value="-o"/>
@@ -39,6 +44,23 @@
 			<arg value="evaluate=false"/>
 		</exec>
 	</target>
+	
+	<target name="copy-js" depends="clean">
+		<copy file="${src.dir}/org/openvv/js/OVVAsset.js" tofile="${tmp.dir}/OVVAsset.min.js" />
+		<!-- Escape line endings -->
+		<fixcrlf srcdir="${tmp.dir}" includes="*.js"
+         eol="lf" eof="remove" />
+		<property name="foo.esc">%%%***%%%</property>
+		
+		<replaceregexp file="${tmp.dir}/OVVAsset.min.js"
+					   flags="g"
+					   match="\n"
+					   replace="${foo.esc}${line.separator}"
+					   byline="false"
+		/>
+		<replace file="${tmp.dir}/OVVAsset.min.js" token="${foo.esc}" value="\" />
+	</target>
+	
 
 	<target name="compile-beacon" depends="check-env, sign-version">
 		<mxmlc file="${src.dir}/org/openvv/OVVBeacon.as"
@@ -46,11 +68,12 @@
 			   static-rsls="true">
 			<source-path path-element="${src.dir}"/>
 		</mxmlc>
+		<copy file="${bin.dir}/OVVBeacon.swf" todir="${test.dir}/test_site/ad" overwrite="true" />
 	</target>
 
-	<target name="compile-lib" depends="check-env, sign-version, minify-js">
+	<target name="compile-lib" depends="check-env, sign-version">
 		<!-- Copy the entire source tree to temp dir so we can alter the source code -->
-		<copy todir="${tmp.dir}">
+		<copy todir="${tmp.dir}" overwrite="true">
 			<fileset dir="${src.dir}"/>
 		</copy>
 		<!-- Store the minified JS code (which was already under temp) in js-src -->
@@ -72,8 +95,11 @@
 			   include-classes="org.openvv.OVVAsset org.openvv.OVVCheck org.openvv.OVVRenderMeter org.openvv.OVVThrottleType org.openvv.events.OVVEvent net.iab.IVPAID net.iab.VPAIDEvent org.openvv.OVVVersion">
 			<source-path path-element="${tmp.dir}"/>
 		</compc>
+		<!-- copy result to the test ad compile area -->
+		<copy file="${bin.dir}/openvv.swc" todir="${test_ad.dir}/libs" overwrite="true" />
+		
 		<!-- Remove the temp dir -->
-		<delete dir="${tmp.dir}" failonerror="false"/>
+		<delete dir="${tmp.dir}" failonerror="false"/>			
 	</target>
 
 	<target name="compile-doc" depends="check-env, sign-version">
@@ -84,6 +110,8 @@
 
 	<target name="clean">
 		<delete file="${src.dir}/org/openvv/OVVVersion.as" failonerror="false" />
+		<delete file="${tmp.dir}/OVVAsset.min.js" failonerror="false" />
+		<delete file="${tmp.dir}/org/openvv/OVVAsset.as" failonerror="false" />
 		<delete dir="${bin.dir}" failonerror="false" />
 		<delete dir="${asdoc.dir}" failonerror="false" />
 	</target>
