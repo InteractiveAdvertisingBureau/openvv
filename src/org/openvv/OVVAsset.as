@@ -221,10 +221,11 @@ package org.openvv {
          * be unavailable.
          * @param id The unique identifier of this OVVAsset. If not supplied,
          * it will be randomly generated.
-         * @param interval The number of milliseconds between polls to
-         * JavaScript for viewability information. Defaults to 250.
+         * @param adRef A reference to the top DisplayObject of the ad; used
+         * to determine full-screen status when player's stage is not available.
+         * Optional only for backwards compatibility.
          */
-        public function OVVAsset(adRef:*, beaconSwfUrl:String = null, id:String = null) {
+        public function OVVAsset( beaconSwfUrl:String = null, id:String = null, adRef:* = null ) {
             if (!externalInterfaceIsAvailable()) {
                 dispatchEvent(new OVVEvent(OVVEvent.OVVError, {
                     "message": "ExternalInterface unavailable"
@@ -233,7 +234,9 @@ package org.openvv {
             }
 
             _id = (id !== null) ? id : "ovv" + Math.floor(Math.random() * 1000000000).toString();
-            _ad = adRef as DisplayObject;
+            if ( !!adRef ) {
+                _ad = adRef as DisplayObject;
+            }
             setStage();
             ExternalInterface.addCallback(_id, flashProbe);
             ExternalInterface.addCallback("onJsReady" + _id, onJsReady);
@@ -325,8 +328,8 @@ package org.openvv {
             if (results && !!results.error)
                 raiseError(results);
 
-            if (_ad != null && _ad.hasOwnProperty('adVolume')) {
-                results.volume = _ad['adVolume'];
+            if (_vpaidEventsDispatcher != null && _vpaidEventsDispatcher.hasOwnProperty('adVolume')) {
+                results.volume = _vpaidEventsDispatcher['adVolume'];
             }
 
             var displayState:String = getDisplayState(results);
@@ -418,18 +421,18 @@ package org.openvv {
 
         private function setStage(evt:Event = null):void
         {
-            var ad:DisplayObject = _ad as DisplayObject;
-            if(!ad) return;
 
-            ad.removeEventListener(Event.ADDED_TO_STAGE, setStage);
+            if(!_ad) return;
+
+            _ad.removeEventListener(Event.ADDED_TO_STAGE, setStage);
             try{
-                _stage = ad.stage;
+                _stage = _ad.stage;
             }
             catch(ignore:Error){
                 //stage is inaccessible
             }
             if(!_stage)
-                ad.addEventListener(Event.ADDED_TO_STAGE, setStage);
+                _ad.addEventListener(Event.ADDED_TO_STAGE, setStage);
         }
 
         private function getDisplayState(results:OVVCheck):String
