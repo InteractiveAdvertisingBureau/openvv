@@ -262,8 +262,7 @@ package org.openvv {
                 standard = viewabilityStandard;
             }
 
-            _id = (id !== null) ? id : "ovv" + Math.floor(Math.random() * 1000000000).toString();
-
+            _id = (id !== null) ? "ovv" + id.replace(/([^a-z0-9]+)/gi, '') : "ovv" + Math.floor(Math.random() * 1000000000).toString();
             ////////  ????  ///////////////
             if ( !!adRef ) {
                 _ad = adRef as DisplayObject;

@@ -620,7 +620,7 @@ function OVVBrowser(userAgent)
 
 function OVVBeaconSupportCheck()
 {
-    var ovvBrowser = new OVVBrowser($ovv.userAgent);
+    var ovvBrowser = new OVVBrowser($ovvs['OVVID'].userAgent);
 
     var browser = ovvBrowser.getBrowser();
     var browserIDEnum = ovvBrowser.getBrowserIDEnum();
@@ -795,7 +795,7 @@ function OVVAsset(uid, dependencies) {
      * for {@link OVV#DEBUG} mode.
      * @type {Number}
      */
-    var BEACON_SIZE = $ovv.DEBUG ? 20 : 1;
+    var BEACON_SIZE = $ovvs['OVVID'].DEBUG ? 20 : 1;
 
     /**
      * The last known location of the player on the page
@@ -865,8 +865,8 @@ function OVVAsset(uid, dependencies) {
     this.checkViewability = function () {
         var check = new OVVCheck();
         check.id = id;
-        check.inIframe = $ovv.IN_IFRAME;
-        check.geometrySupported = $ovv.geometrySupported;
+        check.inIframe = $ovvs['OVVID'].IN_IFRAME;
+        check.geometrySupported = $ovvs['OVVID'].geometrySupported;
         check.focus = isInFocus();
 
         if (!player) {
@@ -876,7 +876,7 @@ function OVVAsset(uid, dependencies) {
         // Check if a CSS attribute value ( 'visibility:hidden' or 'display:none' )
         // on player or an inheritable containing element is rendering the player invisible.
         if (checkCssInvisibility(check, player) === true){
-            if ($ovv.DEBUG) {
+            if ($ovvs['OVVID'].DEBUG) {
                 check.cssViewabilityState = OVVCheck.UNVIEWABLE;
             }else{
                 return check;
@@ -886,20 +886,20 @@ function OVVAsset(uid, dependencies) {
         // player area.
 
         if (checkDomObscuring(check, player) === true){
-            if ($ovv.DEBUG) {
+            if ($ovvs['OVVID'].DEBUG) {
                 check.domViewabilityState = OVVCheck.UNVIEWABLE;
             }else{
                 return check;
             }
         }else{
-	        check.percentObscured = 0;
+            check.percentObscured = 0;
         }
 
         // if we're in IE and we're in a cross-domain iframe, return unmeasurable
         // We are able to measure for same domain iframe ('friendly iframe')
         if (!beaconSupportCheck.supportsBeacons() && check.geometrySupported === false) {
             check.viewabilityState = OVVCheck.UNMEASURABLE;
-            if (!$ovv.DEBUG) {
+            if (!$ovvs['OVVID'].DEBUG) {
                 return check;
             }
         }
@@ -908,7 +908,7 @@ function OVVAsset(uid, dependencies) {
             check.technique = OVVCheck.GEOMETRY;
             checkGeometry(check, player);
             check.viewabilityState = (check.percentViewable >= MIN_VIEW_AREA_PC) ? OVVCheck.VIEWABLE : OVVCheck.UNVIEWABLE;
-            if ($ovv.DEBUG) {
+            if ($ovvs['OVVID'].DEBUG) {
                 // add an additional field when debugging
                 check.geometryViewabilityState = check.viewabilityState;
             } else {
@@ -940,13 +940,13 @@ function OVVAsset(uid, dependencies) {
             if (viewable === null) {
                 check.viewabilityState = OVVCheck.UNMEASURABLE;
                 // add this informational field when debugging
-                if ($ovv.DEBUG) {
+                if ($ovvs['OVVID'].DEBUG) {
                     check.beaconViewabilityState = OVVCheck.UNMEASURABLE;
                 }
             } else {
                 check.viewabilityState = viewable ? OVVCheck.VIEWABLE : OVVCheck.UNVIEWABLE;
                 // add this informational field when debugging
-                if ($ovv.DEBUG) {
+                if ($ovvs['OVVID'].DEBUG) {
                     check.beaconViewabilityState = viewable ? OVVCheck.VIEWABLE : OVVCheck.UNVIEWABLE;
                 }
             }
@@ -955,7 +955,7 @@ function OVVAsset(uid, dependencies) {
         }
 
         // in debug mode, reconcile the viewability states from all techniques
-        if ($ovv.DEBUG) {
+        if ($ovvs['OVVID'].DEBUG) {
             // revert the technique to blank during debug, since both were used
             check.technique = '';
             if (check.geometryViewabilityState === null && check.beaconViewabilityState === null) {
@@ -979,7 +979,7 @@ function OVVAsset(uid, dependencies) {
      */
     this.beaconStarted = function (index) {
 
-        if ($ovv.DEBUG && getBeacon(index).debug) {
+        if ($ovvs['OVVID'].DEBUG && getBeacon(index).debug) {
             getBeacon(index).debug();
         }
 
@@ -1006,8 +1006,8 @@ function OVVAsset(uid, dependencies) {
                 container.parentElement.removeChild(container);
             }
         }
-        clearInterval( window.$ovv.positionInterval );
-        window.$ovv.removeAsset(this);
+        clearInterval( window.$ovvs['OVVID'].positionInterval );
+        window.$ovvs['OVVID'].removeAsset(this);
     };
 
     /**
@@ -1290,7 +1290,7 @@ function OVVAsset(uid, dependencies) {
             swfContainer.id = 'OVVBeaconContainer_' + index + '_' + id;
 
             swfContainer.style.position = 'absolute';
-            swfContainer.style.zIndex = $ovv.DEBUG ? 99999 : -99999;
+            swfContainer.style.zIndex = $ovvs['OVVID'].DEBUG ? 99999 : -99999;
 
             var html =
                 '<object classid="clsid:D27CDB6E-AE6D-11cf-96B8-444553540000" width="' + BEACON_SIZE + '" height="' + BEACON_SIZE + '">' +
@@ -1329,11 +1329,11 @@ function OVVAsset(uid, dependencies) {
         for (var index = 0; index <= TOTAL_BEACONS; index++) {
             var iframe = document.createElement('iframe');
             iframe.name = iframe.id = 'OVVFrame_' + id + '_' + index;
-            iframe.width =  $ovv.DEBUG ? 20 : 1;
-            iframe.height =  $ovv.DEBUG ? 20 : 1;
+            iframe.width =  $ovvs['OVVID'].DEBUG ? 20 : 1;
+            iframe.height =  $ovvs['OVVID'].DEBUG ? 20 : 1;
             iframe.frameBorder = 0;
             iframe.style.position = 'absolute';
-            iframe.style.zIndex =  $ovv.DEBUG ? 99999 : -99999;
+            iframe.style.zIndex =  $ovvs['OVVID'].DEBUG ? 99999 : -99999;
 
             iframe.src = 'javascript: ' +
                 'window.isInViewArea = undefined; ' +
@@ -1357,7 +1357,7 @@ function OVVAsset(uid, dependencies) {
                             'var paintCount = window.mozPaintCount; ' +
                             'window.isInView = (paintCount>cnt); ' +
                             'cnt = paintCount; ' +
-                            'if (parent.$ovv.DEBUG == true) {' +
+                            'if (parent.$ovvs["OVVID"].DEBUG == true) {' +
                                 'if(window.isInView === true){' +
                                     'document.body.style.background = "green";' +
                                 '} else {' +
@@ -1365,7 +1365,7 @@ function OVVAsset(uid, dependencies) {
                                 '}' +
                             '}' +
                             'if (window.started === false) {' +
-                                'parent.$ovv.getAssetById("'+id+'")' + '.beaconStarted(window.index);' +
+                                'parent.$ovvs["OVVID"].getAssetById("'+id+'")' + '.beaconStarted(window.index);' +
                                 'window.started = true;' +
                             '}' +
                         '}' +
@@ -1600,7 +1600,7 @@ function OVVAsset(uid, dependencies) {
     player = findPlayer();
 
     // only use the beacons if geometry is not supported, or we we are in DEBUG mode.
-    if ($ovv.geometrySupported == false || $ovv.DEBUG) {
+    if ($ovvs['OVVID'].geometrySupported == false || $ovvs['OVVID'].DEBUG) {
 	    if (typeof(window.mozPaintCount)=='number'){
 	        //Use frame technique to measure viewability in cross domain FF scenario
             getBeaconFunc = getFrameBeacon;
@@ -1631,7 +1631,8 @@ function OVVGeometryViewabilityCalculator() {
             return { error: 'Failed to determine viewport'};
         }
         var assetRect = player.getBoundingClientRect();
-        var playerArea = assetRect.width * assetRect.height;
+        //var playerArea = assetRect.width * assetRect.height;
+        var playerArea = player.getClientRects ? player.getClientRects()[0] : assetRect.width * assetRect.height;
         if ((minViewPortSize.area / playerArea) < (MIN_VIEW_AREA_PC / 100)) {
             // no position testing required if viewport is less than the required percentage of the player
             viewablePercentage = Math.floor(100 * minViewPortSize.area / playerArea);
@@ -1879,8 +1880,15 @@ Function.prototype.memoize = function() {
         return fn.memoized.apply(fn, arguments);
     }
 };
-// initialize the OVV object if it doesn't exist
-window.$ovv = window.$ovv || new OVV();
-
+//Create a new instance of OVV every time:
+window.$ovvs = window.$ovvs || [];
+window.$ovvs['OVVID'] = new OVV();
 // 'OVVID' is String substituted from AS
-window.$ovv.addAsset(new OVVAsset('OVVID', { geometryViewabilityCalculator: new OVVGeometryViewabilityCalculator() }));
+window.$ovvs['OVVID'].addAsset(new OVVAsset('OVVID', { geometryViewabilityCalculator: new OVVGeometryViewabilityCalculator() }));
+if ( typeof window.$ovv == 'undefined' ) {
+    //Allow pubs to add listeners using the standard object name:
+    window.$ovv = window.$ovvs['OVVID'];
+} else {
+    //Allow pubs to add listeners when an existing OVV library is present:
+    window.$ovv.addAsset( window.$ovvs['OVVID'].getAssetById('OVVID'));
+}
