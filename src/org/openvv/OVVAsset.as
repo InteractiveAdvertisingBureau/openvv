@@ -83,7 +83,10 @@ package org.openvv {
         /**
          * Hold OVV version. Will pass to JavaScript as well as $ovv.version
          */
-        public static const RELEASE_VERSION: String = "1.3.4";
+        public static const RELEASE_VERSION: String = "1.3.5";
+        /** Changes in v1.3.5 :
+         - AD-1854 : StickyAds solution
+         */
         /** Changes in v1.3.4 :
          - AD-1786 : Firefox Browser detection was failing : Test for valid window.mozPaintCount instead of Browser ID
          */
