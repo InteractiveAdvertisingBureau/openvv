@@ -22,6 +22,47 @@ body, html{
 .light {
 	color: #dff;
 }
+.dataViewBlock{
+	position: relative;
+}
+.quartileViewWrapper{
+	width: 300px;
+	position: fixed;
+	top: 320px;
+	right: 15px;
+	height: auto;
+	background-color: #ddd;
+	border:1px solid #FFF;
+	padding: 5px;
+	border-radius: 3px;
+	box-shadow:
+	
+}
+
+.quartileViewData{
+	padding: 3px;
+	margin: 2px;
+	border: 1px solid #fff;
+	font-size: 0.8em;
+}
+.quartileViewData.inView{
+	background-color: #006600;
+	color: #fff;
+}
+
+.quartileViewData.inView.noFocus{
+	background-color: #ffff66;
+	color: #000;
+}
+
+.quartileViewData.notInView{
+	background-color: #ff3300;
+	color: #000;
+}
+
+div.underlined{
+	border-bottom: 1px solid #fff;
+}
 
 .ovvParamBox{
 	font-family: Verdana, Geneva, sans-serif;

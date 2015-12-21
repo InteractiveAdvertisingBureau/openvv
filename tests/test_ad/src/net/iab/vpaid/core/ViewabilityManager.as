@@ -5,6 +5,7 @@ package net.iab.vpaid.core
 	import org.openvv.events.OVVEvent;
 	import org.openvv.OVVAsset;
 	import org.openvv.OVVCheck;
+	import net.iab.VPAIDEvent;
 	
 	/**
 	 * Handles OpenVV.
@@ -34,7 +35,7 @@ package net.iab.vpaid.core
 			/**
 			 * Ad can load beacons from any fully qualified url
 			 */
-			ovv = new OVVAsset(unescape(String(adData.getParam("ovvBeaconURL"))));
+			ovv = new OVVAsset(unescape(String(adData.getParam("ovvBeaconURL"))), 'my_ovv_test_ad_id');
 			ovv.initEventsWiring(messanger);
 			addListeners();
 		}
@@ -46,8 +47,11 @@ package net.iab.vpaid.core
 			ovv.addEventListener(OVVEvent.OVVError, onOVVEvent);
 			ovv.addEventListener(OVVEvent.OVVImpression, onOVVEvent);
 			ovv.addEventListener(OVVEvent.OVVImpressionUnmeasurable, onOVVEvent);
-			ovv.addEventListener(OVVEvent.OVVLog, onOVVEvent);
+			// ovv.addEventListener(OVVEvent.OVVLog, onOVVEvent);
 			ovv.addEventListener(OVVEvent.OVVReady, onOVVEvent);
+			
+			// Add VPAID event listeners
+			ovv.addEventListener(VPAIDEvent.AdLoaded, onVPAIDEvent);
 		}
 		/**
 		 * Removes OVV event listeners.
@@ -59,10 +63,37 @@ package net.iab.vpaid.core
 				ovv.removeEventListener(OVVEvent.OVVError, onOVVEvent);
 				ovv.removeEventListener(OVVEvent.OVVImpression, onOVVEvent);
 				ovv.removeEventListener(OVVEvent.OVVImpressionUnmeasurable, onOVVEvent);
-				ovv.removeEventListener(OVVEvent.OVVLog, onOVVEvent);
+				// ovv.removeEventListener(OVVEvent.OVVLog, onOVVEvent);
 				ovv.removeEventListener(OVVEvent.OVVReady, onOVVEvent);
+				ovv.addEventListener(VPAIDEvent.AdLoaded, onVPAIDEvent);
 			}
 		}
+		/**
+		 * VPAIDEvent handler
+		 * @param	e
+		 */
+		private function onVPAIDEvent(e:OVVEvent):void
+		{
+			var data:Object = e.data || { };
+			var prefix:String = "\n\t";
+			var log:Array = ["event =", e.type];
+			
+			consoleLog('VPAID EVENT CALL IN FLASH');
+			
+			/*
+			try {
+				var eventObj:Object = {
+					currentTarget: "IAB_FLASH_AD"
+				};
+				ExternalInterface.call("ovvtest.handleOvvEvent", eventObj, data);
+			}
+			catch (ex:Error) {
+				consoleLog(ex.message)
+			}
+			*/
+
+		}
+		
 		/**
 		 * OVVEvent handler
 		 * @param	e
@@ -106,7 +137,7 @@ package net.iab.vpaid.core
 				var eventObj:Object = {
 					currentTarget: "IAB_FLASH_AD"
 				};
-				ExternalInterface.call("ovvtest.handleOvvEvent", eventObj, data);
+				ExternalInterface.call("ovvtest.handleFlashOvvEventCall", eventObj, data);
 			}
 			catch (ex:Error) {
 				consoleLog(ex.message)

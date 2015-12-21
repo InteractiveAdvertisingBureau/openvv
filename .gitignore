@@ -14,3 +14,4 @@ obj/
 .flexLibProperties
 src/org/openvv/OVVVersion.as
 /node_modules
+/tests/test_site/ad/IAB-VPAID-Ad.swf

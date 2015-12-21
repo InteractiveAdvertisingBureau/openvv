@@ -15,15 +15,21 @@
 <body>
 <h1>On Page Video</h1>
 
+	<div id="ovvQuartileViewValues" class="quartileViewWrapper chip_shadow">
+		<div class="title underlined">
+			<h3>Quartile Viewability</h3>
+		</div>
+	</div>
+
 <div id="wrapper">
     <div id="player"></div>
 <div id='chip_events' style="margin-top:120px;" class='chip_section'> </div>
 	
 </div>
 
-
-<div id="ovvParamValues"></div>
-
+<div id="dataViewWrapper" class="dataViewBlock">
+<div id="ovvParamValues" ></div>
+</div>
 
 
 
@@ -40,19 +46,38 @@
 //		positionPlayer();
 		// if (typeof(buildPlayer) === 'function') buildPlayer();
 		
+		ovvtest.setOptions({ adId: 'my_ovv_test_ad_id', quartileValuesOutputElem: 'ovvQuartileViewValues'});
+		// Build the info output window
 		ovvtest.buildInfoWindow('ovvParamValues');
-//ovvtest.setOptions({ valuesOutputElem: 'ovvParamValues'});
 		
 		ovvtest.player.setPlayer('flowplayer');
 		ovvtest.player.initPlayer('player');
 		
+		// Attach our listeners through javascript
+		ovvtest.registerOvvListeners();
 		
+		/*
+		// Attach a debug version of OVVAsset.js
+		// debug scr
+		var debugovvsrc = 'scrip' + 'ts/debug/OVVAsset.js';
+		// var debugovv = '<scr' + 'ipt src="scrip' + 'ts/debug/OVVAsset.js" type="text/jav' + 'ascr' + 'ipt"></sc' + 'ript>'
+		
+		setTimeout(function(){
+			var tag = document.createElement('SCRIPT');
+			tag.setAttribute('src', debugovvsrc);
+			
+			document.body.appendChild(tag);
+		
+		}, 500);
+		*/
 		
 	},false);
 })();
 
 
 </script>
+
+
 
 </body>
 </html>

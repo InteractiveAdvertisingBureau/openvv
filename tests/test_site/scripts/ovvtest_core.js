@@ -71,12 +71,51 @@
 	// Options
 	var opts = {
 		debug: true,
+		adId : 'my_ovv_test_ad_id', // default ID compiled into test ad swf
 		logListener: noop,
 		displayOvvValues: true,
 		buildInfoBox: false,
 		infoBoxTarget: null,
-		valuesOutputElem: null
+		valuesOutputElem: null,
+		quartileValuesOutputElem: null
 	};
+	
+	var quartileChipTemplate = '<div class="quartileViewData" >##name## FOO </div>'
+	
+	function displayQuartileViewability(eventName, data){
+		var el = opts.quartileValuesOutputElem;
+		var id, nd;
+		var k, val, i;
+		var css = '';
+		if(typeof(el) === 'string'){
+			id = el;
+			el = doc.getElementById(id);
+			if(el == null){
+				el = doc.querySelector(id);
+			}
+		}
+		
+		if(el == null || data == null){
+			return;			
+		}
+		
+		if(data.percentViewable >= 50){
+			css = 'inView'
+			if(data.focus === false){
+				css += ' noFocus';
+			}
+		}
+		else{
+			css = 'notInView'
+		}
+		
+		nd = document.createElement('div');
+		nd.className = 'quartileViewData ' + css;
+		
+		nd.innerHTML = eventName;
+		
+		el.appendChild(nd);		
+	}
 	
 	/**
 	* Displays ovv data object values in given DOM element.
@@ -91,6 +130,32 @@
 			if(el == null){
 				el = doc.querySelector(id);
 			}
+		}
+		
+		if(data == null){
+			return;			
+		}
+		// check for empty object
+		var keyCount = 0;
+		if(typeof(data) === 'object'){
+			for(k in data){
+				if(data.hasOwnProperty(k)){
+					keyCount++;
+					if(keyCount > 10){
+						break;
+					}
+				}
+			}			
+		}
+		if(keyCount == 0){
+			impl.log('[ovvtest] - No data to show');
+			return;
+		}
+		else if(keyCount == 2){
+			if(data['ovvData'] == null){
+				impl.log('[ovvtest] - No data to show');
+				return;
+			}				
 		}
 		
 		/**
@@ -208,26 +273,118 @@
 		}
 	}
 	
+	var attachRetries = 0;
+	var regTimer = 0;
+	function registerOvvListeners(ad_id){
+		var ovv;
+		var ad_id = ad_id || opts.adId;
+		
+		if(regTimer !== 0){
+			clearTimeout(regTimer);
+			regTimer = 0;
+		}
+		
+		if(!window['$ovv']){
+			if(++attachRetries < 10){
+				regTimer = setTimeout(function(){
+					registerOvvListeners();
+				}, 300);
+			}
+			
+			return;
+		}
+		
+		var eventNames = [
+			'OVVReady', 'AdLoaded', 'AdImpression', 'AdPlaying', 'AdPaused', 'AdVolumeChange',
+			'AdVideoStart', 'AdVideoFirstQuartile', 'AdVideoMidpoint', 'AdVideoThirdQuartile', 
+			'AdVideoComplete'
+		];
+		
+		var ovvEvents = ['OVVReady', 'OVVImpression', 'OVVImpressionUnmeasurable'];
+		
+		ovv = window['$ovv'];
+		ovv.subscribe(ovvEvents, ad_id, function(id, eventData){
+			if(eventData.ovvArgs != null){
+				handleOvvEvent(eventData, eventData.ovvArgs);
+			}
+			
+		}, true);
+		
+		ovv.subscribe(eventNames, ad_id, function(id, eventData){
+			if(eventData.ovvArgs != null){
+				handleVpaidEvent(eventData, eventData.ovvArgs);
+			}
+			
+		}, true);
+		
+		// Error handles
+		ovv.subscribe(['AdError', 'OVVError'], ad_id, function(id, eventData, more){
+			handleAdError(id, eventData, more);
+		}, true);
+		
+	}
+	
+	
+	function handleAdError(error, args){
+		impl.logError(error);
+		if(args){
+			impl.logError(args);
+		}		
+	}
+	
+	
+	function handleOvvEvent(event, data){
+		var dataObj;
+		if(data.ovvData != null){
+			dataObj = data.ovvData;
+		}
+		else{
+			dataObj = data;
+		}
+				
+		// ovvtest.log(event, data);
+		if(opts.displayOvvValues){
+			displayViewableData(dataObj);
+		}
+	}
+	
+	function handleVpaidEvent(event, data){
+		var name = event && event.eventName || '';
+		
+		var dataObj = data.ovvData;
+		
+		switch(name){
+			case 'AdVideoStart':
+			case 'AdImpression':
+			case 'AdVideoFirstQuartile':
+			case 'AdVideoMidpoint':
+			case 'AdVideoThirdQuartile':
+			case 'AdVideoComplete':
+				displayViewableData(dataObj);
+				displayQuartileViewability(name, dataObj);
+				
+				break;
+			
+		}
+		
+		
+		console.log(event);
+	}
+	
+	function handleFlashOvvEventCall(event, data){
+		console.log('[OVVTest (flash call)]');
+		console.log(event);
+		handleOvvEvent(event, data);		
+	}
 	
 	/**
 	* Static implementation object for ovvtest
 	*/
 	var impl = {
 		
-		handleOvvEvent: function(event, data){
-			var dataObj;
-			if(data.ovvData != null){
-				dataObj = data.ovvData;
-			}
-			else{
-				dataObj = data;
-			}
-					
-			// ovvtest.log(event, data);
-			if(opts.displayOvvValues){
-				displayViewableData(dataObj);
-			}			
-		},
+		registerOvvListeners: registerOvvListeners,
+		
+		handleFlashOvvEventCall: handleFlashOvvEventCall,
 		
 		setOptions: function(options){
 			var k, v;
