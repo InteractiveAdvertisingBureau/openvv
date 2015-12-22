@@ -13,14 +13,27 @@
     <title>OpenVV Viewability Test</title>
 </head>
 <body>
+	<header>
+	<div class="header">
+<img class="logo floatLeft" src="img/ovv_logo.png" style="width:89px;height:100px;float:left;align:left;" />	
 <h1>On Page Video</h1>
+	</div>
+		</header>
 
-	<div id="ovvQuartileViewValues" class="quartileViewWrapper chip_shadow">
+	<div class="quartileViewWrapper chip_shadow">
 		<div class="title underlined">
 			<h3>Quartile Viewability</h3>
 		</div>
+		<div id="ovvQuartileViewValues" class="scrollContent"></div>
 	</div>
 
+	<div class="viewEngineDataWrapper chip_shadow">
+		<div class="title underlined">
+			<h3>View Engine Data</h3>
+		</div>
+		<div id="calculatedViewData" class="scrollContent"></div>
+	</div>
+	
 <div id="wrapper">
     <div id="player"></div>
 <div id='chip_events' style="margin-top:120px;" class='chip_section'> </div>
@@ -36,6 +49,7 @@
 <!-- https://youtu.be/YE7VzlLtp-4 -->
 
 <script src="scripts/ovvtest_core.js" type="text/javascript"></script>
+<script src="scripts/ovvtest_viewEngine.js" type="text/javascript"></script>
 <script src="scripts/ovvtest_player.js" type="text/javascript"></script>
 <script  type="text/javascript">
 
@@ -46,15 +60,30 @@
 //		positionPlayer();
 		// if (typeof(buildPlayer) === 'function') buildPlayer();
 		
-		ovvtest.setOptions({ adId: 'my_ovv_test_ad_id', quartileValuesOutputElem: 'ovvQuartileViewValues'});
-		// Build the info output window
-		ovvtest.buildInfoWindow('ovvParamValues');
+		// TODO: Clean up and consolidate the initialization code
 		
+		var viewReached = function(vals){
+			console.log('[OVV VIEW ENGINE] Viewability Reached');
+			console.log(vals);
+			
+			var el = document.getElementById('calculatedViewData');
+			el.innerHTML = 'Viewability parameters reached <br /> MS: ' + vals.viewTime;
+		}
+		
+		ovvtest.setOptions({ 
+			adId: 'my_ovv_test_ad_id', 
+			quartileValuesOutputElem: 'ovvQuartileViewValues',
+			enableViewEngine: true,
+			viewabilityReached: viewReached
+		});
+		// Build the info output window
+		ovvtest.buildInfoWindow('ovvParamValues');		
 		ovvtest.player.setPlayer('flowplayer');
 		ovvtest.player.initPlayer('player');
 		
 		// Attach our listeners through javascript
-		ovvtest.registerOvvListeners();
+		ovvtest.init();
+		
 		
 		/*
 		// Attach a debug version of OVVAsset.js

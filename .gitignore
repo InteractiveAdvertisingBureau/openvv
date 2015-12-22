@@ -15,3 +15,4 @@ obj/
 src/org/openvv/OVVVersion.as
 /node_modules
 /tests/test_site/ad/IAB-VPAID-Ad.swf
+/tests/test_site/ad/OVVBeacon.swf

@@ -19,6 +19,10 @@ body, html{
 	border:1px solid #FFF;
 }
 
+.header{
+	height: 120px;
+}
+
 .light {
 	color: #dff;
 }
@@ -28,15 +32,34 @@ body, html{
 .quartileViewWrapper{
 	width: 300px;
 	position: fixed;
-	top: 320px;
+	top: 270px;
 	right: 15px;
-	height: auto;
 	background-color: #ddd;
 	border:1px solid #FFF;
 	padding: 5px;
 	border-radius: 3px;
-	box-shadow:
-	
+}
+
+.viewEngineDataWrapper{
+	position: absolute;
+	left: 300px;
+	top: 10px;
+	height: 140px;
+	width: 400px;
+	padding: 5px;
+	border-radius: 3px;
+	margin-bottom: 10px;
+	background-color: #ffe6cc;
+}
+
+.chip_shadow .title h3{
+	margin-top: 2px;
+	margin-bottom: 3px;
+}
+
+.quartileViewWrapper .scrollContent{
+	overflow: auto;
+	max-height: 300px;
 }
 
 .quartileViewData{

@@ -43,7 +43,9 @@
 		viewabilityInfoMarkup :
 '<div class="chip chip_shadow ovvParamBox dragbox"> \
 <button type="button" class="close">&times;</button> \
-<h2>OVV Viewability data</h2> \
+<div class="title">\
+<h3>OVV Viewability data</h3> \
+</div>\
 ###DETAILS### \
 <hr class="light" /> \
 ###SUMMARY### \
@@ -77,7 +79,8 @@
 		buildInfoBox: false,
 		infoBoxTarget: null,
 		valuesOutputElem: null,
-		quartileValuesOutputElem: null
+		quartileValuesOutputElem: null,
+		enableViewEngine: false
 	};
 	
 	var quartileChipTemplate = '<div class="quartileViewData" >##name## FOO </div>'
@@ -86,6 +89,7 @@
 		var el = opts.quartileValuesOutputElem;
 		var id, nd;
 		var k, val, i;
+		var buf = [];
 		var css = '';
 		if(typeof(el) === 'string'){
 			id = el;
@@ -98,6 +102,19 @@
 		if(el == null || data == null){
 			return;			
 		}
+		
+		buf.push('<div class="eventName">', eventName, '</div>');
+		buf.push('<div class="viewabilityState">Viewable State: ', data.viewabilityState, '</div>');
+		buf.push(' <span class="ivpct">In View: ', data.percentViewable, '%</span>');
+		buf.push(' <span class="infocus">Focus: ');
+		if(data.focus === true){
+			buf.push('true');
+		}
+		else{
+			buf.push('false');
+		}
+		buf.push('</span>');
+		
 		
 		if(data.percentViewable >= 50){
 			css = 'inView'
@@ -112,7 +129,7 @@
 		nd = document.createElement('div');
 		nd.className = 'quartileViewData ' + css;
 		
-		nd.innerHTML = eventName;
+		nd.innerHTML = buf.join('');
 		
 		el.appendChild(nd);		
 	}
@@ -295,12 +312,13 @@
 		}
 		
 		var eventNames = [
-			'OVVReady', 'AdLoaded', 'AdImpression', 'AdPlaying', 'AdPaused', 'AdVolumeChange',
+			'AdLoaded', 'AdImpression', 'AdPlaying', 'AdPaused', 'AdVolumeChange',
 			'AdVideoStart', 'AdVideoFirstQuartile', 'AdVideoMidpoint', 'AdVideoThirdQuartile', 
 			'AdVideoComplete'
 		];
 		
-		var ovvEvents = ['OVVReady', 'OVVImpression', 'OVVImpressionUnmeasurable'];
+		// list of OVV events. We must listen to OVVLog in order to get up to date viewability information
+		var ovvEvents = ['OVVReady', 'OVVImpression', 'OVVImpressionUnmeasurable', 'OVVLog'];
 		
 		ovv = window['$ovv'];
 		ovv.subscribe(ovvEvents, ad_id, function(id, eventData){
@@ -332,8 +350,27 @@
 		}		
 	}
 	
+	function updateViewEngine(eventObj, data){
+		var eng = ovvtest.viewEngine;
+		var eventName, ovvtime;
+		
+		if(typeof(eventObj) === 'string'){
+			eventName = eventObj;
+		}
+		else{
+			eventName = eventObj.eventName;
+			ovvtime = eventObj.eventTime;
+		}
+		
+		if(opts.enableViewEngine && eng != null){
+			eng.processEvent(eventName, ovvtime, data);
+		}		
+	}
 	
-	function handleOvvEvent(event, data){
+	/**
+	* Handle OVV specific events
+	*/
+	function handleOvvEvent(eventObj, data){
 		var dataObj;
 		if(data.ovvData != null){
 			dataObj = data.ovvData;
@@ -341,17 +378,26 @@
 		else{
 			dataObj = data;
 		}
+		
+		var dataObj = data.ovvData;
+		
+		updateViewEngine(eventObj, dataObj);
 				
-		// ovvtest.log(event, data);
+		// ovvtest.log(eventObj, data);
 		if(opts.displayOvvValues){
 			displayViewableData(dataObj);
 		}
 	}
 	
-	function handleVpaidEvent(event, data){
-		var name = event && event.eventName || '';
+	/**
+	* Handle VPAID events
+	*/
+	function handleVpaidEvent(eventObj, data){
+		var name = eventObj && eventObj.eventName || '';
 		
 		var dataObj = data.ovvData;
+		
+		updateViewEngine(eventObj, dataObj);
 		
 		switch(name){
 			case 'AdVideoStart':
@@ -371,16 +417,33 @@
 		console.log(event);
 	}
 	
-	function handleFlashOvvEventCall(event, data){
+	function handleFlashOvvEventCall(eventObj, data){
 		console.log('[OVVTest (flash call)]');
-		console.log(event);
-		handleOvvEvent(event, data);		
+		console.log(eventObj);
+		handleOvvEvent(eventObj, data);		
+	}
+	
+	function initializeCore(ignoreEvents){
+		
+		if(opts.enableViewEngine && ovvtest.ViewEngine != null){
+			ovvtest.viewEngine = new ovvtest.ViewEngine();
+			if(opts.viewabilityReached != null){
+				ovvtest.viewEngine.addEventListener('viewabilityReached', opts.viewabilityReached);
+			}
+		}
+		
+		if(!ignoreEvents){
+			ovvtest.registerOvvListeners();
+		}
+
 	}
 	
 	/**
 	* Static implementation object for ovvtest
 	*/
 	var impl = {
+		
+		init: initializeCore,
 		
 		registerOvvListeners: registerOvvListeners,
 		
@@ -391,6 +454,10 @@
 			for(k in options){
 				if(options.hasOwnProperty(k)){
 					opts[k] = options[k];
+					
+					if(k == 'viewabilityReached' && ovvtest.viewEngine != null){
+						ovvtest.viewEngine.addEventListener('viewabilityReached', opts[k]);
+					}					
 				}
 			}			
 		},
@@ -435,9 +502,9 @@
 
 // Setup bridge methods for demo until we get an updated creative
 var prevDVVfunc = DVViewableDetect;
-window.DVViewableDetect = function(event, data){
-	ovvtest.handleOvvEvent(event, data);
-	prevDVVfunc(event, data);
+window.DVViewableDetect = function(eventObj, data){
+	ovvtest.handleOvvEvent(eventObj, data);
+	prevDVVfunc(eventObj, data);
 }
 
 
