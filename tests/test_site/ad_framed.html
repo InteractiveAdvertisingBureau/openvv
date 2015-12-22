@@ -14,17 +14,16 @@
 </head>
 
 <body>
-<p style="color:red;">Need to set up beacon</p>
-<div id="wrapper">
+<div id="wrapper" style="margin-top: 35px;">
     <div id="player" ></div>
-<div id='chip_events' style="margin-top:120px;" class='chip_section'> </div>
-
 </div>
 
 <div id="ovvParamValues"></div>
 
 <script src="scripts/ovvtest_core.js" type="text/javascript"></script>
 <script src="scripts/ovvtest_player.js" type="text/javascript"></script>
+<script src="scripts/ovvtest_viewEngine.js" type="text/javascript"></script>
+
 <script  type="text/javascript">
 
 // init things
@@ -34,12 +33,34 @@
 //		positionPlayer();
 		// if (typeof(buildPlayer) === 'function') buildPlayer();
 		
-		ovvtest.buildInfoWindow('ovvParamValues');
-//ovvtest.setOptions({ valuesOutputElem: 'ovvParamValues'});
+		ovvtest.setOptions({ 
+			adId: 'my_ovv_test_ad_id', 
+			quartileValuesOutputElem: 'ovvQuartileViewValues',
+			enableViewEngine: false,
+			reportToParent: true
+		});
 		
+		var boxDetails = {
+			detailDef: [
+				{label: 'Viewable', ovv: 'percentViewable'},
+				{label: 'Window Focus', ovv: 'windowActive'},
+				{label: 'IFramed', ovv: 'inIframe'},
+				{label: 'Measurement By', ovv: 'measureTechnique'},
+				{label: 'OVV State', ovv: 'viewabilityState'}
+			],
+				
+			summaryDef: []
+		
+		}
+		
+		// Build the info output window
+		ovvtest.buildInfoWindow('ovvParamValues', { topFrame: true} );		
+		ovvtest.buildInfoWindow('ovvParamValues', { topFrame: false, infoBox: boxDetails} );		
 		ovvtest.player.setPlayer('flowplayer');
 		ovvtest.player.initPlayer('player');
 		
+		// Attach our listeners through javascript
+		ovvtest.init();
 		
 		
 	},false);

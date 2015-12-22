@@ -18,6 +18,16 @@
 			return true;
 		}
 	}
+	
+	var isArray = function(ar){
+		if(ar == null || typeof(ar) === 'string'){
+			return false;
+		}
+		if(typeof(ar) === 'object' && ar.length != null){
+			return true;
+		}
+		return false;		
+	}
 		
 	var valOutput = [
 	{ key: 'adHeight', type: 'calc', prop : 'objBottom - objTop'},
@@ -76,14 +86,37 @@
 		adId : 'my_ovv_test_ad_id', // default ID compiled into test ad swf
 		logListener: noop,
 		displayOvvValues: true,
-		buildInfoBox: false,
-		infoBoxTarget: null,
 		valuesOutputElem: null,
 		quartileValuesOutputElem: null,
 		enableViewEngine: false
 	};
 	
 	var quartileChipTemplate = '<div class="quartileViewData" >##name## FOO </div>'
+	
+	/**
+	* Mixin utility to merge objects
+	*/
+	function mixin(objA, objB){
+		var k, v;
+		var targ = {};
+		
+		if(objA && typeof(objA) === 'object'){
+			for(k in objA){
+				if(objA.hasOwnProperty(k)){
+					targ[k] = objA[k];
+				}
+			}
+		}
+		if(objB && typeof(objB) === 'object'){
+			for(k in objB){
+				if(objB.hasOwnProperty(k)){
+					targ[k] = objB[k];
+				}
+			}
+		}
+		
+		return targ;
+	}
 	
 	function displayQuartileViewability(eventName, data){
 		var el = opts.quartileValuesOutputElem;
@@ -139,14 +172,11 @@
 	*/
 	function displayViewableData(data){
 		var el = opts.valuesOutputElem;
-		var id;
+		var id, arr;
 		var k, val, i;
-		if(typeof(el) === 'string'){
-			id = el;
-			el = doc.getElementById(id);
-			if(el == null){
-				el = doc.querySelector(id);
-			}
+		
+		if(el == null){
+			return;
 		}
 		
 		if(data == null){
@@ -173,59 +203,95 @@
 				impl.log('[ovvtest] - No data to show');
 				return;
 			}				
-		}
+		}		
 		
-		/**
-		* Embedded function to display the value
-		*/
-		var showData = function(obj, valKey){
-			var valEl, val, parts;
-			var attr = '[data-ovv=' + valKey.key + ']';
-			valEl = doc.querySelector(attr);
-			if(valEl == null){
-				valEl = doc.querySelector('.' + valKey.key);
-			}
-			if(valEl == null){
-				return;
-			}
-			if(valKey.type == 'val'){
-				val = obj[valKey.prop];
-			}
-			else if(valKey.type == 'calc'){
-				parts = valKey.prop.split(' ');
-				if(parts.length != 3){
-					ovvtest.logError('invalid valOutput prop ' + valKey.prop);
-					return;
-				}
-				val = '';
-				if(parts[1] == '-'){
-					val = obj[parts[0]] - obj[parts[2]]; 
-				}				
+		if(typeof(el) === 'string'){
+			id = el;
+			el = doc.getElementById(id);
+			if(el == null){
+				el = doc.querySelector(id);
 			}
 			
-			if(val && valKey.format != null){
-				val = valKey.format.replace("{0}", val)
-			}
-			
-			valEl.innerHTML = val
-			
+			_displayViewableDataImpl(data, el);
 		}
-		
+		else if(isArray(el)){
+			arr = el;
+			for(i=0;i<arr.length;i++){
+				el = arr[i];
+				_displayViewableDataImpl(data, el);
+			}			
+		}		
+	}
+	
+	/**
+	* Displays ovv data object values in given DOM element.
+	*/
+	function _displayViewableDataImpl(data, el){
+		var id;
+		var k, val, i;
 		if(el == null){
 			return;
 		}
 		
-		for(i=0;i<valOutput.length;i++){
-			showData(data, valOutput[i]);
+		if(typeof(el) === 'string'){
+			id = el;
+			el = doc.getElementById(id);
+			if(el == null){
+				el = doc.querySelector(id);
+			}
+			
+			_displayViewableDataImpl(data, el);
 		}
+		
+			
+		for(i=0;i<valOutput.length;i++){
+			showData(data, valOutput[i], el);
+		}
+	}
+	
+	/**
+	* Embedded function to display the value
+	*/
+	var showData = function(obj, valKey, rootEl){
+		var valEl, val, parts;
+		var attr = '[data-ovv=' + valKey.key + ']';
+		valEl = rootEl.querySelector(attr);
+		if(valEl == null){
+			valEl = rootEl.querySelector('.' + valKey.key);
+		}
+		if(valEl == null){
+			return;
+		}
+		if(valKey.type == 'val'){
+			val = obj[valKey.prop];
+		}
+		else if(valKey.type == 'calc'){
+			parts = valKey.prop.split(' ');
+			if(parts.length != 3){
+				ovvtest.logError('invalid valOutput prop ' + valKey.prop);
+				return;
+			}
+			val = '';
+			if(parts[1] == '-'){
+				val = obj[parts[0]] - obj[parts[2]]; 
+			}				
+		}
+		
+		if(val && valKey.format != null){
+			val = valKey.format.replace("{0}", val)
+		}
+		
+		valEl.innerHTML = val
+		
 	}
 	
 	/**
 	* openvvtest.util object definition
 	*/
 	var util = {
-		getEl: function(elemOrId){
+		getEl: function(elemOrId, doc){
 			var id, el;
+			var doc = doc || document;
 			
 			if(elemOrId == null){
 				throw "Null identifier to find elem";
@@ -236,7 +302,7 @@
 				if(id.substr(0,1) == '#'){
 					id = id.substr(1);
 				}
-				return document.getElementById(id);
+				return doc.getElementById(id);
 			}
 			else if(typeof(elemOrId === 'Object')){
 				return elemOrId;
@@ -247,36 +313,63 @@
 	/**
 	* Method to build the info window at the target location
 	*/
-	function buildInfoWindow(elemOrId){
-		var el = util.getEl(elemOrId);
-		var html = infoBox.viewabilityInfoMarkup;
-		var line, tp = infoBox.lineMarkup;
+	function buildInfoWindow(elemOrId, options){
+		var el;
+		var ibox = infoBox;
+		var options = options || {};
 		var i, k, d;
-		var sumbuf = [], detbuf = []
+		var sumbuf = [], detbuf = [];
+		var twin, tdoc;
+		var regTopWindow = false;
+		
+		if(options.infoBox != null){
+			ibox = mixin(infoBox, options.infoBox);
+		}
+		
+		var html = ibox.viewabilityInfoMarkup;
+		var line, tp = ibox.lineMarkup;
 		
 		var id;
-		
-		id = el.getAttribute('id');
-		if(id != null){		
-			ovvtest.setOptions({ valuesOutputElem: id});
-		}
-		else{
-			ovvtest.setOptions({ valuesOutputElem: el});
-		}
-		
-		for(i=0;i<infoBox.detailDef.length;i++){
-			d = infoBox.detailDef[i];
+				
+		for(i=0;i<ibox.detailDef.length;i++){
+			d = ibox.detailDef[i];
 			line = tp.replace('##label##', d.label).replace('##ovv##', d.ovv);
 			detbuf.push(line);
 		}
-		for(i=0;i<infoBox.summaryDef.length;i++){
-			d = infoBox.summaryDef[i];
+		for(i=0;i<ibox.summaryDef.length;i++){
+			d = ibox.summaryDef[i];
 			line = tp.replace('##label##', d.label).replace('##ovv##', d.ovv);
 			sumbuf.push(line);
 		}
 		
 		html = html.replace('###DETAILS###', detbuf.join(''));
 		html = html.replace('###SUMMARY###', sumbuf.join(''));
+		
+		if(opts.valuesOutputElem == null){
+			opts.valuesOutputElem = [];
+		}
+		
+		if(options.topFrame && !ovvtest.isTopFrame()){
+			twin = window.top;
+			tdoc = twin.document;
+			el = util.getEl(elemOrId, tdoc);
+			regTopWindow = true;
+			id = el.getAttribute('id');
+			
+			opts.valuesOutputElem.push(el);
+			
+		}
+		else{
+			el = util.getEl(elemOrId);
+			id = el.getAttribute('id');
+			
+			if(id != null){		
+				opts.valuesOutputElem.push(id);
+			}
+			else{
+				opts.valuesOutputElem.push(el);
+			}
+		}
 		
 		el.innerHTML = html;
 
@@ -464,6 +557,13 @@
 		
 		buildInfoWindow: buildInfoWindow,
 		
+		isTopFrame: function(){
+			if(window === window.top){
+				return true;
+			}
+			return false;
+		},
+		
 		log: function(message, data){
 			if(opts.debug){
 				if(console.log){
@@ -494,18 +594,22 @@
 	}
 	
 	impl.util = util;
-	
+		
 	win['ovvtest'] = impl;
 
 })(window);
 
 
 // Setup bridge methods for demo until we get an updated creative
-var prevDVVfunc = DVViewableDetect;
-window.DVViewableDetect = function(eventObj, data){
-	ovvtest.handleOvvEvent(eventObj, data);
-	prevDVVfunc(eventObj, data);
-}
+(function(){
+	if(window.DVViewableDetect != null){
+		window.prevDVVfunc = DVViewableDetect;
+		window.DVViewableDetect = function(eventObj, data){
+			ovvtest.handleOvvEvent(eventObj, data);
+			prevDVVfunc(eventObj, data);
+		}
+	}
+})();
 
 
 
