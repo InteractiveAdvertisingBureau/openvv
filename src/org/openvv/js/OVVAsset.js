@@ -1880,15 +1880,21 @@ Function.prototype.memoize = function() {
         return fn.memoized.apply(fn, arguments);
     }
 };
-//Create a new instance of OVV every time:
-window.$ovvs = window.$ovvs || [];
-window.$ovvs['OVVID'] = new OVV();
-// 'OVVID' is String substituted from AS
-window.$ovvs['OVVID'].addAsset(new OVVAsset('OVVID', { geometryViewabilityCalculator: new OVVGeometryViewabilityCalculator() }));
-if ( typeof window.$ovv == 'undefined' ) {
-    //Allow pubs to add listeners using the standard object name:
-    window.$ovv = window.$ovvs['OVVID'];
-} else {
-    //Allow pubs to add listeners when an existing OVV library is present:
-    window.$ovv.addAsset( window.$ovvs['OVVID'].getAssetById('OVVID'));
+
+try {
+	//Create a new instance of OVV every time:
+	window.$ovvs = window.$ovvs || [];
+	window.$ovvs['OVVID'] = new OVV();
+	// 'OVVID' is String substituted from AS
+	window.$ovvs['OVVID'].addAsset(new OVVAsset('OVVID', { geometryViewabilityCalculator: new OVVGeometryViewabilityCalculator() }));
+	if (typeof window.$ovv == 'undefined') {
+		//Allow pubs to add listeners using the standard object name:
+		window.$ovv = window.$ovvs['OVVID'];
+	} else {
+		//Allow pubs to add listeners when an existing OVV library is present:
+		window.$ovv.addAsset(window.$ovvs['OVVID'].getAssetById('OVVID'));
+	}
+	true; // result for 'eval' in Flash OVVAsset constructor
+}catch(e){
+	false; // result for 'eval' in Flash OVVAsset constructor
 }

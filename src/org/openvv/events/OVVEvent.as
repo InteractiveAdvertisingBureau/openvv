@@ -33,9 +33,14 @@ package org.openvv.events {
 		 */
 		public static const OVVReady: String = "OVVReady";
         /**
-         * Events of this type represent an error that has occurred
+         * Events of this type represent an error that occurred while querying viewability state
          */
         public static const OVVError: String = "OVVError";
+
+        /**
+         * Events of this type represent a run-time error thrown while the Flash OVVAsset attempts to 'eval' the javascript
+         */
+        public static const OVVJsInitError: String = "OVVJsInitError";
 
         /**
          * Events of this type represent 2 seconds of contiguous viewability have occurred

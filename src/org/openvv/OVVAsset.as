@@ -26,6 +26,7 @@ package org.openvv {
     import flash.events.TimerEvent;
     import flash.external.ExternalInterface;
     import flash.utils.Timer;
+    import flash.utils.setTimeout;
     import org.openvv.OVVConfig;
     import org.openvv.events.OVVEvent;
     import net.iab.VPAIDEvent;
@@ -83,7 +84,10 @@ package org.openvv {
         /**
          * Hold OVV version. Will pass to JavaScript as well as $ovv.version
          */
-        public static const RELEASE_VERSION: String = "1.3.5";
+        public static const RELEASE_VERSION: String = "1.3.6";
+        /** Changes in v1.3.6 :
+         * AD-1832 : try / catch javascript 'eval'
+         */
         /** Changes in v1.3.5 :
          - AD-1854 : StickyAds solution
          */
@@ -205,7 +209,9 @@ package org.openvv {
 			VPAIDEvent.AdInteraction, VPAIDEvent.AdVideoStart]);
 
 		/**
-		 * A vector of all OVV events
+		 * A vector of all OVV events that may be published to javascript.
+         * (Do not include OVVJsInitError as the 'publish()' method will likely not be
+         * available in the javascript if this Event is dispatched.
 		 */
 		private static const OVV_EVENTS:Array = ([OVVEvent.OVVError,OVVEvent.OVVLog, OVVEvent.OVVImpression,
 			OVVEvent.OVVImpressionUnmeasurable, OVVEvent.OVVReady]);
@@ -292,7 +298,14 @@ package org.openvv {
 			{
 				ovvAssetSource = ovvAssetSource.replace(/BEACON_SWF_URL/g, beaconSwfUrl);
 			}
-            ExternalInterface.call("eval", ovvAssetSource);
+            if (!ExternalInterface.call("eval", ovvAssetSource)){
+                // Delay to allow time for OVVAsset.as to add event listeners after instantiating
+                setTimeout(
+                     function():void{
+                         raiseError({error:OVVEvent.OVVJsInitError});
+                     },200
+                )
+            }
         }
 
         ////////////////////////////////////////////////////////////
