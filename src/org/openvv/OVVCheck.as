@@ -72,6 +72,79 @@ package org.openvv {
          */
         public static const VIEWABLE: String = 'viewable';
 
+        // NEW : Reasons for instantaneous Unviewability or Unmeasurability (passed in viewabilityStateReason)
+
+        /**
+         * Unviewable by reason of inactive tab or minimized browser window
+         */
+        public static const REASON_INACTIVE_WINDOW: String = 'reason_inactive_window';
+
+        /**
+         * Unviewable by reason of player made invisible by manipulation of 'visibility' property
+         */
+        public static const REASON_PLAYER_INVISIBLE: String = 'reason_player_invisible';
+
+        /**
+         * Unviewable by reason of player containing element hidden by manipulation of 'display' property
+         */
+        public static const REASON_PLAYER_HIDDEN: String = 'reason_player_hidden';
+
+        /**
+         * Unviewable by reason of too little area viewable measured by browser geometry (no iframe)
+         */
+        public static const REASON_GEOMETRY: String = 'reason_geometry';
+
+        /**
+         * Unviewable by reason of too little area viewable measured by browser geometry (in same domain iframe)
+         */
+        public static const REASON_IFRAME_GEOMETRY: String = 'reason_iframe_geometry';
+
+        /**
+         * Unviewable by reason of too little area viewable measured by Flash beacons
+         */
+        public static const REASON_FLASH_BEACONS: String = 'reason_flash_beacons';
+
+        /**
+         * Unviewable by reason of too little area viewable measured by MozPaint beacons (in Firefox Browser)
+         */
+        public static const REASON_MOZ_BEACONS: String = 'reason_moz_beacons';
+
+        /**
+         * Unmeasurable by reason of cross-domain iframe, with Flash beacons not available
+         */
+        public static const REASON_XD_IFRAME: String = 'reason_xd_iframe';
+
+        /**
+         * Unmeasurable by reason of flash control beacon in view
+         */
+        public static const REASON_FLASH_CONTROL_BEACON_VIEWABLE: String = 'reason_flash_control_beacon_viewable';
+
+        /**
+         * Unmeasurable by reason of mozpaint control beacon in view
+         */
+        public static const REASON_MOZPAINT_CONTROL_BEACON_VIEWABLE: String = 'reason_mozpaint_control_beacon_viewable';
+
+        /**
+         * Unmeasurable by reason of flash beacons failed to initialize
+         */
+        public static const REASON_FLASH_BEACONS_INIT_ERROR: String = 'reason_flash_beacons_init_error';
+
+        /**
+         * Unmeasurable by reason of mozpaint beacons failed to initialize
+         */
+        public static const REASON_MOZPAINT_BEACONS_INIT_ERROR: String = 'reason_mozpaint_beacons_init_error';
+
+        /**
+         * Unmeasurable by reason of flash beacons generated an invalid result ('impossible combination of viewable and unviewable beacons)
+         * */
+        public static const REASON_FLASH_BEACONS_INVALID_RESULT: String = 'reason_flash_beacons_invalid_result';
+
+        /**
+         * Unmeasurable by reason of mozpaint beacons generated an invalid result ('impossible combination of viewable and unviewable beacons)
+         * */
+        public static const REASON_MOZPAINT_BEACONS_INVALID_RESULT: String = 'reason_mozpaint_beacons_invalid_result';
+
+
         /**
          * The value that {@link OVVCheck#viewabilityState} will be set to if the beacons
          * are not ready to determine the viewability state
@@ -195,6 +268,15 @@ package org.openvv {
          * @see #UNMEASURABLE
          */
         public var viewabilityState: String;
+
+        /**
+         * if viewabilityState is not VIEWABLE this property holds the
+         * reason why it is either unviewable or unmeasurable
+         *
+         * @see #UNVIEWABLE
+         * @see #UNMEASURABLE
+         */
+        public var viewabilityStateReason: String;
 
         /**
          * When the viewabilityState is changed by ActionScript detecting that

@@ -468,6 +468,15 @@ function OVVCheck() {
     * @see {@link OVVCheck.NOT_READY}
     */
     this.viewabilityState = '';
+
+    /**
+    * if viewabilityState is not VIEWABLE this property holds the
+    * reason why it is either unviewable or unmeasurable
+    *
+    * @see {@link OVVCheck.UNMEASURABLE}
+    * @see {@link OVVCheck.VIEWABLE}
+    */
+    this.viewabilityStateReason = '';
 }
 
 /**
@@ -487,6 +496,80 @@ OVVCheck.VIEWABLE = 'viewable';
 * determines that the asset is less than 50% viewable.
 */
 OVVCheck.UNVIEWABLE = 'unviewable';
+
+
+// NEW : Reasons for instantaneous Unviewability or Unmeasurability (passed in viewabilityStateReason)
+
+/**
+ * Unviewable by reason of inactive tab or minimized browser window
+ */
+OVVCheck.REASON_INACTIVE_WINDOW = 'reason_inactive_window';
+
+/**
+ * Unviewable by reason of player made invisible by manipulation of 'visibility' property
+ */
+OVVCheck.REASON_PLAYER_INVISIBLE = 'reason_player_invisible';
+
+/**
+ * Unviewable by reason of player containing element hidden by manipulation of 'display' property
+ */
+OVVCheck.REASON_PLAYER_HIDDEN = 'reason_player_hidden';
+
+/**
+ * Unviewable by reason of too little area viewable measured by browser geometry (no iframe)
+ */
+OVVCheck.REASON_GEOMETRY = 'reason_geometry';
+
+/**
+ * Unviewable by reason of too little area viewable measured by browser geometry (in same domain iframe)
+ */
+OVVCheck.REASON_IFRAME_GEOMETRY = 'reason_iframe_geometry';
+
+/**
+ * Unviewable by reason of too little area viewable measured by Flash beacons
+ */
+OVVCheck.REASON_FLASH_BEACONS = 'reason_flash_beacons';
+
+/**
+ * Unviewable by reason of too little area viewable measured by MozPaint beacons (in Firefox Browser)
+ */
+OVVCheck.REASON_MOZ_BEACONS = 'reason_moz_beacons';
+
+/**
+ * Unmeasurable by reason of cross-domain iframe, with Flash beacons not available
+ */
+OVVCheck.REASON_XD_IFRAME = 'reason_xd_iframe';
+
+/**
+ * Unmeasurable by reason of flash control beacon in view
+ */
+OVVCheck.REASON_FLASH_CONTROL_BEACON_VIEWABLE = 'reason_flash_control_beacon_viewable';
+
+/**
+ * Unmeasurable by reason of mozpaint control beacon in view
+ */
+OVVCheck.REASON_MOZPAINT_CONTROL_BEACON_VIEWABLE = 'reason_mozpaint_control_beacon_viewable';
+
+/**
+ * Unmeasurable by reason of flash beacons failed to initialize
+ */
+OVVCheck.REASON_FLASH_BEACONS_INIT_ERROR = 'reason_flash_beacons_init_error';
+
+/**
+ * Unmeasurable by reason of mozpaint beacons failed to initialize
+ */
+OVVCheck.REASON_MOZPAINT_BEACONS_INIT_ERROR = 'reason_mozpaint_beacons_init_error';
+
+/**
+ * Unmeasurable by reason of flash beacons generated an invalid result ('impossible combination of viewable and unviewable beacons)
+ * */
+OVVCheck.REASON_FLASH_BEACONS_INVALID_RESULT = 'reason_flash_beacons_invalid_result';
+
+/**
+ * Unmeasurable by reason of mozpaint beacons generated an invalid result ('impossible combination of viewable and unviewable beacons)
+ * */
+OVVCheck.REASON_MOZPAINT_BEACONS_INVALID_RESULT = 'reason_mozpaint_beacons_invalid_result';
+
 
 /**
 * The value that {@link OVVCheck#viewabilityState} will be set to if the beacons
@@ -873,6 +956,9 @@ function OVVAsset(uid, dependencies) {
             check.error = 'Player not found!';
             return check;
         }
+
+
+
         // Check if a CSS attribute value ( 'visibility:hidden' or 'display:none' )
         // on player or an inheritable containing element is rendering the player invisible.
         if (checkCssInvisibility(check, player) === true){
@@ -1046,7 +1132,9 @@ function OVVAsset(uid, dependencies) {
         if ( visibility == 'hidden' || display == 'none' ){
             check.technique = OVVCheck.CSS_INVISIBILITY;
             check.viewabilityState = OVVCheck.UNVIEWABLE;
-            return true;
+	        check.viewabilityStateReason = visibility ? CHECK.REASON
+
+	        return true;
         }
         return false;
     };
