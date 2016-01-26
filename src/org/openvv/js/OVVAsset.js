@@ -358,10 +358,20 @@ function OVVCheck() {
     this.beaconViewabilityState = '';
 
     /**
+     * The viewability state, measured UNVIEWABLE if the player is on an
+     * inactive browser window (inactive tab or minimized browser) or not.
+     * Only populated when OVV.DEBUG is true.
+     * @type {String}
+     * @see {@link catchInactiveWindow}
+     * @see {@link OVV#DEBUG}
+     */
+    this.windowViewabilityState = '';
+
+    /**
      * The viewability state measured by the css visibility technique. Only populated
      * when OVV.DEBUG is true.
      * @type {String}
-     * @see {@link checkCssInvisibility}
+     * @see {@link catchCssInvisibility}
      * @see {@link OVV#DEBUG}
      */
     this.cssViewabilityState = '';
@@ -370,7 +380,7 @@ function OVVCheck() {
      * The viewability state measured by the dom_obs curing technique. Only populated
      * when OVV.DEBUG is true.
      * @type {String}
-     * @see {@link checkDomObscuring}
+     * @see {@link catchDomObscuring}
      * @see {@link OVV#DEBUG}
      */
     this.domViewabilityState = '';
@@ -501,74 +511,92 @@ OVVCheck.UNVIEWABLE = 'unviewable';
 // NEW : Reasons for instantaneous Unviewability or Unmeasurability (passed in viewabilityStateReason)
 
 /**
- * Unviewable by reason of inactive tab or minimized browser window
+ * Not viewable by reason of too little area viewable measured by browser geometry (no iframe)
  */
-OVVCheck.REASON_INACTIVE_WINDOW = 'reason_inactive_window';
+REASON_GEOMETRY = 'N1';
 
 /**
- * Unviewable by reason of player made invisible by manipulation of 'visibility' property
+ * Not viewable by reason of too little area viewable measured by browser geometry (in same domain iframe)
  */
-OVVCheck.REASON_PLAYER_INVISIBLE = 'reason_player_invisible';
+REASON_IFRAME_GEOMETRY = 'N2';
 
 /**
- * Unviewable by reason of player containing element hidden by manipulation of 'display' property
+ * Not viewable by reason of too little area viewable measured by Flash beacons
  */
-OVVCheck.REASON_PLAYER_HIDDEN = 'reason_player_hidden';
+REASON_AREA_FLASH_BEACONS = 'N3';
 
 /**
- * Unviewable by reason of too little area viewable measured by browser geometry (no iframe)
+ * Not viewable by reason of too little area viewable measured by MozPaint beacons (in Firefox Browser)
  */
-OVVCheck.REASON_GEOMETRY = 'reason_geometry';
+REASON_AREA_MOZPAINT_BEACONS = 'N4';
 
 /**
- * Unviewable by reason of too little area viewable measured by browser geometry (in same domain iframe)
+ * Not viewable by reason of inactive tab or minimized browser window
  */
-OVVCheck.REASON_IFRAME_GEOMETRY = 'reason_iframe_geometry';
+REASON_INACTIVE_WINDOW = 'N5';
 
 /**
- * Unviewable by reason of too little area viewable measured by Flash beacons
+ * Not viewable by reason of player made invisible by manipulation of 'visibility' property
  */
-OVVCheck.REASON_FLASH_BEACONS = 'reason_flash_beacons';
+REASON_PLAYER_INVISIBLE = 'N6';
 
 /**
- * Unviewable by reason of too little area viewable measured by MozPaint beacons (in Firefox Browser)
+ * Not viewable by reason of player containing element hidden by manipulation of 'display' property
  */
-OVVCheck.REASON_MOZ_BEACONS = 'reason_moz_beacons';
+REASON_PLAYER_HIDDEN = 'N7';
 
 /**
- * Unmeasurable by reason of cross-domain iframe, with Flash beacons not available
+ * Not viewable by reason of player obscured by another element in the DOM
  */
-OVVCheck.REASON_XD_IFRAME = 'reason_xd_iframe';
+REASON_PLAYER_OBSCURED = 'N8';
 
 /**
- * Unmeasurable by reason of flash control beacon in view
+ * Unmeasurable by reason of geometry not supported and can't use Flash beacons
  */
-OVVCheck.REASON_FLASH_CONTROL_BEACON_VIEWABLE = 'reason_flash_control_beacon_viewable';
+REASON_BEACONS_IN_IFRAME = 'U1';
+
+/**
+ * Unmeasurable by reason of flash control beacon not ready
+ */
+REASON_FLASH_CONTROL_BEACON_NOT_READY = 'U2';
 
 /**
  * Unmeasurable by reason of mozpaint control beacon in view
  */
-OVVCheck.REASON_MOZPAINT_CONTROL_BEACON_VIEWABLE = 'reason_mozpaint_control_beacon_viewable';
+REASON_MOZPAINT_CONTROL_BEACON_NOT_READY = 'U3';
+
+/**
+ * Unmeasurable by reason of flash control beacon in view
+ */
+REASON_FLASH_CONTROL_BEACON_IN_VIEW = 'U4';
+
+/**
+ * Unmeasurable by reason of mozpaint control beacon in view
+ */
+REASON_MOZPAINT_CONTROL_BEACON_IN_VIEW = 'U5';
 
 /**
  * Unmeasurable by reason of flash beacons failed to initialize
  */
-OVVCheck.REASON_FLASH_BEACONS_INIT_ERROR = 'reason_flash_beacons_init_error';
+REASON_FLASH_ACTIVE_BEACONS_NOT_READY = 'U6';
 
 /**
  * Unmeasurable by reason of mozpaint beacons failed to initialize
  */
-OVVCheck.REASON_MOZPAINT_BEACONS_INIT_ERROR = 'reason_mozpaint_beacons_init_error';
+REASON_MOZPAINT_BEACONS_NOT_READY = 'U7';
 
 /**
- * Unmeasurable by reason of flash beacons generated an invalid result ('impossible combination of viewable and unviewable beacons)
+ * Unmeasurable by reason of flash beacons generated an invalid result
+ * ('impossible' combination of viewable and unviewable beacons)
  * */
-OVVCheck.REASON_FLASH_BEACONS_INVALID_RESULT = 'reason_flash_beacons_invalid_result';
+REASON_FLASH_BEACONS_INVALID_RESULT = 'U8';
 
 /**
- * Unmeasurable by reason of mozpaint beacons generated an invalid result ('impossible combination of viewable and unviewable beacons)
+ * Unmeasurable by reason of mozpaint beacons generated an invalid result
+ * ('impossible' combination of viewable and unviewable beacons)
  * */
-OVVCheck.REASON_MOZPAINT_BEACONS_INVALID_RESULT = 'reason_mozpaint_beacons_invalid_result';
+REASON_MOZPAINT_BEACONS_INVALID_RESULT = 'U9';
+
 
 
 /**
@@ -731,7 +759,6 @@ function OVVAsset(uid, dependencies) {
     ///////////////////////////////////////////////////////////////////////////
     // CONSTANTS
     ///////////////////////////////////////////////////////////////////////////
-
     /**
      * The total number of beacons being used
      * @type {Number}
@@ -868,10 +895,31 @@ function OVVAsset(uid, dependencies) {
     var id = uid;
 
     /**
-     * The number of beacons that have checked in as being ready
+     * The number of active (non-control) beacons that have checked in as being ready
      * @type {Number}
      */
     var beaconsStarted = 0;
+
+    var beaconDiagonals = [
+        [
+            OUTER_TOP_LEFT,
+            MIDDLE_TOP_LEFT,
+            INNER_TOP_LEFT,
+            CENTER,
+            INNER_BOTTOM_RIGHT,
+            MIDDLE_BOTTOM_RIGHT,
+            OUTER_BOTTOM_RIGHT
+        ],
+        [
+            OUTER_TOP_RIGHT,
+            MIDDLE_TOP_RIGHT,
+            INNER_TOP_RIGHT,
+            CENTER,
+            INNER_BOTTOM_LEFT,
+            MIDDLE_BOTTOM_LEFT,
+            OUTER_BOTTOM_LEFT
+        ]
+    ];
 
     /**
      * The height and width of the beacons on the page. 1 for production, 20
@@ -954,95 +1002,156 @@ function OVVAsset(uid, dependencies) {
 
         if (!player) {
             check.error = 'Player not found!';
+            console.log("viewabilityState : player found : true")
             return check;
         }
 
+        // Player found: Is it in an active browser window? :
 
-
-        // Check if a CSS attribute value ( 'visibility:hidden' or 'display:none' )
-        // on player or an inheritable containing element is rendering the player invisible.
-        if (checkCssInvisibility(check, player) === true){
+        if (catchInactiveWindow()){
             if ($ovvs['OVVID'].DEBUG) {
-                check.cssViewabilityState = OVVCheck.UNVIEWABLE;
+                check.windowViewabilityState = OVVCheck.UNVIEWABLE;
             }else{
+                console.log("viewabilityState inactive window : " + check.viewabilityState)
                 return check;
             }
         }
-        // Check if any detectable element in the DOM is obscuring more than 50% of the
-        // player area.
 
-        if (checkDomObscuring(check, player) === true){
+        // Player is in an active window (or DEBUG mode is enabled ) :
+        // Has its visibility been modified by manipulation of its containing
+        // elements' style or properties? :
+        if (catchCssInvisibility(check, player) === true){
+            if ($ovvs['OVVID'].DEBUG) {
+                check.cssViewabilityState = OVVCheck.UNVIEWABLE;
+            }else{
+                console.log("viewabilityState invisible : " + check.viewabilityState)
+                return check;
+            }
+        }
+
+        // Player's visibility has not been turned off (or DEBUG mode is enabled ) :
+        // Is it obscured by an opaque, overlapping element?:
+        if (catchDomObscuring(check, player) === true){
             if ($ovvs['OVVID'].DEBUG) {
                 check.domViewabilityState = OVVCheck.UNVIEWABLE;
             }else{
+                console.log("viewabilityState obscured : " + check.viewabilityState)
                 return check;
             }
+
         }else{
             check.percentObscured = 0;
         }
 
-        // if we're in IE and we're in a cross-domain iframe, return unmeasurable
-        // We are able to measure for same domain iframe ('friendly iframe')
-        if (!beaconSupportCheck.supportsBeacons() && check.geometrySupported === false) {
-            check.viewabilityState = OVVCheck.UNMEASURABLE;
-            if (!$ovvs['OVVID'].DEBUG) {
-                return check;
-            }
-        }
+        // Player is on the active browser tab in an un-minimized browser window and
+        // it is not invisible, hidden or obscured. (or DEBUG mode is enabled ) :
+        // Try to measure its viewable area:
+
         // if we can use the geometry method, use it over the beacon method
         if (check.geometrySupported) {
             check.technique = OVVCheck.GEOMETRY;
             checkGeometry(check, player);
-            check.viewabilityState = (check.percentViewable >= MIN_VIEW_AREA_PC) ? OVVCheck.VIEWABLE : OVVCheck.UNVIEWABLE;
+            if (check.percentViewable >= MIN_VIEW_AREA_PC){
+                check.viewabilityState = OVVCheck.VIEWABLE;
+            }else{
+                check.viewabilityState = OVVCheck.UNVIEWABLE;
+                check.viewabilityStateReason = OVVCheck.REASON_GEOMETRY;
+            }
+            console.log("viewabilityState : " + check.viewabilityState)
+
             if ($ovvs['OVVID'].DEBUG) {
                 // add an additional field when debugging
                 check.geometryViewabilityState = check.viewabilityState;
             } else {
+                console.log("viewabilityState geometry : " + check.viewabilityState)
                 return check;
             }
         }
-        var controlBeacon = getBeacon(0);
-        var controlBeaconContainer = getBeaconContainer(0);
-        // check to make sure the control beacon is found and its callback has been setup
-        if (controlBeacon && controlBeacon.isViewable && controlBeaconContainer) {
-            // the control beacon should always be off screen and not viewable,
-            // if that's not true, it can't be used
-            var controlBeaconVisible = isOnScreen(controlBeaconContainer) && controlBeacon.isViewable();
-            check.beaconsSupported = !controlBeaconVisible;
-        } else {
-            // if the control beacon wasn't found or it isn't ready yet,
-            // then beacons can't be used for this check
-            check.beaconsSupported = false;
-        }
-        if (!beaconsReady()) {
-            check.technique = OVVCheck.BEACON;
-            check.viewabilityState = OVVCheck.NOT_READY;
-        } else if (check.beaconsSupported) { // if the control beacon checked out, and all the beacons are ready proceed
-            check.technique = OVVCheck.BEACON;
-            var viewable = checkBeacons(check);
 
-            // certain scenarios return null when the beacons can't guarantee
-            // that the player is > 50% viewable, so it's deemed unmeasurable
-            if (viewable === null) {
-                check.viewabilityState = OVVCheck.UNMEASURABLE;
-                // add this informational field when debugging
-                if ($ovvs['OVVID'].DEBUG) {
-                    check.beaconViewabilityState = OVVCheck.UNMEASURABLE;
-                }
-            } else {
-                check.viewabilityState = viewable ? OVVCheck.VIEWABLE : OVVCheck.UNVIEWABLE;
-                // add this informational field when debugging
-                if ($ovvs['OVVID'].DEBUG) {
-                    check.beaconViewabilityState = viewable ? OVVCheck.VIEWABLE : OVVCheck.UNVIEWABLE;
-                }
-            }
-        } else {
+        // Geometry not supported (or DEBUG mode is enabled ) :
+        // Try to use beacons to determine viewable area of player:
+
+        // if we're in IE and we're in a (cross-domain) iframe, return unmeasurable
+        // We are able to measure for same domain iframe ('friendly iframe')
+        if (!beaconSupportCheck.supportsBeacons() && check.geometrySupported === false) {
             check.viewabilityState = OVVCheck.UNMEASURABLE;
+            check.viewabilityStateReason = OVVCheck.REASON_BEACONS_IN_IFRAME;
+            if (!$ovvs['OVVID'].DEBUG) {
+                console.log("viewabilityState beacon supported : " + check.viewabilityState)
+                return check;
+            }
+        }
+
+        if (controlBeaconNotReady()){
+            check.viewabilityState = OVVCheck.UNMEASURABLE;
+            if (beaconFunc == getFlashBeacon) {
+                OVVCheck.viewabilityStateReason = OVVCheck.REASON_FLASH_CONTROL_BEACON_NOT_READY;
+            }else{
+                OVVCheck.viewabilityStateReason = OVVCheck.REASON_MOZPAINT_CONTROL_BEACON_READY;
+            }
+            check.beaconsSupported = false;
+            console.log("viewabilityState control beacon not ready: " + check.viewabilityState)
+            return check;
+        }
+
+        if (controlBeaconInView()){
+            check.viewabilityState = OVVCheck.UNMEASURABLE;
+            if (beaconFunc == getFlashBeacon) {
+                OVVCheck.viewabilityStateReason = OVVCheck.REASON_FLASH_CONTROL_BEACON_IN_VIEW;
+            }else{
+                OVVCheck.viewabilityStateReason = OVVCheck.REASON_MOZPAINT_CONTROL_BEACON_IN_VIEW;
+            }
+            check.beaconsSupported = false;
+            console.log("viewabilityState control beacon in view: " + check.viewabilityState)
+            return check;
+        }
+
+        if (activeBeaconsNotReady()){
+            // check.viewabilityState = OVVCheck.UNMEASURABLE;
+            check.viewabilityState = OVVCheck.NOT_READY;
+            if (beaconFunc == getFlashBeacon) {
+                OVVCheck.viewabilityStateReason = OVVCheck.REASON_FLASH_ACTIVE_BEACONS_NOT_READY;
+            }else{
+                OVVCheck.viewabilityStateReason = OVVCheck.REASON_MOZPAINT_ACTIVE_BEACONS_NOT_READY;
+            }
+            console.log("viewabilityState active beacons not ready: " + check.viewabilityState)
+            return check;
+        }
+
+        check.technique = OVVCheck.BEACON;
+
+        check.viewabilityState = checkActiveBeacons();
+
+        switch ( check.viewabilityState ){
+            case OVVCheck.VIEWABLE:
+                break;
+            case OVVCheck.UNVIEWABLE:
+                check.viewabilityState = OVVCheck.NOT_READY;
+                if (beaconFunc == getFlashBeacon) {
+                    OVVCheck.viewabilityStateReason = OVVCheck.REASON_AREA_FLASH_BEACONS;
+                }else{
+                    OVVCheck.viewabilityStateReason = OVVCheck.REASON_AREA_MOZPAINT_BEACONS;
+                }
+                break;
+            case OVVCheck.UNMEASURABLE:
+            default:
+                check.viewabilityState = OVVCheck.NOT_READY;
+                if (beaconFunc == getFlashBeacon) {
+                    OVVCheck.viewabilityStateReason = OVVCheck.REASON_FLASH_BEACONS_INVALID_RESULT;
+                }else{
+                    OVVCheck.viewabilityStateReason = OVVCheck.REASON_MOZPAINT_BEACONS_INVALID_RESULT;
+                }
+                break;
+        }
+
+        // add this informational field when debugging
+        if ($ovvs['OVVID'].DEBUG) {
+            check.beaconViewabilityState = check.viewabilityState;
         }
 
         // in debug mode, reconcile the viewability states from all techniques
         if ($ovvs['OVVID'].DEBUG) {
-            // revert the technique to blank during debug, since both were used
+            // revert the technique to blank during debug, since more than on technique will have been tested
             check.technique = '';
             if (check.geometryViewabilityState === null && check.beaconViewabilityState === null) {
                 check.viewabilityState = OVVCheck.UNMEASURABLE;
@@ -1055,9 +1164,29 @@ function OVVAsset(uid, dependencies) {
                     geometryViewable) ? OVVCheck.VIEWABLE : OVVCheck.UNVIEWABLE;
             }
         }
+        console.log("viewabilityState end beacon check : " + check.viewabilityState)
 
         return check;
     };
+
+    this.controlBeaconNotReady = function(){
+        var controlBeacon = getBeacon(0);
+        var controlBeaconContainer = getBeaconContainer(0);
+        // check to make sure the control beacon is found and its callback has been setup.
+        // Note : 'controlBeacon.isViewable' is testing for presence of callback: not trying to invoke it.
+        return !(controlBeacon && controlBeacon.isViewable && controlBeaconContainer);
+    }
+        
+    this.controlBeaconInView = function(){
+        var controlBeacon = getBeacon(0);
+        var controlBeaconContainer = getBeaconContainer(0);
+        return isOnScreen(controlBeaconContainer) && controlBeacon.isViewable();
+    }
+
+    this.activeBeaconsNotReady = function(){
+         return !beaconsReady();
+    }
+
 
     /**
      * Called by each beacon to signify that it's ready to measure
@@ -1075,7 +1204,7 @@ function OVVAsset(uid, dependencies) {
 
         beaconsStarted++;
 
-        if (beaconsReady()) {
+        if (beaconsReady() && player) {
             player['onJsReady' + uid]();
         }
     };
@@ -1125,16 +1254,15 @@ function OVVAsset(uid, dependencies) {
      * @param {OVVCheck} check The OVVCheck object to populate
      * @param {Element} player The HTML Element to measure
      */
-    var checkCssInvisibility = function (check, player) {
+    var catchCssInvisibility = function (check, player) {
         var style = window.getComputedStyle(player, null);
         var visibility = style.getPropertyValue('visibility');
         var display = style.getPropertyValue('display');
         if ( visibility == 'hidden' || display == 'none' ){
             check.technique = OVVCheck.CSS_INVISIBILITY;
             check.viewabilityState = OVVCheck.UNVIEWABLE;
-	        check.viewabilityStateReason = visibility ? CHECK.REASON
-
-	        return true;
+            check.viewabilityStateReason = visibility ? OVVCheck.REASON_PLAYER_INVISIBLE : OVVCheck.REASON_PLAYER_HIDDEN;
+            return true;
         }
         return false;
     };
@@ -1148,7 +1276,7 @@ function OVVAsset(uid, dependencies) {
      * @param {OVVCheck} check The OVVCheck object to populate
      * @param {Element} player The HTML Element to measure
      */
-    var checkDomObscuring = function(check, player){
+    var catchDomObscuring = function(check, player){
         var playerRect = player.getBoundingClientRect(),
             offset = 12, // ToDo: Make sure test points don't overlap beacons.
             xLeft = playerRect.left+offset,
@@ -1181,6 +1309,7 @@ function OVVAsset(uid, dependencies) {
                             check.percentViewable = 100 - check.percentObscured;
                             check.technique = OVVCheck.DOM_OBSCURING;
                             check.viewabilityState = OVVCheck.UNVIEWABLE;
+                            check.viewabilityStateReason = OVVCheck.REASON_PLAYER_OBSCURED;
                             return true;
                         }
                     }
@@ -1221,16 +1350,13 @@ function OVVAsset(uid, dependencies) {
     };
 
     /**
-    * Performs the beacon technique. Queries the state of each beacon and
+    * Performs the beacon technique. Queries the state of each active beacon and
     * attempts to make a determination of whether the minimum required
     * percentage of the player area is within the viewport.
     * @param {OVVCheck} check The OVVCheck object to populate
     */
-    var checkBeacons = function (check) {
-        if (!beaconsReady()) {
-            return null;
-        }
-
+    var checkActiveBeacons = function (check) {
+        // All active beacons guaranteed to be ready by the time this function is called
         var beaconsVisible = 0;
         var outerCornersVisible = 0;
         var middleCornersVisible = 0;
@@ -1244,13 +1370,8 @@ function OVVAsset(uid, dependencies) {
         check.objLeft = objRect.left;
         check.objRight = objRect.right;
 
-        for (var index = 0; index <= TOTAL_BEACONS; index++) {
-
-            // the control beacon is only involved in determining if the
-            // browser supports beacon measurement, so move on
-            if (index === 0) {
-                continue;
-            }
+        // Active beacons start at index 1
+        for (var index = 1; index <= TOTAL_BEACONS; index++) {
             var beacon = getBeacon(index);
             var beaconContainer = getBeaconContainer(index);
             var isViewable = beacon.isViewable();
@@ -1286,23 +1407,20 @@ function OVVAsset(uid, dependencies) {
             }
         }
 
-        // when all points are visible
-        if (beaconsVisible === TOTAL_BEACONS) {
-            return true;
-        }else if ( MIN_VIEW_AREA_PC == 100 ){
-                return false;
-        }else if ( MIN_VIEW_AREA_PC == 50 ) {
-            // The original MRC standard ...
-            var beacons = check.beacons;
+        // Assume MIN_VIEW_AREA_PC is 100% (GroupM or 50% : MRC)
+        // Currently the only two viewability standards we support...
 
-            // when the center is not visible
-            if (beacons[CENTER] === false) {
-                // and 3 corners are visible
-                if ((innerCornersVisible >= 3) || (middleCornersVisible >= 3) || (outerCornersVisible >= 3)) {
-                    return null;
-                }
-                return false;
-            }
+        // when all beacons are visible
+        if (beaconsVisible === TOTAL_BEACONS) {
+            return OVVCheck.VIEWABLE;
+        }else if ( MIN_VIEW_AREA_PC == 100 ){
+            // GroupM requires 100% of player area viewable
+            return OVVCheck.UNVIEWABLE;
+        }else if ( invalidBeaconConfiguration() ) {
+            return OVVCheck.UNMEASURABLE;
+        } else {
+            // return viewable / unviewable result based on a valid beacon configuration:
+            var beacons = check.beacons;
 
             // when the center of the player is visible
             if ((beacons[CENTER] === true) &&
@@ -1312,47 +1430,55 @@ function OVVAsset(uid, dependencies) {
                     (beacons[OUTER_TOP_RIGHT] === true && beacons[OUTER_BOTTOM_RIGHT] === true) ||
                     (beacons[OUTER_BOTTOM_LEFT] === true && beacons[OUTER_BOTTOM_RIGHT] === true))
                 ) {
-                return true;
+                return OVVCheck.VIEWABLE;
             }
 
             // when the center and all of the middle corners are visible
             if (beacons[CENTER] === true && middleCornersVisible == 4) {
-                return true;
+                return OVVCheck.VIEWABLE;
             }
 
-            // // when top left and bottom right corners are visible
-            if ((beacons[OUTER_TOP_LEFT] && beacons[OUTER_BOTTOM_RIGHT]) &&
-                // and any of their diagonals are covered
-                (!beacons[MIDDLE_TOP_LEFT] || !beacons[INNER_TOP_LEFT] || !beacons[CENTER] || beacons[INNER_BOTTOM_RIGHT] || beacons[MIDDLE_BOTTOM_RIGHT])
-                ) {
-                return null;
-            }
-
-            // when bottom left and top right corners are visible
-            if ((beacons[OUTER_BOTTOM_LEFT] && beacons[OUTER_TOP_RIGHT]) &&
-                // and any of their diagonals are covered
-                (!beacons[MIDDLE_BOTTOM_LEFT] || !beacons[INNER_BOTTOM_LEFT] || !beacons[CENTER] || !beacons[INNER_TOP_RIGHT] || !beacons[MIDDLE_TOP_RIGHT])
-                ) {
-                return null;
-            }
-
-            return false;
-        }else{
-            // ToDo : Currently only MRC (50%) and GROUPM (100%) supported.
-            // ToDo : Accommodate minimum viewable area of percentages other than 50% & 100%
-            return null;
+            // Otherwise beacons indicate viewable area < 50%
+            return OVVCheck.UNVIEWABLE;
         }
+    }
+
+    var invalidBeaconConfiguration = function(){
+        // If either of the diagonals contains an 'off' beacon between
+        // any two 'on' beacons the beacon configuration is invalid.
+        var beaconState;
+        var beaconStateChange;
+
+        for (var d = 0; d<2; d++) {
+            diag = beaconDiagonals[d];
+            beaconStateChange = 0;
+            for (var i = 0; i < diag.length; i++) {
+                beaconState = check.beacons[diag[i]];
+                if (beaconState === true && beaconStateChange == 0) {
+                    // first 'on' beacon found on diagonal
+                    beaconStateChange++;
+                    continue;
+                }
+                if (beaconState === false && beaconStateChange == 1) {
+                    // an 'on' beacon had been found, now we have an 'off' beacon
+                    beaconStateChange++;
+                    continue;
+                }
+                if (beaconState === true && beaconStateChange == 2) {
+                    // we previously found a 'on' beacon followed by an 'off' beacon.
+                    // Now we have another 'on' beacon: BOGUS!
+                    return true;
+                }
+            }
+        }
+        // nothing suspicious here ...
+        return false;
     };
 
     /**
      * @returns {Boolean} Whether all beacons have checked in
      */
     var beaconsReady = function () {
-
-        if (!player) {
-            return false;
-        }
-
         return beaconsStarted === TOTAL_BEACONS;
     };
 
@@ -1361,7 +1487,7 @@ function OVVAsset(uid, dependencies) {
      * @param {String} url The URL of the beacon SWFs
      * @see {@link positionBeacons}
      */
-    var createBeacons = function (url) {
+    var createFlashBeacons = function (url) {
         // double checking that our URL was actually set to something
         // (BEACON_SWF_URL is obfuscated here to prevent it from being
         // String substituted by ActionScript)
@@ -1472,12 +1598,13 @@ function OVVAsset(uid, dependencies) {
         this.positionInterval = setInterval(positionBeacons.bind(this), positionBeaconsIntervalDelay);
     };
 
+
     /**
      * Repositions the beacon SWFs on top of the player
      */
     var positionBeacons = function () {
 
-        if (!beaconsReady()) {
+        if (!(beaconsReady() && player))  {
             return;
         }
 
@@ -1668,29 +1795,36 @@ function OVVAsset(uid, dependencies) {
         return document.getElementById(id);
     };
 
-    var isInFocus = function () {
+    var catchInactiveWindow = function () {
         if (document.hidden !== 'undefined'){
             if (document.hidden === true){
                 // Either the browser window is minified or the page is on an inactive tab.
                 // Ad cannot be visible.
-                return false;
+                OVVCheck.viewabilityState = OVVCheck.UNVIEWABLE;
+                OVVCheck.viewabilityStateReason = OVVCheck.REASON_INACTIVE_WINDOW;
+                return true;
             }
         }
+        return false;
+    };
+
+    var isInFocus = function(){
         //    NOTE : MRC requires an in-focus BROWSER TAB (which is tested by document.hidden) but here we were
         //    testing for an out-of-focus BROWSER WINDOW, which can (and often is) viewable if user
         //    is watching video in one browser window while web-surfing / working in another window
         //    Additionally : Third party viewability vendors (IAS) report viewable ads in VTS tests which we
         //    know to have been running in out-of-focus BROWSER WINDOWS
-        //    Removed 'hasFocus' test for Browser Window.
+        //    Failing this test should not indicate Unviewability, unless a specific viewability standard requires it.
+        // toDo - re-implement hasFocus test here
         return true;
-    };
+    }
 
     player = findPlayer();
 
     // only use the beacons if geometry is not supported, or we we are in DEBUG mode.
     if ($ovvs['OVVID'].geometrySupported == false || $ovvs['OVVID'].DEBUG) {
-	    if (typeof(window.mozPaintCount)=='number'){
-	        //Use frame technique to measure viewability in cross domain FF scenario
+        if (typeof(window.mozPaintCount)=='number'){
+            //Use frame technique to measure viewability in cross domain FF scenario
             getBeaconFunc = getFrameBeacon;
             getBeaconContainerFunc = getFrameBeaconContainer;
             createFrameBeacons.bind(this)();
@@ -1699,7 +1833,7 @@ function OVVAsset(uid, dependencies) {
             getBeaconFunc = getFlashBeacon;
             getBeaconContainerFunc = getFlashBeaconContainer;
             // 'BEACON_SWF_URL' is String substituted from ActionScript
-            createBeacons.bind(this)('BEACON_SWF_URL');
+            createFlashBeacons.bind(this)('BEACON_SWF_URL');
         }
     } else if (player && player['onJsReady' + uid]) {
         // since we don't have to wait for beacons to be ready, we're ready now
@@ -1715,7 +1849,7 @@ function OVVGeometryViewabilityCalculator() {
     this.getViewabilityState = function (player, contextWindow) {
         var minViewPortSize = getMinViewPortSize(),
             viewablePercentage;
-	    if (minViewPortSize.area == Infinity) {
+        if (minViewPortSize.area == Infinity) {
             return { error: 'Failed to determine viewport'};
         }
         var assetRect = player.getBoundingClientRect();
@@ -1736,7 +1870,7 @@ function OVVGeometryViewabilityCalculator() {
                 //Partially above the top
                 visibleAssetSize.height += visibleAssetSize.top;
             }
-	        // Width visible in viewport:
+            // Width visible in viewport:
             if ( visibleAssetSize.left < 0 ) {
                 visibleAssetSize.width += visibleAssetSize.left;
             }
@@ -1755,7 +1889,7 @@ function OVVGeometryViewabilityCalculator() {
             objRight: assetRect.right,
             percentViewable: viewablePercentage
         };
-	    return result;
+        return result;
     };
 
     ///////////////////////////////////////////////////////////////////////////

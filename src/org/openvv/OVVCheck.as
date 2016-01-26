@@ -75,74 +75,91 @@ package org.openvv {
         // NEW : Reasons for instantaneous Unviewability or Unmeasurability (passed in viewabilityStateReason)
 
         /**
-         * Unviewable by reason of inactive tab or minimized browser window
+         * Not viewable by reason of too little area viewable measured by browser geometry (no iframe)
          */
-        public static const REASON_INACTIVE_WINDOW: String = 'reason_inactive_window';
+        public static const REASON_GEOMETRY: String = 'N1';
 
         /**
-         * Unviewable by reason of player made invisible by manipulation of 'visibility' property
+         * Not viewable by reason of too little area viewable measured by browser geometry (in same domain iframe)
          */
-        public static const REASON_PLAYER_INVISIBLE: String = 'reason_player_invisible';
+        public static const REASON_IFRAME_GEOMETRY: String = 'N2';
 
         /**
-         * Unviewable by reason of player containing element hidden by manipulation of 'display' property
+         * Not viewable by reason of too little area viewable measured by Flash beacons
          */
-        public static const REASON_PLAYER_HIDDEN: String = 'reason_player_hidden';
+        public static const REASON_AREA_FLASH_BEACONS: String = 'N3';
 
         /**
-         * Unviewable by reason of too little area viewable measured by browser geometry (no iframe)
+         * Not viewable by reason of too little area viewable measured by MozPaint beacons (in Firefox Browser)
          */
-        public static const REASON_GEOMETRY: String = 'reason_geometry';
+        public static const REASON_AREA_MOZPAINT_BEACONS: String = 'N4';
 
         /**
-         * Unviewable by reason of too little area viewable measured by browser geometry (in same domain iframe)
+         * Not viewable by reason of inactive tab or minimized browser window
          */
-        public static const REASON_IFRAME_GEOMETRY: String = 'reason_iframe_geometry';
+        public static const REASON_INACTIVE_WINDOW: String = 'N5';
 
         /**
-         * Unviewable by reason of too little area viewable measured by Flash beacons
+         * Not viewable by reason of player made invisible by manipulation of 'visibility' property
          */
-        public static const REASON_FLASH_BEACONS: String = 'reason_flash_beacons';
+        public static const REASON_PLAYER_INVISIBLE: String = 'N6';
 
         /**
-         * Unviewable by reason of too little area viewable measured by MozPaint beacons (in Firefox Browser)
+         * Not viewable by reason of player containing element hidden by manipulation of 'display' property
          */
-        public static const REASON_MOZ_BEACONS: String = 'reason_moz_beacons';
+        public static const REASON_PLAYER_HIDDEN: String = 'N7';
 
         /**
-         * Unmeasurable by reason of cross-domain iframe, with Flash beacons not available
+         * Not viewable by reason of player obscured by another element in the DOM
          */
-        public static const REASON_XD_IFRAME: String = 'reason_xd_iframe';
+        public static const REASON_PLAYER_OBSCURED: String = 'N8';
 
         /**
-         * Unmeasurable by reason of flash control beacon in view
+         * Unmeasurable by reason of geometry not supported and can't use Flash beacons
          */
-        public static const REASON_FLASH_CONTROL_BEACON_VIEWABLE: String = 'reason_flash_control_beacon_viewable';
+        public static const REASON_BEACONS_IN_IFRAME: String = 'U1';
+
+        /**
+         * Unmeasurable by reason of flash control beacon not ready
+         */
+        public static const REASON_FLASH_CONTROL_BEACON_NOT_READY: String = 'U2';
 
         /**
          * Unmeasurable by reason of mozpaint control beacon in view
          */
-        public static const REASON_MOZPAINT_CONTROL_BEACON_VIEWABLE: String = 'reason_mozpaint_control_beacon_viewable';
+        public static const REASON_MOZPAINT_CONTROL_BEACON_NOT_READY: String = 'U3';
+
+        /**
+         * Unmeasurable by reason of flash control beacon in view
+         */
+        public static const REASON_FLASH_CONTROL_BEACON_IN_VIEW: String = 'U4';
+
+        /**
+         * Unmeasurable by reason of mozpaint control beacon in view
+         */
+        public static const REASON_MOZPAINT_CONTROL_BEACON_IN_VIEW: String = 'U5';
 
         /**
          * Unmeasurable by reason of flash beacons failed to initialize
          */
-        public static const REASON_FLASH_BEACONS_INIT_ERROR: String = 'reason_flash_beacons_init_error';
+        public static const REASON_FLASH_ACTIVE_BEACONS_NOT_READY: String = 'U6';
 
         /**
          * Unmeasurable by reason of mozpaint beacons failed to initialize
          */
-        public static const REASON_MOZPAINT_BEACONS_INIT_ERROR: String = 'reason_mozpaint_beacons_init_error';
+        public static const REASON_MOZPAINT_BEACONS_NOT_READY: String = 'U7';
 
         /**
-         * Unmeasurable by reason of flash beacons generated an invalid result ('impossible combination of viewable and unviewable beacons)
+         * Unmeasurable by reason of flash beacons generated an invalid result
+         * ('impossible' combination of viewable and unviewable beacons)
          * */
-        public static const REASON_FLASH_BEACONS_INVALID_RESULT: String = 'reason_flash_beacons_invalid_result';
+        public static const REASON_FLASH_BEACONS_INVALID_RESULT: String = 'U8';
 
         /**
-         * Unmeasurable by reason of mozpaint beacons generated an invalid result ('impossible combination of viewable and unviewable beacons)
+         * Unmeasurable by reason of mozpaint beacons generated an invalid result
+         * ('impossible' combination of viewable and unviewable beacons)
          * */
-        public static const REASON_MOZPAINT_BEACONS_INVALID_RESULT: String = 'reason_mozpaint_beacons_invalid_result';
+        public static const REASON_MOZPAINT_BEACONS_INVALID_RESULT: String = 'U9';
 
 
         /**
