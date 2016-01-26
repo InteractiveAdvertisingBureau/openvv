@@ -513,89 +513,89 @@ OVVCheck.UNVIEWABLE = 'unviewable';
 /**
  * Not viewable by reason of too little area viewable measured by browser geometry (no iframe)
  */
-REASON_GEOMETRY = 'N1';
+OVVCheck.REASON_GEOMETRY = 'N1';
 
 /**
  * Not viewable by reason of too little area viewable measured by browser geometry (in same domain iframe)
  */
-REASON_IFRAME_GEOMETRY = 'N2';
+OVVCheck.REASON_IFRAME_GEOMETRY = 'N2';
 
 /**
  * Not viewable by reason of too little area viewable measured by Flash beacons
  */
-REASON_AREA_FLASH_BEACONS = 'N3';
+OVVCheck.REASON_AREA_FLASH_BEACONS = 'N3';
 
 /**
  * Not viewable by reason of too little area viewable measured by MozPaint beacons (in Firefox Browser)
  */
-REASON_AREA_MOZPAINT_BEACONS = 'N4';
+OVVCheck.REASON_AREA_MOZPAINT_BEACONS = 'N4';
 
 /**
  * Not viewable by reason of inactive tab or minimized browser window
  */
-REASON_INACTIVE_WINDOW = 'N5';
+OVVCheck.REASON_INACTIVE_WINDOW = 'N5';
 
 /**
  * Not viewable by reason of player made invisible by manipulation of 'visibility' property
  */
-REASON_PLAYER_INVISIBLE = 'N6';
+OVVCheck.REASON_PLAYER_INVISIBLE = 'N6';
 
 /**
  * Not viewable by reason of player containing element hidden by manipulation of 'display' property
  */
-REASON_PLAYER_HIDDEN = 'N7';
+OVVCheck.REASON_PLAYER_HIDDEN = 'N7';
 
 /**
  * Not viewable by reason of player obscured by another element in the DOM
  */
-REASON_PLAYER_OBSCURED = 'N8';
+OVVCheck.REASON_PLAYER_OBSCURED = 'N8';
 
 /**
  * Unmeasurable by reason of geometry not supported and can't use Flash beacons
  */
-REASON_BEACONS_IN_IFRAME = 'U1';
+OVVCheck.REASON_BEACONS_IN_IFRAME = 'U1';
 
 /**
  * Unmeasurable by reason of flash control beacon not ready
  */
-REASON_FLASH_CONTROL_BEACON_NOT_READY = 'U2';
+OVVCheck.REASON_FLASH_CONTROL_BEACON_NOT_READY = 'U2';
 
 /**
  * Unmeasurable by reason of mozpaint control beacon in view
  */
-REASON_MOZPAINT_CONTROL_BEACON_NOT_READY = 'U3';
+OVVCheck.REASON_MOZPAINT_CONTROL_BEACON_NOT_READY = 'U3';
 
 /**
  * Unmeasurable by reason of flash control beacon in view
  */
-REASON_FLASH_CONTROL_BEACON_IN_VIEW = 'U4';
+OVVCheck.REASON_FLASH_CONTROL_BEACON_IN_VIEW = 'U4';
 
 /**
  * Unmeasurable by reason of mozpaint control beacon in view
  */
-REASON_MOZPAINT_CONTROL_BEACON_IN_VIEW = 'U5';
+OVVCheck.REASON_MOZPAINT_CONTROL_BEACON_IN_VIEW = 'U5';
 
 /**
  * Unmeasurable by reason of flash beacons failed to initialize
  */
-REASON_FLASH_ACTIVE_BEACONS_NOT_READY = 'U6';
+OVVCheck.REASON_FLASH_ACTIVE_BEACONS_NOT_READY = 'U6';
 
 /**
  * Unmeasurable by reason of mozpaint beacons failed to initialize
  */
-REASON_MOZPAINT_BEACONS_NOT_READY = 'U7';
+OVVCheck.REASON_MOZPAINT_ACTIVE_BEACONS_NOT_READY = 'U7';
 
 /**
  * Unmeasurable by reason of flash beacons generated an invalid result
  * ('impossible' combination of viewable and unviewable beacons)
  * */
-REASON_FLASH_BEACONS_INVALID_RESULT = 'U8';
+OVVCheck.REASON_FLASH_BEACONS_INVALID_RESULT = 'U8';
 
 /**
  * Unmeasurable by reason of mozpaint beacons generated an invalid result
  * ('impossible' combination of viewable and unviewable beacons)
  * */
-REASON_MOZPAINT_BEACONS_INVALID_RESULT = 'U9';
+OVVCheck.REASON_MOZPAINT_BEACONS_INVALID_RESULT = 'U9';
 
 
 
@@ -1002,7 +1002,6 @@ function OVVAsset(uid, dependencies) {
 
         if (!player) {
             check.error = 'Player not found!';
-            console.log("viewabilityState : player found : true")
             return check;
         }
 
@@ -1012,7 +1011,6 @@ function OVVAsset(uid, dependencies) {
             if ($ovvs['OVVID'].DEBUG) {
                 check.windowViewabilityState = OVVCheck.UNVIEWABLE;
             }else{
-                console.log("viewabilityState inactive window : " + check.viewabilityState)
                 return check;
             }
         }
@@ -1024,7 +1022,6 @@ function OVVAsset(uid, dependencies) {
             if ($ovvs['OVVID'].DEBUG) {
                 check.cssViewabilityState = OVVCheck.UNVIEWABLE;
             }else{
-                console.log("viewabilityState invisible : " + check.viewabilityState)
                 return check;
             }
         }
@@ -1035,7 +1032,6 @@ function OVVAsset(uid, dependencies) {
             if ($ovvs['OVVID'].DEBUG) {
                 check.domViewabilityState = OVVCheck.UNVIEWABLE;
             }else{
-                console.log("viewabilityState obscured : " + check.viewabilityState)
                 return check;
             }
 
@@ -1057,13 +1053,11 @@ function OVVAsset(uid, dependencies) {
                 check.viewabilityState = OVVCheck.UNVIEWABLE;
                 check.viewabilityStateReason = OVVCheck.REASON_GEOMETRY;
             }
-            console.log("viewabilityState : " + check.viewabilityState)
 
             if ($ovvs['OVVID'].DEBUG) {
                 // add an additional field when debugging
                 check.geometryViewabilityState = check.viewabilityState;
             } else {
-                console.log("viewabilityState geometry : " + check.viewabilityState)
                 return check;
             }
         }
@@ -1077,7 +1071,6 @@ function OVVAsset(uid, dependencies) {
             check.viewabilityState = OVVCheck.UNMEASURABLE;
             check.viewabilityStateReason = OVVCheck.REASON_BEACONS_IN_IFRAME;
             if (!$ovvs['OVVID'].DEBUG) {
-                console.log("viewabilityState beacon supported : " + check.viewabilityState)
                 return check;
             }
         }
@@ -1087,10 +1080,9 @@ function OVVAsset(uid, dependencies) {
             if (beaconFunc == getFlashBeacon) {
                 OVVCheck.viewabilityStateReason = OVVCheck.REASON_FLASH_CONTROL_BEACON_NOT_READY;
             }else{
-                OVVCheck.viewabilityStateReason = OVVCheck.REASON_MOZPAINT_CONTROL_BEACON_READY;
+                OVVCheck.viewabilityStateReason = OVVCheck.REASON_MOZPAINT_CONTROL_BEACON_NOT_READY;
             }
             check.beaconsSupported = false;
-            console.log("viewabilityState control beacon not ready: " + check.viewabilityState)
             return check;
         }
 
@@ -1102,7 +1094,6 @@ function OVVAsset(uid, dependencies) {
                 OVVCheck.viewabilityStateReason = OVVCheck.REASON_MOZPAINT_CONTROL_BEACON_IN_VIEW;
             }
             check.beaconsSupported = false;
-            console.log("viewabilityState control beacon in view: " + check.viewabilityState)
             return check;
         }
 
@@ -1114,14 +1105,11 @@ function OVVAsset(uid, dependencies) {
             }else{
                 OVVCheck.viewabilityStateReason = OVVCheck.REASON_MOZPAINT_ACTIVE_BEACONS_NOT_READY;
             }
-            console.log("viewabilityState active beacons not ready: " + check.viewabilityState)
             return check;
         }
 
         check.technique = OVVCheck.BEACON;
-
-        check.viewabilityState = checkActiveBeacons();
-
+        check.viewabilityState = checkActiveBeacons(check);
         switch ( check.viewabilityState ){
             case OVVCheck.VIEWABLE:
                 break;
@@ -1169,23 +1157,23 @@ function OVVAsset(uid, dependencies) {
         return check;
     };
 
-    this.controlBeaconNotReady = function(){
+    var controlBeaconNotReady = function(){
         var controlBeacon = getBeacon(0);
         var controlBeaconContainer = getBeaconContainer(0);
         // check to make sure the control beacon is found and its callback has been setup.
         // Note : 'controlBeacon.isViewable' is testing for presence of callback: not trying to invoke it.
         return !(controlBeacon && controlBeacon.isViewable && controlBeaconContainer);
-    }
+    };
         
-    this.controlBeaconInView = function(){
+    var controlBeaconInView = function(){
         var controlBeacon = getBeacon(0);
         var controlBeaconContainer = getBeaconContainer(0);
         return isOnScreen(controlBeaconContainer) && controlBeacon.isViewable();
-    }
+    };
 
-    this.activeBeaconsNotReady = function(){
+    var activeBeaconsNotReady = function(){
          return !beaconsReady();
-    }
+    };
 
 
     /**
@@ -1379,7 +1367,6 @@ function OVVAsset(uid, dependencies) {
             check.beacons[index] = isViewable && onScreen;
 
             if (isViewable) {
-
                 beaconsVisible++;
 
                 switch (index) {
@@ -1708,11 +1695,9 @@ function OVVAsset(uid, dependencies) {
      * the browser's viewport
      */
     var isOnScreen = function (element) {
-
         if (!element) {
             return false;
         }
-
         var screenWidth = Math.max(document.body.clientWidth, window.innerWidth);
         var screenHeight = Math.max(document.body.clientHeight, window.innerHeight);
         var objRect = element.getClientRects()[0];

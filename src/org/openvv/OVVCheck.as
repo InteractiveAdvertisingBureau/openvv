@@ -147,7 +147,7 @@ package org.openvv {
         /**
          * Unmeasurable by reason of mozpaint beacons failed to initialize
          */
-        public static const REASON_MOZPAINT_BEACONS_NOT_READY: String = 'U7';
+        public static const REASON_MOZPAINT_ACTIVE_BEACONS_NOT_READY: String = 'U7';
 
         /**
          * Unmeasurable by reason of flash beacons generated an invalid result
