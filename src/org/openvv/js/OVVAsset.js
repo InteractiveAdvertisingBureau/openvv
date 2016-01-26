@@ -1114,7 +1114,7 @@ function OVVAsset(uid, dependencies) {
             case OVVCheck.VIEWABLE:
                 break;
             case OVVCheck.UNVIEWABLE:
-                check.viewabilityState = OVVCheck.NOT_READY;
+                check.viewabilityState = OVVCheck.UNVIEWABLE;
                 if (beaconFunc == getFlashBeacon) {
                     OVVCheck.viewabilityStateReason = OVVCheck.REASON_AREA_FLASH_BEACONS;
                 }else{
@@ -1349,7 +1349,7 @@ function OVVAsset(uid, dependencies) {
         var outerCornersVisible = 0;
         var middleCornersVisible = 0;
         var innerCornersVisible = 0;
-        check.beacons = new Array(TOTAL_BEACONS);
+        var beacons = new Array(TOTAL_BEACONS);
 
         //Get player dimensions:
         var objRect = player.getClientRects ? player.getClientRects()[0] : { top: -1, bottom: -1, left: -1, right: -1};
@@ -1364,7 +1364,7 @@ function OVVAsset(uid, dependencies) {
             var beaconContainer = getBeaconContainer(index);
             var isViewable = beacon.isViewable();
             var onScreen = isOnScreen(beaconContainer);
-            check.beacons[index] = isViewable && onScreen;
+            beacons[index] = isViewable && onScreen;
 
             if (isViewable) {
                 beaconsVisible++;
@@ -1403,11 +1403,10 @@ function OVVAsset(uid, dependencies) {
         }else if ( MIN_VIEW_AREA_PC == 100 ){
             // GroupM requires 100% of player area viewable
             return OVVCheck.UNVIEWABLE;
-        }else if ( invalidBeaconConfiguration() ) {
+        }else if ( invalidBeaconConfiguration(beacons) ) {
             return OVVCheck.UNMEASURABLE;
         } else {
             // return viewable / unviewable result based on a valid beacon configuration:
-            var beacons = check.beacons;
 
             // when the center of the player is visible
             if ((beacons[CENTER] === true) &&
@@ -1430,7 +1429,7 @@ function OVVAsset(uid, dependencies) {
         }
     }
 
-    var invalidBeaconConfiguration = function(){
+    var invalidBeaconConfiguration = function(beacons){
         // If either of the diagonals contains an 'off' beacon between
         // any two 'on' beacons the beacon configuration is invalid.
         var beaconState;
@@ -1438,24 +1437,27 @@ function OVVAsset(uid, dependencies) {
 
         for (var d = 0; d<2; d++) {
             diag = beaconDiagonals[d];
+            console.log("XXX beaconDiagonals[0] : " + beaconDiagonals[0] )
+            console.log("XXX beaconDiagonals[1] : " + beaconDiagonals[1] )
+            console.log("XXX diag : " + diag)
             beaconStateChange = 0;
             for (var i = 0; i < diag.length; i++) {
-                beaconState = check.beacons[diag[i]];
+                beaconState = beacons[diag[i]];
+
                 if (beaconState === true && beaconStateChange == 0) {
                     // first 'on' beacon found on diagonal
                     beaconStateChange++;
-                    continue;
-                }
-                if (beaconState === false && beaconStateChange == 1) {
+                }else if (beaconState === false && beaconStateChange == 1) {
                     // an 'on' beacon had been found, now we have an 'off' beacon
                     beaconStateChange++;
-                    continue;
-                }
-                if (beaconState === true && beaconStateChange == 2) {
+                }else if (beaconState === true && beaconStateChange == 2) {
                     // we previously found a 'on' beacon followed by an 'off' beacon.
                     // Now we have another 'on' beacon: BOGUS!
+                    console.log("XXX beaconState : " + d + " / " + i + " : " + beaconState + " :  " + beaconStateChange + " . . . BOGUS!");
                     return true;
                 }
+                console.log("XXX beaconState : " + d + " / " + i + " : " + beaconState + " :  " + beaconStateChange );
+
             }
         }
         // nothing suspicious here ...

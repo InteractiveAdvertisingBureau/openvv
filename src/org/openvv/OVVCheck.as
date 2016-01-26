@@ -15,6 +15,7 @@
  * TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 package org.openvv {
+    import com.tubemogul.util.Debug;
 
     /**
      * OVVCheck is a container for properties about the current viewability
@@ -308,6 +309,8 @@ package org.openvv {
         */
         public var volume: Number = -1;
 
+        public var jsObject: Object = null;
+
         ////////////////////////////////////////////////////////////
         //   CONSTRUCTOR 
         ////////////////////////////////////////////////////////////
@@ -320,9 +323,13 @@ package org.openvv {
          *
          */
         public function OVVCheck(jsCheck: Object) {
+            jsObject = jsCheck;
+            Debug.traceObj(jsCheck, "jsCheck");
             for (var field: String in jsCheck) {
                 if (this.hasOwnProperty(field)) {
                     this[field] = jsCheck[field];
+                }else{
+                    trace("jsCheck property : '" + field + "' not found on OVVCheck : cannot transfer ")
                 }
             }
         }
