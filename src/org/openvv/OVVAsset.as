@@ -30,7 +30,6 @@ package org.openvv {
     import org.openvv.OVVConfig;
     import org.openvv.events.OVVEvent;
     import net.iab.VPAIDEvent;
-
     /**
      * The event dispatched when the asset has been viewable for 5 contiguous seconds
      */
@@ -341,7 +340,6 @@ package org.openvv {
 			throw "You must pass an EventDispatcher to init event wiring";
 		registerEventHandler(vpaidEventsDispatcher);
 		_vpaidEventsDispatcher = vpaidEventsDispatcher;
-        trace("XXX _vpaidEventsDispatcher" , _vpaidEventsDispatcher);
 
         if ((Object)(vpaidEventsDispatcher).hasOwnProperty('getVPAID') && vpaidEventsDispatcher['getVPAID']  is Function) {
             _vpaidAd = (Object)(_vpaidEventsDispatcher).getVPAID();
