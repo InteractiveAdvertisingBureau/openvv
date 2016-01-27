@@ -1077,10 +1077,10 @@ function OVVAsset(uid, dependencies) {
 
         if (controlBeaconNotReady()){
             check.viewabilityState = OVVCheck.UNMEASURABLE;
-            if (beaconFunc == getFlashBeacon) {
-                OVVCheck.viewabilityStateReason = OVVCheck.REASON_FLASH_CONTROL_BEACON_NOT_READY;
+            if (getBeaconFunc == getFlashBeacon) {
+                check.viewabilityStateReason = OVVCheck.REASON_FLASH_CONTROL_BEACON_NOT_READY;
             }else{
-                OVVCheck.viewabilityStateReason = OVVCheck.REASON_MOZPAINT_CONTROL_BEACON_NOT_READY;
+                check.viewabilityStateReason = OVVCheck.REASON_MOZPAINT_CONTROL_BEACON_NOT_READY;
             }
             check.beaconsSupported = false;
             return check;
@@ -1088,10 +1088,10 @@ function OVVAsset(uid, dependencies) {
 
         if (controlBeaconInView()){
             check.viewabilityState = OVVCheck.UNMEASURABLE;
-            if (beaconFunc == getFlashBeacon) {
-                OVVCheck.viewabilityStateReason = OVVCheck.REASON_FLASH_CONTROL_BEACON_IN_VIEW;
+            if (getBeaconFunc == getFlashBeacon) {
+                check.viewabilityStateReason = OVVCheck.REASON_FLASH_CONTROL_BEACON_IN_VIEW;
             }else{
-                OVVCheck.viewabilityStateReason = OVVCheck.REASON_MOZPAINT_CONTROL_BEACON_IN_VIEW;
+                check.viewabilityStateReason = OVVCheck.REASON_MOZPAINT_CONTROL_BEACON_IN_VIEW;
             }
             check.beaconsSupported = false;
             return check;
@@ -1100,34 +1100,34 @@ function OVVAsset(uid, dependencies) {
         if (activeBeaconsNotReady()){
             // check.viewabilityState = OVVCheck.UNMEASURABLE;
             check.viewabilityState = OVVCheck.NOT_READY;
-            if (beaconFunc == getFlashBeacon) {
-                OVVCheck.viewabilityStateReason = OVVCheck.REASON_FLASH_ACTIVE_BEACONS_NOT_READY;
+            if (getBeaconFunc == getFlashBeacon) {
+                check.viewabilityStateReason = OVVCheck.REASON_FLASH_ACTIVE_BEACONS_NOT_READY;
             }else{
-                OVVCheck.viewabilityStateReason = OVVCheck.REASON_MOZPAINT_ACTIVE_BEACONS_NOT_READY;
+                check.viewabilityStateReason = OVVCheck.REASON_MOZPAINT_ACTIVE_BEACONS_NOT_READY;
             }
             return check;
         }
 
         check.technique = OVVCheck.BEACON;
         check.viewabilityState = checkActiveBeacons(check);
+
         switch ( check.viewabilityState ){
             case OVVCheck.VIEWABLE:
                 break;
             case OVVCheck.UNVIEWABLE:
-                check.viewabilityState = OVVCheck.UNVIEWABLE;
-                if (beaconFunc == getFlashBeacon) {
-                    OVVCheck.viewabilityStateReason = OVVCheck.REASON_AREA_FLASH_BEACONS;
+                if (getBeaconFunc == getFlashBeacon) {
+                    check.viewabilityStateReason = OVVCheck.REASON_AREA_FLASH_BEACONS;
                 }else{
-                    OVVCheck.viewabilityStateReason = OVVCheck.REASON_AREA_MOZPAINT_BEACONS;
+                    check.viewabilityStateReason = OVVCheck.REASON_AREA_MOZPAINT_BEACONS;
                 }
                 break;
             case OVVCheck.UNMEASURABLE:
             default:
                 check.viewabilityState = OVVCheck.NOT_READY;
-                if (beaconFunc == getFlashBeacon) {
-                    OVVCheck.viewabilityStateReason = OVVCheck.REASON_FLASH_BEACONS_INVALID_RESULT;
+                if (getBeaconFunc == getFlashBeacon) {
+                    check.viewabilityStateReason = OVVCheck.REASON_FLASH_BEACONS_INVALID_RESULT;
                 }else{
-                    OVVCheck.viewabilityStateReason = OVVCheck.REASON_MOZPAINT_BEACONS_INVALID_RESULT;
+                    check.viewabilityStateReason = OVVCheck.REASON_MOZPAINT_BEACONS_INVALID_RESULT;
                 }
                 break;
         }
@@ -1152,7 +1152,6 @@ function OVVAsset(uid, dependencies) {
                     geometryViewable) ? OVVCheck.VIEWABLE : OVVCheck.UNVIEWABLE;
             }
         }
-        console.log("viewabilityState end beacon check : " + check.viewabilityState)
 
         return check;
     };
@@ -1437,9 +1436,6 @@ function OVVAsset(uid, dependencies) {
 
         for (var d = 0; d<2; d++) {
             diag = beaconDiagonals[d];
-            console.log("XXX beaconDiagonals[0] : " + beaconDiagonals[0] )
-            console.log("XXX beaconDiagonals[1] : " + beaconDiagonals[1] )
-            console.log("XXX diag : " + diag)
             beaconStateChange = 0;
             for (var i = 0; i < diag.length; i++) {
                 beaconState = beacons[diag[i]];
@@ -1453,10 +1449,8 @@ function OVVAsset(uid, dependencies) {
                 }else if (beaconState === true && beaconStateChange == 2) {
                     // we previously found a 'on' beacon followed by an 'off' beacon.
                     // Now we have another 'on' beacon: BOGUS!
-                    console.log("XXX beaconState : " + d + " / " + i + " : " + beaconState + " :  " + beaconStateChange + " . . . BOGUS!");
                     return true;
                 }
-                console.log("XXX beaconState : " + d + " / " + i + " : " + beaconState + " :  " + beaconStateChange );
 
             }
         }
@@ -1787,8 +1781,8 @@ function OVVAsset(uid, dependencies) {
             if (document.hidden === true){
                 // Either the browser window is minified or the page is on an inactive tab.
                 // Ad cannot be visible.
-                OVVCheck.viewabilityState = OVVCheck.UNVIEWABLE;
-                OVVCheck.viewabilityStateReason = OVVCheck.REASON_INACTIVE_WINDOW;
+                check.viewabilityState = OVVCheck.UNVIEWABLE;
+                check.viewabilityStateReason = OVVCheck.REASON_INACTIVE_WINDOW;
                 return true;
             }
         }
