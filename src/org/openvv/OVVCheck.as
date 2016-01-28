@@ -73,15 +73,45 @@ package org.openvv {
 
         // NEW : Reasons for instantaneous Unviewability or Unmeasurability (passed in viewabilityStateReason)
 
+        public static const INIT_SUCCESS:String = "SUCCESS";
+
+        // =============  Javascript Initialization Errors  =============
+
+        /**
+         * Unmeasurable : External Interface not available (not required in OVVCheck javascript class)
+         */
+        public static const NO_EXTERNAL_INTERFACE:String = 'EX';
+
+        /**
+         * Unmeasurable by reason of OVV Init unspecified javascript runtime error
+         */
+        public static const REASON_INIT_ERROR_OTHER:String = 'E0';
+
+        /**
+         * Unmeasurable by reason of OVV Init player not found
+         */
+        public static const REASON_PLAYER_NOT_FOUND:String = 'E1';
+
+        /**
+         * Unmeasurable by reason of OVV Init player javascript runtime error
+         */
+        public static const REASON_BAD_BEACON_SWF_URL:String = 'E2';
+
+        /**
+         * Unmeasurable by reason of neither geometry nor beacon measuring technique available in current browser
+         */
+        public static const REASON_NO_AVAILABLE_MEASURING_TECHNIQUE:String = 'E3';
+
+        // =============  Not Viewable Reasons  =============
         /**
          * Not viewable by reason of too little area viewable measured by browser geometry (no iframe)
          */
-        public static const REASON_GEOMETRY: String = 'N1';
+        public static const REASON_AREA_GEOMETRY: String = 'N1';
 
         /**
          * Not viewable by reason of too little area viewable measured by browser geometry (in same domain iframe)
          */
-        public static const REASON_IFRAME_GEOMETRY: String = 'N2';
+        public static const REASON_AREA_IFRAME_GEOMETRY: String = 'N2';
 
         /**
          * Not viewable by reason of too little area viewable measured by Flash beacons
@@ -113,8 +143,9 @@ package org.openvv {
          */
         public static const REASON_PLAYER_OBSCURED: String = 'N8';
 
+        // =============  Unmeasurable Reasons  =============
         /**
-         * Unmeasurable by reason of geometry not supported and can't use Flash beacons
+         * Unmeasurable by reason of geometry not supported and can't use Flash beacons in current browser
          */
         public static const REASON_BEACONS_IN_IFRAME: String = 'U1';
 

@@ -30,6 +30,7 @@ package org.openvv {
     import org.openvv.OVVConfig;
     import org.openvv.events.OVVEvent;
     import net.iab.VPAIDEvent;
+import com.tubemogul.util.Debug;
     /**
      * The event dispatched when the asset has been viewable for 5 contiguous seconds
      */
@@ -198,6 +199,11 @@ package org.openvv {
 		private var _impressionUnmeasurableEventRaised: Boolean = false;
 
 		/**
+		* Flag to record javascript  initialization error
+		*/
+		private var _jsInitError: String = null;
+
+		/**
 		 * A array of all VPAID events
 		 */
 		private static const VPAID_EVENTS:Array = ([VPAIDEvent.AdLoaded, VPAIDEvent.AdClickThru, VPAIDEvent.AdExpandedChange,
@@ -235,6 +241,9 @@ package org.openvv {
 		 */
 		private var jsReady:Boolean;
 
+
+       private var initErrorReason:String = null;
+
         ////////////////////////////////////////////////////////////
         //   CONSTRUCTOR
         ////////////////////////////////////////////////////////////
@@ -259,9 +268,8 @@ package org.openvv {
          */
         public function OVVAsset( beaconSwfUrl:String = null, id:String = null, adRef:* = null, viewabilityStandard:String = null) {
             if (!externalInterfaceIsAvailable()) {
-                dispatchEvent(new OVVEvent(OVVEvent.OVVError, {
-                    "message": "ExternalInterface unavailable"
-                }));
+                _jsInitError = OVVCheck.NO_EXTERNAL_INTERFACE;
+                raiseError({error:OVVCheck.NO_EXTERNAL_INTERFACE}, true); // delay dispatch for ad unit to add listener
                 return;
             }
             if (viewabilityStandard == null) {
@@ -297,13 +305,13 @@ package org.openvv {
 			{
 				ovvAssetSource = ovvAssetSource.replace(/BEACON_SWF_URL/g, beaconSwfUrl);
 			}
-            if (!ExternalInterface.call("eval", ovvAssetSource)){
-                // Delay to allow time for OVVAsset.as to add event listeners after instantiating
-                setTimeout(
-                     function():void{
-                         raiseError({error:OVVEvent.OVVJsInitError});
-                     },200
-                )
+
+            var evalResult:String = String( ExternalInterface.call( "eval", ovvAssetSource ) );
+
+            if ( evalResult == null || evalResult != OVVCheck.INIT_SUCCESS){
+                 Debug.trace("XXX : EVAL ERROR : "  + evalResult)
+                 _jsInitError = evalResult || OVVCheck.REASON_INIT_ERROR_OTHER;
+                 raiseError({error:evalResult}, true);
             }
         }
 
@@ -402,10 +410,13 @@ package org.openvv {
          * @see org.openvv.OVVCheck
          */
         public function checkViewability(): OVVCheck {
-            if (!externalInterfaceIsAvailable()) {
-                return new OVVCheck({
-                    "error": "ExternalInterface unavailable"
-                });
+            if ( _jsInitError ) {
+                return new OVVCheck(
+                    {
+                        viewabilityState: OVVCheck.UNMEASURABLE,
+                        viewabilityStateReason:_jsInitError
+                    }
+                );
             }
 
             var jsResults: Object = ExternalInterface.call("$ovv.getAssetById('" + _id + "')" + ".checkViewability");
@@ -733,7 +744,7 @@ package org.openvv {
 					break;
 				case VPAIDEvent.AdImpression:
 					adStarted = true;
-					if ( jsReady  ) {
+					if ( jsReady  && !_jsInitError ) {
 						startImpressionTimer();
 					}
 					break;
@@ -805,9 +816,12 @@ package org.openvv {
 			dispatchEvent(new OVVEvent(OVVEvent.OVVLog, ovvData));
 		}
 
-		private function raiseError(ovvData:*):void
+		private function raiseError(ovvData:*, delay:Boolean = false):void
 		{
-			dispatchEvent(new OVVEvent(OVVEvent.OVVError, ovvData));
-		}
+            setTimeout(function():void{
+                Debug.trace("XXX Error Raised and Dispatch to Ad Unit")
+                dispatchEvent(new OVVEvent(OVVEvent.OVVError, ovvData));
+            },delay?200:0);
+        }
     }
 }

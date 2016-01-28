@@ -20,6 +20,11 @@
  * @class
  * @constructor
  */
+
+try {
+    console.log("XXX INIT")
+
+
 function OVV() {
 
     ///////////////////////////////////////////////////////////////////////////
@@ -507,18 +512,45 @@ OVVCheck.VIEWABLE = 'viewable';
 */
 OVVCheck.UNVIEWABLE = 'unviewable';
 
-
 // NEW : Reasons for instantaneous Unviewability or Unmeasurability (passed in viewabilityStateReason)
+
+OVVCheck.INIT_SUCCESS = "SUCCESS";
+
+// =============  Javascript Initialization Errors  =============
+
+OVVCheck.INIT_ERRORS = [
+    /**
+     * Unmeasurable by reason of OVV Init unspecified javascript runtime error
+     */
+    OVVCheck.REASON_INIT_ERROR_OTHER = 'E0',
+
+    /**
+     * Unmeasurable by reason of OVV Init player not found
+     */
+    OVVCheck.REASON_PLAYER_NOT_FOUND = 'E1',
+
+    /**
+     * Unmeasurable by reason of OVV Init player javascript runtime error
+     */
+    OVVCheck.REASON_BAD_BEACON_SWF_URL = 'E2',
+
+    /**
+     * Unmeasurable by reason of neither geometry nor beacon measuring technique available in current browser
+     */
+    OVVCheck.REASON_NO_AVAILABLE_MEASURING_TECHNIQUE = 'E3'
+];
+
+// =============  Not Viewable Reasons  =============
 
 /**
  * Not viewable by reason of too little area viewable measured by browser geometry (no iframe)
  */
-OVVCheck.REASON_GEOMETRY = 'N1';
+OVVCheck.REASON_AREA_GEOMETRY = 'N1';
 
 /**
  * Not viewable by reason of too little area viewable measured by browser geometry (in same domain iframe)
  */
-OVVCheck.REASON_IFRAME_GEOMETRY = 'N2';
+OVVCheck.REASON_AREA_IFRAME_GEOMETRY = 'N2';
 
 /**
  * Not viewable by reason of too little area viewable measured by Flash beacons
@@ -550,6 +582,7 @@ OVVCheck.REASON_PLAYER_HIDDEN = 'N7';
  */
 OVVCheck.REASON_PLAYER_OBSCURED = 'N8';
 
+// =============  Unmeasurable Reasons  =============
 /**
  * Unmeasurable by reason of geometry not supported and can't use Flash beacons
  */
@@ -1051,7 +1084,7 @@ function OVVAsset(uid, dependencies) {
                 check.viewabilityState = OVVCheck.VIEWABLE;
             }else{
                 check.viewabilityState = OVVCheck.UNVIEWABLE;
-                check.viewabilityStateReason = OVVCheck.REASON_GEOMETRY;
+                check.viewabilityStateReason = OVVCheck.REASON_AREA_GEOMETRY;
             }
 
             if ($ovvs['OVVID'].DEBUG) {
@@ -1478,7 +1511,7 @@ function OVVAsset(uid, dependencies) {
         var reversed = "LRU_FWS_NOCAEB";
         var unreplaced = reversed.split("").reverse().join('');
         if (url == '' || url == unreplaced) {
-            return;
+            throw new Error( OVVCheck.REASON_BAD_BEACON_SWF_URL );
         }
 
         for (var index = 0; index <= TOTAL_BEACONS; index++) {
@@ -1802,6 +1835,14 @@ function OVVAsset(uid, dependencies) {
 
     player = findPlayer();
 
+    if (player == null){
+        throw new Error(OVVCheck.REASON_PLAYER_NOT_FOUND);
+    }
+
+    if (!beaconSupportCheck.supportsBeacons() && check.geometrySupported === false) {
+        throw new Error( OVVCheck.REASON_NO_AVAILABLE_MEASURING_TECHNIQUE );
+    }
+
     // only use the beacons if geometry is not supported, or we we are in DEBUG mode.
     if ($ovvs['OVVID'].geometrySupported == false || $ovvs['OVVID'].DEBUG) {
         if (typeof(window.mozPaintCount)=='number'){
@@ -2084,8 +2125,8 @@ Function.prototype.memoize = function() {
     }
 };
 
-try {
-	//Create a new instance of OVV every time:
+
+    //Create a new instance of OVV every time:
 	window.$ovvs = window.$ovvs || [];
 	window.$ovvs['OVVID'] = new OVV();
 	// 'OVVID' is String substituted from AS
@@ -2097,7 +2138,11 @@ try {
 		//Allow pubs to add listeners when an existing OVV library is present:
 		window.$ovv.addAsset(window.$ovvs['OVVID'].getAssetById('OVVID'));
 	}
-	true; // result for 'eval' in Flash OVVAsset constructor
+    OVVCheck.INIT_SUCCESS; // result for 'eval' in Flash OVVAsset constructor
 }catch(e){
-	false; // result for 'eval' in Flash OVVAsset constructor
+    // result for 'eval' in Flash OVVAsset constructor
+    // if ( OVVCheck.INIT_ERRORS.indexOf(e.message) == -1 ){
+       // e.message = OVVCheck.REASON_INIT_ERROR_OTHER;
+    //}
+    e.message;
 }
