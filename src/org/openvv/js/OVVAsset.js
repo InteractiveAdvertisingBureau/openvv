@@ -522,7 +522,7 @@ OVVCheck.INIT_ERRORS = [
     /**
      * Unmeasurable by reason of OVV Init unspecified javascript runtime error
      */
-    OVVCheck.REASON_INIT_ERROR_OTHER = 'E0',
+    OVVCheck.INIT_ERROR_OTHER = 'E0',
 
     /**
      * Unmeasurable by reason of OVV Init player not found
@@ -532,7 +532,7 @@ OVVCheck.INIT_ERRORS = [
     /**
      * Unmeasurable by reason of OVV Init player javascript runtime error
      */
-    OVVCheck.REASON_BAD_BEACON_SWF_URL = 'E2',
+    OVVCheck.REASON_BAD_FLASH_BEACON_URL = 'E2',
 
     /**
      * Unmeasurable by reason of neither geometry nor beacon measuring technique available in current browser
@@ -1511,7 +1511,7 @@ function OVVAsset(uid, dependencies) {
         var reversed = "LRU_FWS_NOCAEB";
         var unreplaced = reversed.split("").reverse().join('');
         if (url == '' || url == unreplaced) {
-            throw new Error( OVVCheck.REASON_BAD_BEACON_SWF_URL );
+            throw new Error( OVVCheck.REASON_BAD_FLASH_BEACON_URL );
         }
 
         for (var index = 0; index <= TOTAL_BEACONS; index++) {
@@ -1833,7 +1833,7 @@ function OVVAsset(uid, dependencies) {
         return true;
     }
 
-    player = findPlayer();
+    player = null;// findPlayer();
 
     if (player == null){
         throw new Error(OVVCheck.REASON_PLAYER_NOT_FOUND);
