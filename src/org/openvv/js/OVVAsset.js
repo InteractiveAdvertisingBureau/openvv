@@ -22,7 +22,6 @@
  */
 
 try {
-    console.log("XXX INIT");
 
 
 function OVV() {
@@ -2139,12 +2138,10 @@ Function.prototype.memoize = function() {
 		//Allow pubs to add listeners when an existing OVV library is present:
 		window.$ovv.addAsset(window.$ovvs['OVVID'].getAssetById('OVVID'));
 	}
-    OVVCheck.INIT_SUCCESS; // result for 'eval' in Flash OVVAsset constructor
+    OVVCheck.INIT_SUCCESS; // result for 'eval' in Flash OVVAsset constructor i ncase of success
 }catch(e){
-    // result for 'eval' in Flash OVVAsset constructor
     if ( OVVCheck.INIT_ERRORS.indexOf(e.message) == -1 ){
        e.message = OVVCheck.REASON_INIT_ERROR_OTHER;
     }
-    console.log("XXX ERROR : " + e.message)
-    e.message;
+    e.message;  // result for 'eval' in Flash OVVAsset constructor in case of initialization error
 }
