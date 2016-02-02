@@ -22,7 +22,7 @@
  */
 
 try {
-    console.log("XXX INIT")
+    console.log("XXX INIT");
 
 
 function OVV() {
@@ -522,7 +522,7 @@ OVVCheck.INIT_ERRORS = [
     /**
      * Unmeasurable by reason of OVV Init unspecified javascript runtime error
      */
-    OVVCheck.INIT_ERROR_OTHER = 'E0',
+    OVVCheck.REASON_INIT_ERROR_OTHER = 'E0',
 
     /**
      * Unmeasurable by reason of OVV Init player not found
@@ -586,7 +586,7 @@ OVVCheck.REASON_PLAYER_OBSCURED = 'N8';
 /**
  * Unmeasurable by reason of geometry not supported and can't use Flash beacons
  */
-OVVCheck.REASON_BEACONS_IN_IFRAME = 'U1';
+OVVCheck.REASON_BEACONS_IN_IFRAME = 'U1';  // No longer used : This condition now caught as an initialization error : E3
 
 /**
  * Unmeasurable by reason of flash control beacon not ready
@@ -1100,6 +1100,8 @@ function OVVAsset(uid, dependencies) {
 
         // if we're in IE and we're in a (cross-domain) iframe, return unmeasurable
         // We are able to measure for same domain iframe ('friendly iframe')
+        // This condition is now caught as an initialization error : E3 so no check required here
+        /*
         if (!beaconSupportCheck.supportsBeacons() && check.geometrySupported === false) {
             check.viewabilityState = OVVCheck.UNMEASURABLE;
             check.viewabilityStateReason = OVVCheck.REASON_BEACONS_IN_IFRAME;
@@ -1107,6 +1109,7 @@ function OVVAsset(uid, dependencies) {
                 return check;
             }
         }
+        */
 
         if (controlBeaconNotReady()){
             check.viewabilityState = OVVCheck.UNMEASURABLE;
@@ -1790,9 +1793,7 @@ function OVVAsset(uid, dependencies) {
      * @returns {Element|null} The video player being measured
      */
     var findPlayer = function () {
-
         var embeds = document.getElementsByTagName('embed');
-
         for (var i = 0; i < embeds.length; i++) {
             if (embeds[i][id]) {
                 return embeds[i];
@@ -1833,13 +1834,13 @@ function OVVAsset(uid, dependencies) {
         return true;
     }
 
-    player = null;// findPlayer();
+    player = findPlayer();
 
     if (player == null){
         throw new Error(OVVCheck.REASON_PLAYER_NOT_FOUND);
     }
 
-    if (!beaconSupportCheck.supportsBeacons() && check.geometrySupported === false) {
+    if (!beaconSupportCheck.supportsBeacons() && $ovvs['OVVID'].geometrySupported === false) {
         throw new Error( OVVCheck.REASON_NO_AVAILABLE_MEASURING_TECHNIQUE );
     }
 
@@ -2141,8 +2142,9 @@ Function.prototype.memoize = function() {
     OVVCheck.INIT_SUCCESS; // result for 'eval' in Flash OVVAsset constructor
 }catch(e){
     // result for 'eval' in Flash OVVAsset constructor
-    // if ( OVVCheck.INIT_ERRORS.indexOf(e.message) == -1 ){
-       // e.message = OVVCheck.REASON_INIT_ERROR_OTHER;
-    //}
+    if ( OVVCheck.INIT_ERRORS.indexOf(e.message) == -1 ){
+       e.message = OVVCheck.REASON_INIT_ERROR_OTHER;
+    }
+    console.log("XXX ERROR : " + e.message)
     e.message;
 }

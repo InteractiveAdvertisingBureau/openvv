@@ -84,7 +84,7 @@ import com.tubemogul.util.Debug;
         /**
          * Hold OVV version. Will pass to JavaScript as well as $ovv.version
          */
-        public static const RELEASE_VERSION: String = "1.3.6";
+        public static const RELEASE_VERSION: String = "1.3.6a";
         /** Changes in v1.3.6 :
          * AD-1832 : try / catch javascript 'eval'
          */
@@ -293,6 +293,7 @@ import com.tubemogul.util.Debug;
             _sprite = new Sprite();
             _renderMeter = new OVVRenderMeter(_sprite);
             _sprite.addEventListener(OVVThrottleType.THROTTLE, onThrottleEvent);
+            Debug.trace("XXX : _id in OVVAsset.as : "  + _id);
 
             ovvAssetSource = ovvAssetSource
                                 .replace(/OVVID/g, _id)
@@ -307,11 +308,12 @@ import com.tubemogul.util.Debug;
 			}
 
             var evalResult:String = String( ExternalInterface.call( "eval", ovvAssetSource ) );
+            Debug.trace("XXX : EVAL ERROR : "  + evalResult)
 
             if ( evalResult == null || evalResult != OVVCheck.INIT_SUCCESS){
                  Debug.trace("XXX : EVAL ERROR : "  + evalResult)
                  _jsInitError = evalResult || OVVCheck.REASON_INIT_ERROR_OTHER;
-                 raiseError({error:evalResult}, true);
+                 raiseError({error:_jsInitError}, true);
             }
         }
 
