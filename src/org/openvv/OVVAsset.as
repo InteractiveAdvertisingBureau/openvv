@@ -83,7 +83,10 @@ package org.openvv {
         /**
          * Hold OVV version. Will pass to JavaScript as well as $ovv.version
          */
-        public static const RELEASE_VERSION: String = "1.3.6";
+        public static const RELEASE_VERSION: String = "1.3.7";
+        /** Changes in v1.3.7 :
+         * AD-1802 : report unviewable / unmeasurable reasons
+         */
         /** Changes in v1.3.6 :
          * AD-1832 : try / catch javascript 'eval'
          */
