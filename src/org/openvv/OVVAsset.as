@@ -85,7 +85,7 @@ package org.openvv {
          */
         public static const RELEASE_VERSION: String = "1.3.7";
         /** Changes in v1.3.7 :
-         * AD-1012 : Merged and enhanced functionality of AD-1832 & AD-1802
+         * AD-1912 : Merged and enhanced functionality of AD-1832 & AD-1802
          */
         /** Changes in v1.3.6 :
          * AD-1832 : try / catch javascript 'eval'
