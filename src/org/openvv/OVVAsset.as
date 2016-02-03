@@ -30,7 +30,6 @@ package org.openvv {
     import org.openvv.OVVConfig;
     import org.openvv.events.OVVEvent;
     import net.iab.VPAIDEvent;
-import com.tubemogul.util.Debug;
     /**
      * The event dispatched when the asset has been viewable for 5 contiguous seconds
      */
@@ -84,7 +83,10 @@ import com.tubemogul.util.Debug;
         /**
          * Hold OVV version. Will pass to JavaScript as well as $ovv.version
          */
-        public static const RELEASE_VERSION: String = "1.3.6a";
+        public static const RELEASE_VERSION: String = "1.3.7";
+        /** Changes in v1.3.7 :
+         * AD-1012 : Merged and enhanced functionality of AD-1832 & AD-1802
+         */
         /** Changes in v1.3.6 :
          * AD-1832 : try / catch javascript 'eval'
          */
@@ -293,7 +295,6 @@ import com.tubemogul.util.Debug;
             _sprite = new Sprite();
             _renderMeter = new OVVRenderMeter(_sprite);
             _sprite.addEventListener(OVVThrottleType.THROTTLE, onThrottleEvent);
-            Debug.trace("XXX : _id in OVVAsset.as : "  + _id);
 
             ovvAssetSource = ovvAssetSource
                                 .replace(/OVVID/g, _id)
@@ -308,10 +309,8 @@ import com.tubemogul.util.Debug;
 			}
 
             var evalResult:String = String( ExternalInterface.call( "eval", ovvAssetSource ) );
-            Debug.trace("XXX : EVAL ERROR : "  + evalResult)
 
             if ( evalResult == null || evalResult != OVVCheck.INIT_SUCCESS){
-                 Debug.trace("XXX : EVAL ERROR : "  + evalResult)
                  _jsInitError = evalResult || OVVCheck.REASON_INIT_ERROR_OTHER;
                  raiseError({error:_jsInitError}, true);
             }
@@ -821,7 +820,6 @@ import com.tubemogul.util.Debug;
 		private function raiseError(ovvData:*, delay:Boolean = false):void
 		{
             setTimeout(function():void{
-                Debug.trace("XXX Error Raised and Dispatch to Ad Unit")
                 dispatchEvent(new OVVEvent(OVVEvent.OVVError, ovvData));
             },delay?200:0);
         }
