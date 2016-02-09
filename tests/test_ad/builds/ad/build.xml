@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<project name="IABAd" default="compile-all" basedir=".">
+	
+	<property environment="env"/>
+	<property name="FLEX_HOME" value="${env.FLEX_HOME}"/>
+
+	<property name="src.dir" value="..\..\src" />
+	<property name="libs.dir" value="..\..\libs" />
+	<property name="bin.dir" value="..\..\bin" />
+	<property name="localserver.dir" value="../../../test_site/ad" />
+	
+	<taskdef resource="flexTasks.tasks" classpath="${FLEX_HOME}/ant/lib/flexTasks.jar"/>
+	
+	<target name="compile-all" depends="clean">
+		<mxmlc file="${src.dir}\net\iab\vpaid\VPAIDAd.as"
+			   output="${bin.dir}\IAB-VPAID-Ad.swf"
+			   static-rsls="true">
+			<compiler.library-path dir="${libs.dir}" append="true">
+				<include name="openvv.swc"/>
+			</compiler.library-path>
+			<source-path path-element="${src.dir}"/>
+			<arg value="compiler.omit-trace-statements=true" />
+			<arg value="compiler.show-actionscript-warnings=false" />
+			<debug>false</debug>
+		</mxmlc>
+		<copy file="${bin.dir}\IAB-VPAID-Ad.swf" tofile="${localserver.dir}\IAB-VPAID-Ad.swf" overwrite="true"/>
+	</target>
+	
+	<target name="clean">
+		<delete file="${bin.dir}/IAB-VPAID-Ad.swf" failonerror="false" />
+	</target>
+
+</project>

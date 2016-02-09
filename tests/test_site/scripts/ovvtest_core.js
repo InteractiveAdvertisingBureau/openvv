@@ -18,6 +18,16 @@
 			return true;
 		}
 	}
+	
+	var isArray = function(ar){
+		if(ar == null || typeof(ar) === 'string'){
+			return false;
+		}
+		if(typeof(ar) === 'object' && ar.length != null){
+			return true;
+		}
+		return false;		
+	}
 		
 	var valOutput = [
 	{ key: 'adHeight', type: 'calc', prop : 'objBottom - objTop'},
@@ -43,7 +53,9 @@
 		viewabilityInfoMarkup :
 '<div class="chip chip_shadow ovvParamBox dragbox"> \
 <button type="button" class="close">&times;</button> \
-<h2>OVV Viewability data</h2> \
+<div class="title">\
+<h3>OVV Viewability data</h3> \
+</div>\
 ###DETAILS### \
 <hr class="light" /> \
 ###SUMMARY### \
@@ -71,20 +83,47 @@
 	// Options
 	var opts = {
 		debug: true,
+		adId : 'my_ovv_test_ad_id', // default ID compiled into test ad swf
 		logListener: noop,
 		displayOvvValues: true,
-		buildInfoBox: false,
-		infoBoxTarget: null,
-		valuesOutputElem: null
+		valuesOutputElem: null,
+		quartileValuesOutputElem: null,
+		enableViewEngine: false
 	};
 	
+	var quartileChipTemplate = '<div class="quartileViewData" >##name## FOO </div>'
+	
 	/**
-	* Displays ovv data object values in given DOM element.
+	* Mixin utility to merge objects
 	*/
-	function displayViewableData(data){
-		var el = opts.valuesOutputElem;
-		var id;
+	function mixin(objA, objB){
+		var k, v;
+		var targ = {};
+		
+		if(objA && typeof(objA) === 'object'){
+			for(k in objA){
+				if(objA.hasOwnProperty(k)){
+					targ[k] = objA[k];
+				}
+			}
+		}
+		if(objB && typeof(objB) === 'object'){
+			for(k in objB){
+				if(objB.hasOwnProperty(k)){
+					targ[k] = objB[k];
+				}
+			}
+		}
+		
+		return targ;
+	}
+	
+	function displayQuartileViewability(eventName, data){
+		var el = opts.quartileValuesOutputElem;
+		var id, nd;
 		var k, val, i;
+		var buf = [];
+		var css = '';
 		if(typeof(el) === 'string'){
 			id = el;
 			el = doc.getElementById(id);
@@ -93,57 +132,166 @@
 			}
 		}
 		
-		/**
-		* Embedded function to display the value
-		*/
-		var showData = function(obj, valKey){
-			var valEl, val, parts;
-			var attr = '[data-ovv=' + valKey.key + ']';
-			valEl = doc.querySelector(attr);
-			if(valEl == null){
-				valEl = doc.querySelector('.' + valKey.key);
-			}
-			if(valEl == null){
-				return;
-			}
-			if(valKey.type == 'val'){
-				val = obj[valKey.prop];
-			}
-			else if(valKey.type == 'calc'){
-				parts = valKey.prop.split(' ');
-				if(parts.length != 3){
-					ovvtest.logError('invalid valOutput prop ' + valKey.prop);
-					return;
-				}
-				val = '';
-				if(parts[1] == '-'){
-					val = obj[parts[0]] - obj[parts[2]]; 
-				}				
-			}
-			
-			if(val && valKey.format != null){
-				val = valKey.format.replace("{0}", val)
-			}
-			
-			valEl.innerHTML = val
-			
+		if(el == null || data == null){
+			return;			
 		}
+		
+		buf.push('<div class="eventName">', eventName, '</div>');
+		buf.push('<div class="viewabilityState">Viewable State: ', data.viewabilityState, '</div>');
+		buf.push(' <span class="ivpct">In View: ', data.percentViewable, '%</span>');
+		buf.push(' <span class="infocus">Focus: ');
+		if(data.focus === true){
+			buf.push('true');
+		}
+		else{
+			buf.push('false');
+		}
+		buf.push('</span>');
+		
+		
+		if(data.percentViewable >= 50){
+			css = 'inView'
+			if(data.focus === false){
+				css += ' noFocus';
+			}
+		}
+		else{
+			css = 'notInView'
+		}
+		
+		nd = document.createElement('div');
+		nd.className = 'quartileViewData ' + css;
+		
+		nd.innerHTML = buf.join('');
+		
+		el.appendChild(nd);		
+	}
+	
+	/**
+	* Displays ovv data object values in given DOM element.
+	*/
+	function displayViewableData(data){
+		var el = opts.valuesOutputElem;
+		var id, arr;
+		var k, val, i;
 		
 		if(el == null){
 			return;
 		}
 		
-		for(i=0;i<valOutput.length;i++){
-			showData(data, valOutput[i]);
+		if(data == null){
+			return;			
 		}
+		// check for empty object
+		var keyCount = 0;
+		if(typeof(data) === 'object'){
+			for(k in data){
+				if(data.hasOwnProperty(k)){
+					keyCount++;
+					if(keyCount > 10){
+						break;
+					}
+				}
+			}			
+		}
+		if(keyCount == 0){
+			impl.log('[ovvtest] - No data to show');
+			return;
+		}
+		else if(keyCount == 2){
+			if(data['ovvData'] == null){
+				impl.log('[ovvtest] - No data to show');
+				return;
+			}				
+		}		
+		
+		if(typeof(el) === 'string'){
+			id = el;
+			el = doc.getElementById(id);
+			if(el == null){
+				el = doc.querySelector(id);
+			}
+			
+			_displayViewableDataImpl(data, el);
+		}
+		else if(isArray(el)){
+			arr = el;
+			for(i=0;i<arr.length;i++){
+				el = arr[i];
+				_displayViewableDataImpl(data, el);
+			}			
+		}		
+	}
+	
+	/**
+	* Displays ovv data object values in given DOM element.
+	*/
+	function _displayViewableDataImpl(data, el){
+		var id;
+		var k, val, i;
+		if(el == null){
+			return;
+		}
+		
+		if(typeof(el) === 'string'){
+			id = el;
+			el = doc.getElementById(id);
+			if(el == null){
+				el = doc.querySelector(id);
+			}
+			
+			_displayViewableDataImpl(data, el);
+		}
+		
+			
+		for(i=0;i<valOutput.length;i++){
+			showData(data, valOutput[i], el);
+		}
+	}
+	
+	/**
+	* Embedded function to display the value
+	*/
+	var showData = function(obj, valKey, rootEl){
+		var valEl, val, parts;
+		var attr = '[data-ovv=' + valKey.key + ']';
+		valEl = rootEl.querySelector(attr);
+		if(valEl == null){
+			valEl = rootEl.querySelector('.' + valKey.key);
+		}
+		if(valEl == null){
+			return;
+		}
+		if(valKey.type == 'val'){
+			val = obj[valKey.prop];
+		}
+		else if(valKey.type == 'calc'){
+			parts = valKey.prop.split(' ');
+			if(parts.length != 3){
+				ovvtest.logError('invalid valOutput prop ' + valKey.prop);
+				return;
+			}
+			val = '';
+			if(parts[1] == '-'){
+				val = obj[parts[0]] - obj[parts[2]]; 
+			}				
+		}
+		
+		if(val && valKey.format != null){
+			val = valKey.format.replace("{0}", val)
+		}
+		
+		valEl.innerHTML = val
+		
 	}
 	
 	/**
 	* openvvtest.util object definition
 	*/
 	var util = {
-		getEl: function(elemOrId){
+		getEl: function(elemOrId, doc){
 			var id, el;
+			var doc = doc || document;
 			
 			if(elemOrId == null){
 				throw "Null identifier to find elem";
@@ -154,7 +302,7 @@
 				if(id.substr(0,1) == '#'){
 					id = id.substr(1);
 				}
-				return document.getElementById(id);
+				return doc.getElementById(id);
 			}
 			else if(typeof(elemOrId === 'Object')){
 				return elemOrId;
@@ -165,36 +313,63 @@
 	/**
 	* Method to build the info window at the target location
 	*/
-	function buildInfoWindow(elemOrId){
-		var el = util.getEl(elemOrId);
-		var html = infoBox.viewabilityInfoMarkup;
-		var line, tp = infoBox.lineMarkup;
+	function buildInfoWindow(elemOrId, options){
+		var el;
+		var ibox = infoBox;
+		var options = options || {};
 		var i, k, d;
-		var sumbuf = [], detbuf = []
+		var sumbuf = [], detbuf = [];
+		var twin, tdoc;
+		var regTopWindow = false;
+		
+		if(options.infoBox != null){
+			ibox = mixin(infoBox, options.infoBox);
+		}
+		
+		var html = ibox.viewabilityInfoMarkup;
+		var line, tp = ibox.lineMarkup;
 		
 		var id;
-		
-		id = el.getAttribute('id');
-		if(id != null){		
-			ovvtest.setOptions({ valuesOutputElem: id});
-		}
-		else{
-			ovvtest.setOptions({ valuesOutputElem: el});
-		}
-		
-		for(i=0;i<infoBox.detailDef.length;i++){
-			d = infoBox.detailDef[i];
+				
+		for(i=0;i<ibox.detailDef.length;i++){
+			d = ibox.detailDef[i];
 			line = tp.replace('##label##', d.label).replace('##ovv##', d.ovv);
 			detbuf.push(line);
 		}
-		for(i=0;i<infoBox.summaryDef.length;i++){
-			d = infoBox.summaryDef[i];
+		for(i=0;i<ibox.summaryDef.length;i++){
+			d = ibox.summaryDef[i];
 			line = tp.replace('##label##', d.label).replace('##ovv##', d.ovv);
 			sumbuf.push(line);
 		}
 		
 		html = html.replace('###DETAILS###', detbuf.join(''));
 		html = html.replace('###SUMMARY###', sumbuf.join(''));
+		
+		if(opts.valuesOutputElem == null){
+			opts.valuesOutputElem = [];
+		}
+		
+		if(options.topFrame && !ovvtest.isTopFrame()){
+			twin = window.top;
+			tdoc = twin.document;
+			el = util.getEl(elemOrId, tdoc);
+			regTopWindow = true;
+			id = el.getAttribute('id');
+			
+			opts.valuesOutputElem.push(el);
+			
+		}
+		else{
+			el = util.getEl(elemOrId);
+			id = el.getAttribute('id');
+			
+			if(id != null){		
+				opts.valuesOutputElem.push(id);
+			}
+			else{
+				opts.valuesOutputElem.push(el);
+			}
+		}
 		
 		el.innerHTML = html;
 
@@ -208,29 +383,186 @@
 		}
 	}
 	
+	var attachRetries = 0;
+	var regTimer = 0;
+	function registerOvvListeners(ad_id){
+		var ovv;
+		var ad_id = ad_id || opts.adId;
+		
+		if(regTimer !== 0){
+			clearTimeout(regTimer);
+			regTimer = 0;
+		}
+		
+		if(!window['$ovv']){
+			if(++attachRetries < 10){
+				regTimer = setTimeout(function(){
+					registerOvvListeners();
+				}, 300);
+			}
+			
+			return;
+		}
+		
+		var eventNames = [
+			'AdLoaded', 'AdImpression', 'AdPlaying', 'AdPaused', 'AdVolumeChange',
+			'AdVideoStart', 'AdVideoFirstQuartile', 'AdVideoMidpoint', 'AdVideoThirdQuartile', 
+			'AdVideoComplete'
+		];
+		
+		// list of OVV events. We must listen to OVVLog in order to get up to date viewability information
+		var ovvEvents = ['OVVReady', 'OVVImpression', 'OVVImpressionUnmeasurable', 'OVVLog'];
+		
+		ovv = window['$ovv'];
+		ovv.subscribe(ovvEvents, ad_id, function(id, eventData){
+			if(eventData.ovvArgs != null){
+				handleOvvEvent(eventData, eventData.ovvArgs);
+			}
+			
+		}, true);
+		
+		ovv.subscribe(eventNames, ad_id, function(id, eventData){
+			if(eventData.ovvArgs != null){
+				handleVpaidEvent(eventData, eventData.ovvArgs);
+			}
+			
+		}, true);
+		
+		// Error handles
+		ovv.subscribe(['AdError', 'OVVError'], ad_id, function(id, eventData, more){
+			handleAdError(id, eventData, more);
+		}, true);
+		
+	}
+	
+	
+	function handleAdError(error, args){
+		impl.logError(error);
+		if(args){
+			impl.logError(args);
+		}		
+	}
+	
+	function updateViewEngine(eventObj, data){
+		var eng = ovvtest.viewEngine;
+		var eventName, ovvtime;
+		
+		if(typeof(eventObj) === 'string'){
+			eventName = eventObj;
+		}
+		else{
+			eventName = eventObj.eventName;
+			ovvtime = eventObj.eventTime;
+		}
+		
+		if(opts.enableViewEngine && eng != null){
+			eng.processEvent(eventName, ovvtime, data);
+		}		
+	}
+	
+	/**
+	* Handle OVV specific events
+	*/
+	function handleOvvEvent(eventObj, data){
+		var dataObj;
+		if(data.ovvData != null){
+			dataObj = data.ovvData;
+		}
+		else{
+			dataObj = data;
+		}
+		
+		var dataObj = data.ovvData;
+		
+		updateViewEngine(eventObj, dataObj);
+				
+		// ovvtest.log(eventObj, data);
+		if(opts.displayOvvValues){
+			displayViewableData(dataObj);
+		}
+	}
+	
+	/**
+	* Handle VPAID events
+	*/
+	function handleVpaidEvent(eventObj, data){
+		var name = eventObj && eventObj.eventName || '';
+		
+		var dataObj = data.ovvData;
+		
+		updateViewEngine(eventObj, dataObj);
+		
+		switch(name){
+			case 'AdVideoStart':
+			case 'AdImpression':
+			case 'AdVideoFirstQuartile':
+			case 'AdVideoMidpoint':
+			case 'AdVideoThirdQuartile':
+			case 'AdVideoComplete':
+				displayViewableData(dataObj);
+				displayQuartileViewability(name, dataObj);
+				
+				break;
+			
+		}
+		
+		
+		console.log(event);
+	}
+	
+	function handleFlashOvvEventCall(eventObj, data){
+		console.log('[OVVTest (flash call)]');
+		console.log(eventObj);
+		handleOvvEvent(eventObj, data);		
+	}
+	
+	function initializeCore(ignoreEvents){
+		
+		if(opts.enableViewEngine && ovvtest.ViewEngine != null){
+			ovvtest.viewEngine = new ovvtest.ViewEngine();
+			if(opts.viewabilityReached != null){
+				ovvtest.viewEngine.addEventListener('viewabilityReached', opts.viewabilityReached);
+			}
+		}
+		
+		if(!ignoreEvents){
+			ovvtest.registerOvvListeners();
+		}
+
+	}
 	
 	/**
 	* Static implementation object for ovvtest
 	*/
 	var impl = {
 		
-		handleOvvEvent: function(event, data){
-			// ovvtest.log(event, data);
-			if(opts.displayOvvValues){
-				displayViewableData(data.ovvData);
-			}			
-		},
+		init: initializeCore,
+		
+		registerOvvListeners: registerOvvListeners,
+		
+		handleFlashOvvEventCall: handleFlashOvvEventCall,
 		
 		setOptions: function(options){
 			var k, v;
 			for(k in options){
 				if(options.hasOwnProperty(k)){
 					opts[k] = options[k];
+					
+					if(k == 'viewabilityReached' && ovvtest.viewEngine != null){
+						ovvtest.viewEngine.addEventListener('viewabilityReached', opts[k]);
+					}					
 				}
 			}			
 		},
 		
 		buildInfoWindow: buildInfoWindow,
+		
+		isTopFrame: function(){
+			if(window === window.top){
+				return true;
+			}
+			return false;
+		},
 		
 		log: function(message, data){
 			if(opts.debug){
@@ -262,18 +594,22 @@
 	}
 	
 	impl.util = util;
-	
+		
 	win['ovvtest'] = impl;
 
 })(window);
 
 
 // Setup bridge methods for demo until we get an updated creative
-var prevDVVfunc = DVViewableDetect;
-window.DVViewableDetect = function(event, data){
-	ovvtest.handleOvvEvent(event, data);
-	prevDVVfunc(event, data);
-}
+(function(){
+	if(window.DVViewableDetect != null){
+		window.prevDVVfunc = DVViewableDetect;
+		window.DVViewableDetect = function(eventObj, data){
+			ovvtest.handleOvvEvent(eventObj, data);
+			prevDVVfunc(eventObj, data);
+		}
+	}
+})();
 
 
 

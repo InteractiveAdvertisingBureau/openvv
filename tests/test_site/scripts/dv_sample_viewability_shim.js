@@ -1,4 +1,8 @@
-
+/*
+* Shim file that exposes an expected set of public events which the "DVVpaidWrapper.swf" sample ad expects.
+* This file, in conjuction with a Shim event listener will appropriately andle events raised  by the referenced swf.
+*
+*/
 
 var $gl = function(id){
 	if(id.substr(0,1) == '#'){

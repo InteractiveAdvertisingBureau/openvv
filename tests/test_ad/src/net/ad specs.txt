@@ -1,0 +1,8 @@
+1. Muted by default
+2. Ad comunicates with JS wrapper and report OVV communications.
+
+3. JS API proposal
+4. VAST FlashVars conventions
+
+5. OVV url flashvar - ovvurl
+6. Video url - videourl

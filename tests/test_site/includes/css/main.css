@@ -11,6 +11,13 @@ body {
   background-image: url(../images/tile.jpg);
   background-repeat: repeat-x;
 }
+h1, h2, h3{
+	margin-top: 3px;
+	margin-bottom: 5px;
+}
+h1{
+	font-size: 1.4em;
+}
 
 .close{
 	height: 18px;
@@ -28,7 +35,7 @@ body {
 }
 
 #wrapper {
-  width: 970px;
+  width: 1970px;
   margin-right: auto;
   margin-left: auto;
   height: 1990px;

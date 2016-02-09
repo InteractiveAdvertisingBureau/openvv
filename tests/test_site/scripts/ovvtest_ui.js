@@ -22,15 +22,6 @@
 </div> '
 	
 
-<div><label>Ad Width</label> <span data-ovv="adWidth"></span></div>
-<div><label>Ad Height</label> <span data-ovv="adHeight"></span></div>
-<div><label>Viewport Width</label> <span data-ovv="viewportWidth"></span></div>
-<div><label>Viewport Height</label> <span data-ovv="viewportHeight"></span></div>
-
-<div><label>Viewable</label> <span data-ovv="percentViewable"></span></div>
-<div><label>Window Focus</label> <span data-ovv="windowActive"></span></div>
-
-
 	var impl = {
 		
 		setDraggable: function(elem){

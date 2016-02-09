@@ -1,0 +1,9 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<docProject xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+  <pageTitle>IAB OpenVV API</pageTitle>
+  <classPaths>C:\Users\Andrei.Andreev\Documents\Sizmek\DevelopmentProjects\InStream\IAB\src\net;C:\Users\Andrei.Andreev\Documents\Sizmek\DevelopmentProjects\InStream\IAB\src\org</classPaths>
+  <sourcesList />
+  <outputDirectory>C:\Users\Andrei.Andreev\Documents\Sizmek\DevelopmentProjects\InStream\IAB\documentation\ASDocs</outputDirectory>
+  <activeCompiler>1</activeCompiler>
+  <extraOptions>-strict=false</extraOptions>
+</docProject>

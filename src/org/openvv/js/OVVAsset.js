@@ -39,12 +39,6 @@ function OVV() {
     this.DEBUG = false;
 
     /**
-    * Whether OpenVV is running within an iframe or not.
-    * @type {Boolean}
-    */
-    this.IN_IFRAME = (window.top !== window.self);
-
-    /**
     * The last asset added to OVV. Useful for easy access from the
     * JavaScript console.
     * @type {OVVAsset}
@@ -59,22 +53,29 @@ function OVV() {
 
     this.servingScenarioEnum = { OnPage: 1, SameDomainIframe: 2, CrossDomainIframe: 3 };
 
-    function getServingScenarioType(servingScenarioEnum) {
+     function getServingScenarioType(servingScenarioEnum) {
         try {
-            if (window.top == window) {
-                return servingScenarioEnum.OnPage;
-            } else if (window.top.document.domain == window.document.domain) {
-                return servingScenarioEnum.SameDomainIframe;
-            }
+			if (window.top == window) {
+				return servingScenarioEnum.OnPage;
+			}
+			var curWin=window;	
+			var level=0;			
+			while(curWin.parent != curWin  && level<1000){
+				 if (curWin.parent.document.domain != curWin.document.domain) {
+					return servingScenarioEnum.CrossDomainIframe;
+				 }
+				 curWin = curWin.parent;
+			}
+			return servingScenarioEnum.SameDomainIframe;
         } catch (e) { }
         return servingScenarioEnum.CrossDomainIframe;
     };
-
+	
     this.servingScenario = getServingScenarioType(this.servingScenarioEnum);
+    this.IN_IFRAME = (this.servingScenario != this.servingScenarioEnum.OnPage);
     this.IN_XD_IFRAME =  (this.servingScenario == this.servingScenarioEnum.CrossDomainIframe);
-    this.geometrySupported = !this.IN_IFRAME;
-
-
+    this.geometrySupported = !this.IN_XD_IFRAME;
+	
     // To support older versions of OVVAsset
     var browserData = new OVVBrowser(this.userAgent);
 
@@ -630,7 +631,7 @@ function OVVBeaconSupportCheck()
         var WIN_8_1 = 6.3;
         var isIE = browser.ID == browserIDEnum.MSIE;
         var isSupportedIEVersion = browser.version >= 11;
-        var ntVersionArr = browser.version ? browser.version.split(' ') : [0];
+        var ntVersionArr = browser.os ? browser.os.split(' ') : [0];
         var ntVersion = ntVersionArr[ntVersionArr.length - 1];
         var isSupportedOSForIE = ntVersion >= WIN_8_1;
         return !isIE || (isSupportedIEVersion && isSupportedOSForIE);
@@ -1118,6 +1119,7 @@ function OVVAsset(uid, dependencies) {
     * @param {Element} player The HTML Element to measure
     */
     var checkGeometry = function (check, player) {
+		check.percentObscured = check.percentObscured || 0; // support override of OVVCheck by previous version  
         var viewabilityResult = geometryViewabilityCalculator.getViewabilityState(player, window);
         if (!viewabilityResult.error) {
             check.clientWidth = viewabilityResult.clientWidth;
@@ -1233,7 +1235,7 @@ function OVVAsset(uid, dependencies) {
         // // when top left and bottom right corners are visible
         if ((beacons[OUTER_TOP_LEFT] && beacons[OUTER_BOTTOM_RIGHT]) &&
                 // and any of their diagonals are covered
-            (!beacons[MIDDLE_TOP_LEFT] || !beacons[INNER_TOP_LEFT] || !beacons[CENTER] || beacons[INNER_BOTTOM_RIGHT] || beacons[MIDDLE_BOTTOM_RIGHT])
+            (!(beacons[MIDDLE_TOP_LEFT] && beacons[INNER_TOP_LEFT] && beacons[CENTER] && beacons[INNER_BOTTOM_RIGHT] && beacons[MIDDLE_BOTTOM_RIGHT]))
         ) {
             return null;
         }
@@ -1241,7 +1243,7 @@ function OVVAsset(uid, dependencies) {
         // when bottom left and top right corners are visible
         if ((beacons[OUTER_BOTTOM_LEFT] && beacons[OUTER_TOP_RIGHT]) &&
             // and any of their diagonals are covered
-            (!beacons[MIDDLE_BOTTOM_LEFT] || !beacons[INNER_BOTTOM_LEFT] || !beacons[CENTER] || !beacons[INNER_TOP_RIGHT] || !beacons[MIDDLE_TOP_RIGHT])
+            (!(beacons[MIDDLE_BOTTOM_LEFT] && beacons[INNER_BOTTOM_LEFT] && beacons[CENTER] && beacons[INNER_TOP_RIGHT] && beacons[MIDDLE_TOP_RIGHT]))
         ) {
             return null;
         }
@@ -1386,7 +1388,7 @@ function OVVAsset(uid, dependencies) {
         var playerLocation = player.getClientRects()[0];
 
         // when we don't have an initial position, or the position hasn't changed 
-        if (!!lastPlayerLocation && !!playerLocation && (lastPlayerLocation.left === playerLocation.left && lastPlayerLocation.right === playerLocation.right && lastPlayerLocation.top === playerLocation.top && lastPlayerLocation.bottom === playerLocation.bottom)) {
+        if (lastPlayerLocation && playerLocation && (lastPlayerLocation.left === playerLocation.left && lastPlayerLocation.right === playerLocation.right && lastPlayerLocation.top === playerLocation.top && lastPlayerLocation.bottom === playerLocation.bottom)) {
             // no need to update positions
             return;
         }
@@ -1793,14 +1795,13 @@ function OVVGeometryViewabilityCalculator() {
             var elementRect = element.getBoundingClientRect();
             if (currWindow != parentWindow) {
                 resultPosition = getPositionRelativeToViewPort(currWindow.frameElement, parentWindow);
-            } else {
+			}
                 resultPosition = {
                     left: elementRect.left + resultPosition.left,
                     right: elementRect.right + resultPosition.left,
                     top: elementRect.top + resultPosition.top,
                     bottom: elementRect.bottom + resultPosition.top
                 };
-            }
         }
         return resultPosition;
     };
@@ -1884,8 +1885,14 @@ Function.prototype.memoize = function() {
         return fn.memoized.apply(fn, arguments);
     }
 };
+var newOVV = new OVV();		
 // initialize the OVV object if it doesn't exist
-window.$ovv = window.$ovv || new OVV();
+window.$ovv = window.$ovv || newOVV;		
+for(var i in newOVV){		
+    if(!$ovv.hasOwnProperty(i)){		
+        $ovv[i] = newOVV[i];		
+   }		
+}
 
 // 'OVVID' is String substituted from AS
 window.$ovv.addAsset(new OVVAsset('OVVID', { geometryViewabilityCalculator: new OVVGeometryViewabilityCalculator() }));
