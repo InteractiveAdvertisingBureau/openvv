@@ -32,7 +32,7 @@
         </sequential>
     </target>
 
-    <target name="minify-js" unless="debug_ovv">
+    <target name="minify-js-prod" unless="debug_ovv">
         <mkdir dir="${tmp.dir}"/>
         <exec executable="${uglifyjs}">
             <arg path="${src.dir}/org/openvv/js/OVVAsset.js"/>
@@ -64,7 +64,7 @@
         </mxmlc>
     </target>
 
-    <target name="prep-lib-src" depends="check-env, sign-version, minify-js, minify-js-debug">
+    <target name="prep-lib-src" depends="check-env, sign-version, minify-js-prod, minify-js-debug">
         <!-- Copy the entire source tree to temp dir so we can alter the source code -->
         <copy todir="${tmp.dir}">
             <fileset dir="${src.dir}"/>
