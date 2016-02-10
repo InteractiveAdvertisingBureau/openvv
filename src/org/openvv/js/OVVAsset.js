@@ -1470,10 +1470,10 @@ function OVVAsset(uid, dependencies) {
                 left -= (BEACON_SIZE / 2);
                 top -= (BEACON_SIZE / 2);
             }
-			//fix issue in chrome 48
-			left = Math.round(left);
-			top = Math.round(top);
-			
+            //fix issue in chrome 48
+            left = Math.round(left);
+            top = Math.round(top);
+            //
             var swfContainer = getBeaconContainer(index);
             swfContainer.style.left = left + 'px';
             swfContainer.style.top = top + 'px';
