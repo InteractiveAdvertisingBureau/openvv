@@ -1875,8 +1875,8 @@ function OVVGeometryViewabilityCalculator() {
             return { error: 'Failed to determine viewport'};
         }
         var assetRect = player.getBoundingClientRect();
-        //var playerArea = assetRect.width * assetRect.height;
-        var playerArea = player.getClientRects ? player.getClientRects()[0] : assetRect.width * assetRect.height;
+        var playerArea = assetRect.width * assetRect.height;
+        // var playerArea = player.getClientRects ? player.getClientRects()[0] : assetRect.width * assetRect.height;
         if ((minViewPortSize.area / playerArea) < (MIN_VIEW_AREA_PC / 100)) {
             // no position testing required if viewport is less than the required percentage of the player
             viewablePercentage = Math.floor(100 * minViewPortSize.area / playerArea);
