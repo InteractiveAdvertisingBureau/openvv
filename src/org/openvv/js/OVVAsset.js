@@ -1465,13 +1465,15 @@ function OVVAsset(uid, dependencies) {
                     top += ((playerHeight - innerHeight) / 2) + innerHeight;
                     break;
             }
-
             // center the middle and inner beacons on their intended point
             if (index >= MIDDLE_TOP_LEFT) {
                 left -= (BEACON_SIZE / 2);
                 top -= (BEACON_SIZE / 2);
             }
-
+			//fix issue in chrome 48
+			left = Math.round(left);
+			top = Math.round(top);
+			
             var swfContainer = getBeaconContainer(index);
             swfContainer.style.left = left + 'px';
             swfContainer.style.top = top + 'px';
