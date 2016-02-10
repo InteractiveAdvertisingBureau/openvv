@@ -1471,8 +1471,8 @@ function OVVAsset(uid, dependencies) {
                 top -= (BEACON_SIZE / 2);
             }
 			//fix issue in chrome 48
-			left = Math.round(left);
-			top = Math.round(top);
+left = Math.round(left);
+top = Math.round(top);
 			
             var swfContainer = getBeaconContainer(index);
             swfContainer.style.left = left + 'px';
