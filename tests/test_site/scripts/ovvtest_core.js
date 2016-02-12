@@ -120,6 +120,7 @@
 	
 	function displayQuartileViewability(eventName, data){
 		var el = opts.quartileValuesOutputElem;
+		var stateEl = doc.getElementById('ovvExecutionState');
 		var id, nd;
 		var k, val, i;
 		var buf = [];
@@ -135,6 +136,8 @@
 		if(el == null || data == null){
 			return;			
 		}
+		
+		stateEl.innerHtml != eventName;
 		
 		buf.push('<div class="eventName">', eventName, '</div>');
 		buf.push('<div class="viewabilityState">Viewable State: ', data.viewabilityState, '</div>');
@@ -395,7 +398,7 @@
 		}
 		
 		if(!window['$ovv']){
-			if(++attachRetries < 10){
+			if(++attachRetries < 60000){
 				regTimer = setTimeout(function(){
 					registerOvvListeners();
 				}, 300);
@@ -489,6 +492,8 @@
 		var name = eventObj && eventObj.eventName || '';
 		
 		var dataObj = data.ovvData;
+		var el = doc.getElementById('ovvStartBox');
+		el.style.display='block';
 		
 		updateViewEngine(eventObj, dataObj);
 		

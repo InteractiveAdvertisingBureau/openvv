@@ -1,0 +1,30 @@
+{
+  "name": "openvv_flash_test_suite",
+  "version": "0.0.5",
+  "description": "Test automation suite for the Flash version of OpenVV",
+  "main": "run_suite.js",
+  "scripts": {
+    "test": "mocha run_suite.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+ssh://git@github.com/InteractiveAdvertisingBureau/openvv.git"
+  },
+  "keywords": [
+    "openvv"
+  ],
+  "author": "Chris Cole",
+  "license": "BSD-3-Clause",
+  "bugs": {
+    "url": "https://github.com/InteractiveAdvertisingBureau/openvv/issues"
+  },
+  "homepage": "https://github.com/InteractiveAdvertisingBureau/openvv#readme",
+  "dependencies": {
+    "chai": "^3.5.0",
+    "chai-as-promised": "^5.2.0",
+    "chromedriver": "^2.21.2",
+    "mocha": "^2.4.5",
+    "selenium-webdriver": "^2.48.2",
+    "webdriver-sync": "^0.17.0"
+  }
+}
