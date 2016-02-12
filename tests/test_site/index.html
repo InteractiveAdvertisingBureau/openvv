@@ -51,6 +51,7 @@
 <script src="scripts/ovvtest_core.js" type="text/javascript"></script>
 <script src="scripts/ovvtest_viewEngine.js" type="text/javascript"></script>
 <script src="scripts/ovvtest_player.js" type="text/javascript"></script>
+<script src="scripts/use_case_tests/simple_embedded_tests.js" type="text/javascript"></script>
 <script  type="text/javascript">
 
 // init things
@@ -70,8 +71,10 @@
 			el.innerHTML = 'Viewability parameters reached <br /> MS: ' + vals.viewTime;
 		}
 		
+		var adId = 'my_ovv_test_ad_id';
+		
 		ovvtest.setOptions({ 
-			adId: 'my_ovv_test_ad_id', 
+			adId: adId, 
 			quartileValuesOutputElem: 'ovvQuartileViewValues',
 			enableViewEngine: true,
 			viewabilityReached: viewReached
@@ -83,6 +86,8 @@
 		
 		// Attach our listeners through javascript
 		ovvtest.init();
+		ovvtest.uc.embedded.init({adId: adId, ucTable: 'ovvUseCases'});
+		
 		
 		
 		/*
@@ -109,6 +114,67 @@
 <div id="ovvExecutionState"></div>
 
 <div id="ovvStartBox" style="display:none;">x</div>
+
+<table id="ovvUseCases" class="table">
+	<thead>
+		<tr>
+			<th>UC #</th>
+			<th>Scenario</th>
+			<th>Preconditions</th>
+			<th>Expected Result</th>
+			<th>Result</th>
+		</tr>
+	</thead>
+	<tbody>
+		<tr data-uc="t_1">
+			<td ><button class="exec btn">t_1</button></td>
+			<td >Top Window, user does not scroll</td>
+			<td>in view, in viewport</td>
+			<td>visible</td>
+			<td class="result"></td>
+		</tr>
+		<tr data-uc="t_2">
+			<td ><button class="exec btn">t_2</button></td>
+			<td >Top Window, user opens new browser</td>
+			<td>in view, in viewport</td>
+			<td>not visible</td>
+			<td class="result"></td>
+		</tr>
+		<tr data-uc="t_3">
+			<td ><button class="exec btn">t_3</button></td>
+			<td >Top Window, user minimizes browser</td>
+			<td>in view, in viewport</td>
+			<td>not visible</td>
+			<td class="result"></td>
+		</tr>
+		<tr data-uc="t_4">
+			<td >t_4</td>
+			<td >Top Window, another window overlays browser</td>
+			<td>in view, in viewport</td>
+			<td>not visible</td>
+			<td class="result"></td>
+		</tr>
+		<tr data-uc="t_5" data-docuc="11">
+			<td ><button class="exec btn">t_5</button></td>
+			<td >Top Window, user scrolls out of view</td>
+			<td>in view, in viewport</td>
+			<td>not visible</td>
+			<td class="result"></td>
+		</tr>
+		<tr data-uc="t_6" >
+			<td ><button class="exec btn">t_6</button></td>
+			<td >Top Window, user scrolls back into view</td>
+			<td>out of view, not in viewport</td>
+			<td>visible</td>
+			<td class="result"></td>
+		</tr>
+		
+	</tbody>
+	</tbody>
+</table>
+
+
+<br /><br /><br />
 
 </body>
 </html>
