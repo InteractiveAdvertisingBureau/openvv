@@ -10,6 +10,8 @@
 var wd = require('webdriver-sync');
 var ChromeDriver = wd.ChromeDriver;
 var By = wd.By;
+var Wait = wd.WebDriverWait;
+var TimeUnit = wd.TimeUnit;
 var assert = require('assert');
 
 	
@@ -72,6 +74,48 @@ describe('OpenVV Embedd Video Test', function() {
 		
 		assert.ok(pageHeaderText == 'On Page Video');
 	});
+	
+	it('should be viewable with page scrolled to top', function(){
+		var vpElems;
+		var inviewEl;
+		var state;
+		this.timeout(timeout);
+		driver.get(testPage);
+		pageutil.letLoad();
+		pageutil.letStartVideo();
+		
+		pageutil.scrollTop();
+		pageutil.allowInitViewable();		
+		
+		vpElems = driver.findElement(By.id('ovvParamValues'));
+		inviewEl = driver.findElement(By.cssSelector('#ovvParamValues div.ovvParamBox span[data-ovv="viewabilityState"]'));
+		
+		assert.ok(inviewEl != null);
+		state = inviewEl.getText();
+		assert.equal(state, 'viewable', "Wrong value - is: " + state );
+	});
+	
+	it('should not be viewable with page scrolled to bottom', function(){
+		var vpElems;
+		var inviewEl;
+		var state;
+		this.timeout(timeout);
+		driver.get(testPage);
+		pageutil.letLoad();
+		pageutil.letStartVideo();
+		
+		pageutil.scrollBottom();
+		pageutil.allowInitViewable();		
+		
+		vpElems = driver.findElement(By.id('ovvParamValues'));
+		inviewEl = driver.findElement(By.cssSelector('#ovvParamValues div.ovvParamBox span[data-ovv="viewabilityState"]'));
+		
+		assert.ok(inviewEl != null);
+		state = inviewEl.getText();
+		assert.equal(state, 'unviewable', "Wrong value - is: " + state );
+	});
+	
+	
 });
 
 // ===============================================
@@ -92,6 +136,43 @@ var pageutil = {
 			
 			return line;
 		}
+	},
+	
+	scrollTop: function(){
+		var b = driver.findElement(By.id('btnScrollTop'));
+		b.click();
+		// wd.Timeouts
+		pageutil.waitForCommand('scrolltop', 500);
+	},
+	scrollBottom: function(){
+		var b = driver.findElement(By.id('btnScrollBottom'));
+		b.click();
+		pageutil.waitForCommand('scrollbottom', 500);
+	},
+	waitForCommand: function(str, time){
+		var time = time || 500;
+		var cmdStatus = driver.findElement(By.id('cmdStatus'));
+		wd.wait(function(){
+			var value = cmdStatus.getText();
+			return value == str;
+		}, {timeout: time});
+		
+	},
+	// interface not wired in this version
+	execScript: function(jscript){
+		var jsExec = driver;
+		
+		var result = jsExec.executeScript(jscript);
+		return result;
+	},
+	
+	
+	allowInitViewable: function(){
+		wd.wait(function(){
+			var inviewEl = driver.findElement(By.cssSelector('#ovvParamValues div.ovvParamBox span[data-ovv="viewabilityState"]'));
+			var txt = inviewEl.getText();
+			return txt != null && txt != '';
+		});
 	},
 	
 	letLoad: function(){
@@ -117,10 +198,7 @@ var pageutil = {
 		var k, v;
 		
 		for(k in obj){
-			if(obj.hasOwnProperty(k)){
-				console.log(k);
-				
-			}
+			console.log(k);
 		}
 		
 	}

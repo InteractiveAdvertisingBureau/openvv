@@ -66,8 +66,6 @@
 			}, 10);				
 			
 		}
-		
-		
 	}
 	
 	function bindTestButton(btn, ucId){
@@ -107,6 +105,27 @@
 				bindTestButton(btn, id);
 			}
 		}
+		
+		var btnTop = doc.getElementById('btnScrollTop');
+		var btnBottom = doc.getElementById('btnScrollBottom');
+		
+		var cmdStatus = doc.getElementById('cmdStatus');
+		
+		btnTop.addEventListener('click', function(){
+			cmdStatus.innerHTML = '';
+			window.scroll(0,0);
+			window.setTimeout(function(){
+				cmdStatus.innerHTML = 'scrolltop';
+			}, 100);
+		});
+		btnBottom.addEventListener('click', function(){
+			cmdStatus.innerHTML = '';
+			var ht = document.body.scrollHeight || 10000;
+			window.scroll(0,ht);
+			window.setTimeout(function(){
+				cmdStatus.innerHTML = 'scrollbottom';
+			}, 100);
+		});
 		
 	}
 	
