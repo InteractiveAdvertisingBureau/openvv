@@ -108,6 +108,9 @@
 		
 		var btnTop = doc.getElementById('btnScrollTop');
 		var btnBottom = doc.getElementById('btnScrollBottom');
+		var btnMin = doc.getElementById('btnMin');
+		var btnRestore = doc.getElementById('btnRestore');
+		var btnBlur = doc.getElementById('btnBlur');
 		
 		var cmdStatus = doc.getElementById('cmdStatus');
 		
@@ -124,6 +127,27 @@
 			window.scroll(0,ht);
 			window.setTimeout(function(){
 				cmdStatus.innerHTML = 'scrollbottom';
+			}, 100);
+		});
+		btnMin.addEventListener('click', function(){
+			cmdStatus.innerHTML = '';
+			window.moveTo(10000, 10000)
+			window.setTimeout(function(){
+				cmdStatus.innerHTML = 'minimize';
+			}, 100);
+		});
+		btnRestore.addEventListener('click', function(){
+			cmdStatus.innerHTML = '';
+			window.moveTo(0,0)
+			window.setTimeout(function(){
+				cmdStatus.innerHTML = 'restore';
+			}, 100);
+		});
+		btnBlur.addEventListener('click', function(){
+			cmdStatus.innerHTML = '';
+			window.blur();
+			window.setTimeout(function(){
+				cmdStatus.innerHTML = 'blur';
 			}, 100);
 		});
 		

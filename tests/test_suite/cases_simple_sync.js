@@ -114,6 +114,46 @@ describe('OpenVV Embedd Video Test', function() {
 		state = inviewEl.getText();
 		assert.equal(state, 'unviewable', "Wrong value - is: " + state );
 	});
+	it('should not be viewable without focus', function(){
+		var vpElems;
+		var inviewEl;
+		var state;
+		this.timeout(timeout);
+		driver.get(testPage);
+		pageutil.letLoad();
+		pageutil.letStartVideo();
+		
+		pageutil.blurWindow();
+		pageutil.allowInitViewable();		
+		
+		vpElems = driver.findElement(By.id('ovvParamValues'));
+		inviewEl = driver.findElement(By.cssSelector('#ovvParamValues div.ovvParamBox span[data-ovv="viewabilityState"]'));
+		
+		assert.ok(inviewEl != null);
+		state = inviewEl.getText();
+		assert.equal(state, 'unviewable', "Wrong value - is: " + state );
+		pageutil.onScreen();
+	});
+	it('should not be viewable when off screen', function(){
+		var vpElems;
+		var inviewEl;
+		var state;
+		this.timeout(timeout);
+		driver.get(testPage);
+		pageutil.letLoad();
+		pageutil.letStartVideo();
+		
+		pageutil.offScreen();
+		pageutil.allowInitViewable();		
+		
+		vpElems = driver.findElement(By.id('ovvParamValues'));
+		inviewEl = driver.findElement(By.cssSelector('#ovvParamValues div.ovvParamBox span[data-ovv="viewabilityState"]'));
+		
+		assert.ok(inviewEl != null);
+		state = inviewEl.getText();
+		assert.equal(state, 'unviewable', "Wrong value - is: " + state );
+		pageutil.onScreen();
+	});
 	
 	
 });
@@ -148,6 +188,21 @@ var pageutil = {
 		var b = driver.findElement(By.id('btnScrollBottom'));
 		b.click();
 		pageutil.waitForCommand('scrollbottom', 500);
+	},
+	offScreen: function(){
+		var b = driver.findElement(By.id('btnMin'));
+		b.click();
+		pageutil.waitForCommand('minimize', 500);
+	},
+	onScreen: function(){
+		var b = driver.findElement(By.id('btnRestore'));
+		b.click();
+		pageutil.waitForCommand('restore', 500);
+	},
+	blurWindow: function(){
+		var b = driver.findElement(By.id('btnBlur'));
+		b.click();
+		pageutil.waitForCommand('blur', 500);
 	},
 	waitForCommand: function(str, time){
 		var time = time || 500;
