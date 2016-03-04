@@ -1428,7 +1428,7 @@ function OVVAsset(uid, dependencies) {
             }
         }
 
-        // Assume MIN_VIEW_AREA_PC is 100% (GroupM or 50% : MRC)
+        // Assume MIN_VIEW_AREA_PC is 100% (GroupM) or 50% (MRC)
         // Currently the only two viewability standards we support...
 
         // when all beacons are visible
@@ -1712,6 +1712,10 @@ function OVVAsset(uid, dependencies) {
                 left -= (BEACON_SIZE / 2);
                 top -= (BEACON_SIZE / 2);
             }
+
+            // ADS-552
+            left = Math.round(left);
+            top = Math.round(top);
 
             var swfContainer = getBeaconContainer(index);
             swfContainer.style.left = left + 'px';
