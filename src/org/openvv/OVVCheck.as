@@ -75,121 +75,48 @@ package org.openvv {
 
         public static const INIT_SUCCESS:String = "SUCCESS";
 
-        // =============  Javascript Initialization Errors  =============
+        // Parts that the 'reason' code, loaded into the viewabilityStateReason property, are composed of.
+        // Example 'reason' codes:
+        // 'E_NMT'       : Initialization Error [E] - No Measuring Technique Available [NMT] - currently only used when beacons can't be used in iframe in IE < 11
+        // 'U_XD_FB_CNR' : Unmeasurable[U], in cross-domain iframe[XD] using Flash Beacons[FB] : Control Beacon Not Ready[CNR])
+        // 'V_0F_GA'     : Viewable[V], not in iframe[0F] using browser geometry to measure viewable area [GA] - no 'detail' required
+        public static const INFO_TYPE_ERROR:String        = "E";
+        public static const INFO_TYPE_VIEWABLE:String     = "V";
+        public static const INFO_TYPE_NOT_VIEWABLE:String = "N";
+        public static const INFO_TYPE_UNMEASURABLE:String = "U";
 
-        /**
-         * Unmeasurable : External Interface not available (not required in OVVCheck javascript class)
-         */
-        public static const NO_EXTERNAL_INTERFACE:String = 'EX';
+        public static const INFO_BROWSER_CH:String = "B1";
+        public static const INFO_BROWSER_FF:String = "B2";
+        public static const INFO_BROWSER_SF:String = "B3";
+        public static const INFO_BROWSER_IE:String = "B4";
 
-        /**
-         * Unmeasurable by reason of OVV Init unspecified javascript runtime error
-         */
-        public static const REASON_INIT_ERROR_OTHER:String = 'E0';
+        public static const INFO_IFRAME_NO:String = "F0";
+        public static const INFO_IFRAME_SD:String = "F1";
+        public static const INFO_IFRAME_XD:String = "F2";
 
-        /**
-         * Unmeasurable by reason of OVV Init player not found
-         */
-        public static const REASON_PLAYER_NOT_FOUND:String = 'E1';
+        public static const INFO_METHOD_GEOMETRY_AREA:String     = "M1";
+        public static const INFO_METHOD_BEACON_FLASH:String      = "M2";
+        public static const INFO_METHOD_BEACON_MOZPAINT:String   = "M3";
+        public static const INFO_METHOD_ACTIVE_WINDOW:String     = "M4";
+        public static const INFO_METHOD_PLAYER_VISIBILITY:String = "M5";
+        public static const INFO_METHOD_PLAYER_DISPLAY:String    = "M6";
+        public static const INFO_METHOD_PLAYER_OBSCURED:String   = "M7";
 
-        /**
-         * Unmeasurable by reason of OVV Init player javascript runtime error
-         */
-        public static const REASON_BAD_BEACON_SWF_URL:String = 'E2';
+        public static const INFO_DETAIL_NONE:String                    = "!!";
+        public static const INFO_DETAIL_INIT_ERROR_OTHER:String        = "E0";
+        public static const INFO_DETAIL_NO_EXTERNAL_INTERFACE:String   = "EX";
+        public static const INFO_DETAIL_INIT_JS_EVAL_NULL:String       = "EN";
+        public static const INFO_DETAIL_INIT_JS_EVAL_ERROR:String      = "EE";
+        public static const INFO_DETAIL_PLAYER_NOT_FOUND:String        = "PN";
+        public static const INFO_DETAIL_BAD_BEACON_URL:String          = "BB";
+        public static const INFO_DETAIL_NO_MEASURING_METHOD:String     = "NM";
+        public static const INFO_DETAIL_CTRL_BEACON_NOT_READY:String   = "CN";
+        public static const INFO_DETAIL_CTRL_BEACON_IN_VIEW:String     = "CV";
+        public static const INFO_DETAIL_BEACONS_NOT_READY:String       = "BN";
+        public static const INFO_DETAIL_INVALID_BEACON_RESULT:String   = "IB";
+        public static const INFO_DETAIL_INVALID_VIEWPORT_RESULT:String = "IV";
 
-        /**
-         * Unmeasurable by reason of neither geometry nor beacon measuring technique available in current browser
-         */
-        public static const REASON_NO_AVAILABLE_MEASURING_TECHNIQUE:String = 'E3';
-
-        // =============  Not Viewable Reasons  =============
-        /**
-         * Not viewable by reason of too little area viewable measured by browser geometry (no iframe)
-         */
-        public static const REASON_AREA_GEOMETRY: String = 'N1';
-
-        /**
-         * Not viewable by reason of too little area viewable measured by browser geometry (in same domain iframe)
-         */
-        public static const REASON_AREA_IFRAME_GEOMETRY: String = 'N2';
-
-        /**
-         * Not viewable by reason of too little area viewable measured by Flash beacons
-         */
-        public static const REASON_AREA_FLASH_BEACONS: String = 'N3';
-
-        /**
-         * Not viewable by reason of too little area viewable measured by MozPaint beacons (in Firefox Browser)
-         */
-        public static const REASON_AREA_MOZPAINT_BEACONS: String = 'N4';
-
-        /**
-         * Not viewable by reason of inactive tab or minimized browser window
-         */
-        public static const REASON_INACTIVE_WINDOW: String = 'N5';
-
-        /**
-         * Not viewable by reason of player made invisible by manipulation of 'visibility' property
-         */
-        public static const REASON_PLAYER_INVISIBLE: String = 'N6';
-
-        /**
-         * Not viewable by reason of player containing element hidden by manipulation of 'display' property
-         */
-        public static const REASON_PLAYER_HIDDEN: String = 'N7';
-
-        /**
-         * Not viewable by reason of player obscured by another element in the DOM
-         */
-        public static const REASON_PLAYER_OBSCURED: String = 'N8';
-
-        // =============  Unmeasurable Reasons  =============
-        /**
-         * Unmeasurable by reason of geometry not supported and can't use Flash beacons in current browser
-         */
-        public static const REASON_BEACONS_IN_IFRAME: String = 'U1';
-
-        /**
-         * Unmeasurable by reason of flash control beacon not ready
-         */
-        public static const REASON_FLASH_CONTROL_BEACON_NOT_READY: String = 'U2';
-
-        /**
-         * Unmeasurable by reason of mozpaint control beacon in view
-         */
-        public static const REASON_MOZPAINT_CONTROL_BEACON_NOT_READY: String = 'U3';
-
-        /**
-         * Unmeasurable by reason of flash control beacon in view
-         */
-        public static const REASON_FLASH_CONTROL_BEACON_IN_VIEW: String = 'U4';
-
-        /**
-         * Unmeasurable by reason of mozpaint control beacon in view
-         */
-        public static const REASON_MOZPAINT_CONTROL_BEACON_IN_VIEW: String = 'U5';
-
-        /**
-         * Unmeasurable by reason of flash beacons failed to initialize
-         */
-        public static const REASON_FLASH_ACTIVE_BEACONS_NOT_READY: String = 'U6';
-
-        /**
-         * Unmeasurable by reason of mozpaint beacons failed to initialize
-         */
-        public static const REASON_MOZPAINT_ACTIVE_BEACONS_NOT_READY: String = 'U7';
-
-        /**
-         * Unmeasurable by reason of flash beacons generated an invalid result
-         * ('impossible' combination of viewable and unviewable beacons)
-         * */
-        public static const REASON_FLASH_BEACONS_INVALID_RESULT: String = 'U8';
-
-        /**
-         * Unmeasurable by reason of mozpaint beacons generated an invalid result
-         * ('impossible' combination of viewable and unviewable beacons)
-         * */
-        public static const REASON_MOZPAINT_BEACONS_INVALID_RESULT: String = 'U9';
+        public static const INFO_OVERRIDE_FULLSCREEN:String = "FS"; // appended when full screen is detected, regardless of viewable state
 
 
         /**
@@ -271,7 +198,9 @@ package org.openvv {
         /**
          * Whether the asset is in an iframe or not
          */
-        public var inIframe: Boolean = false;
+        public var inIframe:   Boolean = false;
+        public var inXDIframe: Boolean = false;
+        public var frameEnv:   String;
 
         /**
          * The distance (in pixels) from the asset's bottom to the bottom of the viewport

@@ -30,6 +30,8 @@ package org.openvv {
     import org.openvv.OVVConfig;
     import org.openvv.events.OVVEvent;
     import net.iab.VPAIDEvent;
+    import com.tubemogul.util.Debug;
+
     /**
      * The event dispatched when the asset has been viewable for 5 contiguous seconds
      */
@@ -249,6 +251,7 @@ package org.openvv {
 
        private var initErrorReason:String = null;
 
+        private var configJs:Object = null;
         ////////////////////////////////////////////////////////////
         //   CONSTRUCTOR
         ////////////////////////////////////////////////////////////
@@ -271,12 +274,13 @@ package org.openvv {
          * determine if a Viewable Impression should be fired.
          * (Currently only 'MRC' and 'GROUPM' supported).
          */
-        public function OVVAsset( beaconSwfUrl:String = null, id:String = null, adRef:* = null, viewabilityStandard:String = null) {
+        public function OVVAsset( beaconSwfUrl:String = null, id:String = null, adRef:* = null, viewabilityStandard:String = null, configJs:Object=null) {
             if (!externalInterfaceIsAvailable()) {
-                _jsInitError = OVVCheck.NO_EXTERNAL_INTERFACE;
-                raiseError({error:OVVCheck.NO_EXTERNAL_INTERFACE}, true); // delay dispatch for ad unit to add listener
+                _jsInitError = OVVCheck.REASON_DETAIL_NO_EXTERNAL_INTERFACE;
+                raiseError({error:_jsInitError}, true); // delay dispatch for ad unit to add listener
                 return;
             }
+            this.configJs = configJs;
             if (viewabilityStandard == null) {
                 standard = OVVConfig.default_standard;
             }else{
@@ -301,7 +305,7 @@ package org.openvv {
 
             ovvAssetSource = ovvAssetSource
                                 .replace(/OVVID/g, _id)
-                                .replace(/INTERVAL/g, OVVConfig.viewability[standard].poll_interval_ms)
+                                .replace(/INTERVAL/g, configJs.pollInterval || OVVConfig.viewability[standard].poll_interval_ms)
                                 .replace(/MIN_VIEW_AREA_PC/g, OVVConfig.viewability[standard].min_viewable_area_pc)
                                 .replace(/OVVBUILDVERSION/g, _buildVersion)
 								.replace(/OVVRELEASEVERSION/g, RELEASE_VERSION);
@@ -313,8 +317,11 @@ package org.openvv {
 
             var evalResult:String = String( ExternalInterface.call( "eval", ovvAssetSource ) );
 
-            if ( evalResult == null || evalResult != OVVCheck.INIT_SUCCESS){
-                 _jsInitError = evalResult || OVVCheck.REASON_INIT_ERROR_OTHER;
+            if ( evalResult == null ){
+                _jsInitError = OVVCheck.REASON_DETAIL_INIT_JS_EVAL_NULL;
+                raiseError({error:_jsInitError}, true);
+            } else if ( evalResult !== OVVCheck.INIT_SUCCESS ){
+                 _jsInitError = evalResult;
                  raiseError({error:_jsInitError}, true);
             }
         }
@@ -415,19 +422,32 @@ package org.openvv {
          */
         public function checkViewability(): OVVCheck {
             if ( _jsInitError ) {
-                return new OVVCheck(
-                    {
+                if (isRealFullScreenMode()){
+                    return new OVVCheck( {
+                           viewabilityState: OVVCheck.VIEWABLE,
+                           viewabilityStateReason:[
+                               OVVCheck.REASON_TYPE_VIEWABLE,
+                               OVVCheck.REASON_TYPE_ERROR,
+                               _jsInitError,
+                               OVVCheck.REASON_DETAIL_FULLSCREEN_OVERRIDE
+                           ].join('_'),
+                           percentViewable: 100
+                    } );
+                }else {
+                    return new OVVCheck({
                         viewabilityState: OVVCheck.UNMEASURABLE,
-                        viewabilityStateReason:_jsInitError
-                    }
-                );
+                        viewabilityStateReason: [
+                            OVVCheck.REASON_TYPE_ERROR,
+                            _jsInitError
+                        ].join('_')
+                    });
+                }
             }
 
             var jsResults: Object = ExternalInterface.call("$ovv.getAssetById('" + _id + "')" + ".checkViewability");
+            Debug.traceObj(jsResults, 'results');
             var results: OVVCheck = new OVVCheck(jsResults);
-
-            if (results && !!results.error)
-                raiseError(results);
+            trace("Checking . . . 3")
 
             results.volume = 1; // default to 1, in case not implemented or not available (eg in Innovid VPAID)
             if (_vpaidAd != null){
@@ -437,18 +457,22 @@ package org.openvv {
                     }
                 }
             }
+            trace("Checking . . . 4 " + results.viewabilityState)
 
-            var displayState:String = getDisplayState(results);
-            // StageDisplayState.FULL_SCREEN_INTERACTIVE is available >= Flash Player 11.3
-            if (displayState == StageDisplayState.FULL_SCREEN || displayState == 'fullScreenInteractive') {
-                results.displayState = displayState;
-                results.viewabilityState = OVVCheck.VIEWABLE;
-                results.viewabilityStateOverrideReason = OVVCheck.FULLSCREEN;
-
-                if (results.technique == OVVCheck.GEOMETRY) {
-                    results.percentViewable = 100;
+            if (results.viewabilityState !== OVVCheck.VIEWABLE) {
+                if ( isRealFullScreenMode() || isFakeFullScreenMode(results)) {
+                    return new OVVCheck({
+                        viewabilityState: OVVCheck.VIEWABLE,
+                        viewabilityStateReason: [
+                            OVVCheck.REASON_TYPE_VIEWABLE,
+                            results.viewabilityStateReason,
+                            OVVCheck.REASON_DETAIL_FULLSCREEN_OVERRIDE
+                        ].join('_'),
+                        percentViewable: 100
+                    });
                 }
             }
+            trace("Checking . . . 5");
 
             return results;
         }
@@ -550,28 +574,26 @@ package org.openvv {
                 _ad.addEventListener(Event.ADDED_TO_STAGE, setStage);
         }
 
-        private function getDisplayState(results:OVVCheck):String
-        {
-            var hasStageAccess:Boolean;
+        private function isRealFullScreenMode():Boolean{
             var displayState:String = StageDisplayState.NORMAL;
-
             try{
                 displayState   = _stage.displayState;
-                hasStageAccess = true;
             }
             catch(ignore:Error){
                 // Either stage was null or we can't access it due to security
                 // restrictions, either way we can ignore this error
             }
+            return displayState == StageDisplayState.FULL_SCREEN || displayState == 'fullScreenInteractive'
+        }
 
-
-            if(!hasStageAccess && _ad && (_ad is DisplayObject))
-            {
+        private function isFakeFullScreenMode(results:OVVCheck):Boolean
+        {
+            if(_ad && (_ad is DisplayObject)) {
                 if ((_ad.width - (results.objRight - results.objLeft)) > 10 && (_ad.height - (results.objBottom - results.objTop)) > 10) {
-                    displayState = StageDisplayState.FULL_SCREEN;
+                    return true;
                 }
             }
-            return displayState;
+            return false;
         }
 
         ////////////////////////////////////////////////////////////
