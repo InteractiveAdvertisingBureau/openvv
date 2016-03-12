@@ -973,6 +973,7 @@ try {
             console.log("Using beacons . . . checkActiveBeacons . . . coming out!");
 
             if (check.viewabilityState == OVVCheck.UNMEASURABLE) {
+                check.beacons = beacons;
                 setViewabilityResult(check, OVVCheck.UNMEASURABLE, OVVCheck.detail.INVALID_BEACON_RESULT);
             } else {
                 setViewabilityResult(check, check.viewabilityState);
