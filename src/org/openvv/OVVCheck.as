@@ -78,36 +78,42 @@ package org.openvv {
         // Parts that the 'reason' code, loaded into the viewabilityStateReason property, are composed of.
         // Example 'reason' codes:
         // 'E_NMT'       : Initialization Error [E] - No Measuring Technique Available [NMT] - currently only used when beacons can't be used in iframe in IE < 11
-        // 'U_XD_FB_CNR' : Unmeasurable[U], in cross-domain iframe[XD] using Flash Beacons[FB] : Control Beacon Not Ready[CNR])
-        // 'V_0F_GA'     : Viewable[V], not in iframe[0F] using browser geometry to measure viewable area [GA] - no 'detail' required
+        // 'U_O1_XD_FB_CNR' : Unmeasurable[U], on mac, in cross-domain iframe[XD] using Flash Beacons[FB] : Control Beacon Not Ready[CNR])
+        // 'V_O2_F0_GA'     : Viewable[V], not in iframe[0F] using browser geometry to measure viewable area [GA] - no 'detail' required
         public static const INFO_TYPE_ERROR:String        = "E";
         public static const INFO_TYPE_VIEWABLE:String     = "V";
         public static const INFO_TYPE_NOT_VIEWABLE:String = "N";
         public static const INFO_TYPE_UNMEASURABLE:String = "U";
 
-        public static const INFO_BROWSER_CH:String = "B1";
-        public static const INFO_BROWSER_FF:String = "B2";
-        public static const INFO_BROWSER_SF:String = "B3";
-        public static const INFO_BROWSER_IE:String = "B4";
+        public static const INFO_OS_MAC:String = "OM";
+        public static const INFO_OS_WIN:String = "OW";
+        public static const INFO_OS_OTHER:String = "O!";
 
-        public static const INFO_IFRAME_NO:String = "F0";
-        public static const INFO_IFRAME_SD:String = "F1";
-        public static const INFO_IFRAME_XD:String = "F2";
+        public static const INFO_BROWSER_CHROME:String = "BC";
+        public static const INFO_BROWSER_FIREFOX:String = "BF";
+        public static const INFO_BROWSER_SAFARI:String = "BS";
+        public static const INFO_BROWSER_IE:String = "BI";
+        public static const INFO_BROWSER_OPERA:String = "BO";
+        public static const INFO_BROWSER_OTHER:String = "B!";
 
-        public static const INFO_METHOD_GEOMETRY_AREA:String     = "M1";
-        public static const INFO_METHOD_BEACON_FLASH:String      = "M2";
-        public static const INFO_METHOD_BEACON_MOZPAINT:String   = "M3";
-        public static const INFO_METHOD_ACTIVE_WINDOW:String     = "M4";
-        public static const INFO_METHOD_PLAYER_VISIBILITY:String = "M5";
-        public static const INFO_METHOD_PLAYER_DISPLAY:String    = "M6";
-        public static const INFO_METHOD_PLAYER_OBSCURED:String   = "M7";
+        public static const INFO_IFRAME_NONE:String = "FN";
+        public static const INFO_IFRAME_SD:String = "FS";
+        public static const INFO_IFRAME_XD:String = "FX";
+
+        public static const INFO_METHOD_GEOMETRY_AREA:String     = "MG";
+        public static const INFO_METHOD_BEACON_FLASH:String      = "MF";
+        public static const INFO_METHOD_BEACON_MOZPAINT:String   = "MM";
+        public static const INFO_METHOD_ACTIVE_WINDOW:String     = "MW";
+        public static const INFO_METHOD_PLAYER_VISIBILITY:String = "MV";
+        public static const INFO_METHOD_PLAYER_DISPLAY:String    = "MD";
+        public static const INFO_METHOD_PLAYER_OBSCURED:String   = "MO";
 
         public static const INFO_DETAIL_NONE:String                    = "!!";
-        public static const INFO_DETAIL_INIT_ERROR_OTHER:String        = "E0";
+        public static const INFO_DETAIL_INIT_ERROR_OTHER:String        = "EO";
         public static const INFO_DETAIL_NO_EXTERNAL_INTERFACE:String   = "EX";
         public static const INFO_DETAIL_INIT_JS_EVAL_NULL:String       = "EN";
         public static const INFO_DETAIL_INIT_JS_EVAL_ERROR:String      = "EE";
-        public static const INFO_DETAIL_PLAYER_NOT_FOUND:String        = "PN";
+        public static const INFO_DETAIL_PLAYER_NOT_FOUND:String        = "EP";
         public static const INFO_DETAIL_BAD_BEACON_URL:String          = "BB";
         public static const INFO_DETAIL_NO_MEASURING_METHOD:String     = "NM";
         public static const INFO_DETAIL_CTRL_BEACON_NOT_READY:String   = "CN";
