@@ -83,8 +83,11 @@ package org.openvv {
         /**
          * Hold OVV version. Will pass to JavaScript as well as $ovv.version
          */
-        public static const RELEASE_VERSION: String = "1.3.8";
-        /** Changes in v1.3.8 :
+        public static const RELEASE_VERSION: String = "1.3.9";
+        /** Changes in v1.3.9 :
+         * ADS-655 : Round top/left position of Flash beacons, continually update background of MozPaintBeacons
+         */
+       /** Changes in v1.3.8 :
          * Fixed geometry-breaking bug introduced in AD-1854 : StickyAds solution
          * Added more functionality to build.xml to facilitate debugging OVVAsset.js in browser Developer Tools
         /** Changes in v1.3.7 :
