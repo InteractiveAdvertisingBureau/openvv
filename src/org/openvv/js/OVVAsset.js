@@ -1589,12 +1589,13 @@ function OVVAsset(uid, dependencies) {
                             'var paintCount = window.mozPaintCount; ' +
                             'window.isInView = (paintCount>cnt); ' +
                             'cnt = paintCount; ' +
-                            'if (parent.$ovvs["OVVID"].DEBUG == true) {' +
-                                'if(window.isInView === true){' +
-                                    'document.body.style.background = "green";' +
-                                '} else {' +
-                                    'document.body.style.background = "red";' +
-                                '}' +
+                            // Required for Firefox change to MozPaintCount behavior
+                            'var rnd1 = (Math.round(Math.random() * 0x44)).toString(16); ' +
+                            'var rnd2 = (Math.round(Math.random() * 0x44)).toString(16); ' +
+                            'if(window.isInView === true){' +
+                               'document.body.style.background = "#" + rnd1 + "ff"  + rnd2; ' +
+                            '} else {' +
+                               'document.body.style.background = "#ff" + rnd1 + rnd2; ' +
                             '}' +
                             'if (window.started === false) {' +
                                 'parent.$ovvs["OVVID"].getAssetById("'+id+'")' + '.beaconStarted(window.index);' +
@@ -1712,6 +1713,10 @@ function OVVAsset(uid, dependencies) {
                 left -= (BEACON_SIZE / 2);
                 top -= (BEACON_SIZE / 2);
             }
+
+            // Required for Chrome v48.0
+            left = Math.round(left);
+            top = Math.round(top);
 
             var swfContainer = getBeaconContainer(index);
             swfContainer.style.left = left + 'px';
