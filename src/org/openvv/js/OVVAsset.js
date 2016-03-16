@@ -1559,7 +1559,7 @@ function OVVAsset(uid, dependencies) {
         var embeds = document.getElementsByTagName('embed');
 
         for (var i = 0; i < embeds.length; i++) {
-            if (embeds[i][id]) {
+            if (embeds[i][id] || embed[i]['onJsReady' + id]) {
                 return embeds[i];
             }
         }
@@ -1567,7 +1567,7 @@ function OVVAsset(uid, dependencies) {
         var objs = document.getElementsByTagName('object');
 
         for (var i = 0; i < objs.length; i++) {
-            if (objs[i][id]) {
+            if (objs[i][id] || objs[i]['onJsReady' + id]) {
                 return objs[i];
             }
         }
