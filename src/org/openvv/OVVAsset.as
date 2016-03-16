@@ -102,7 +102,7 @@ package org.openvv {
          * Hold OVV version. Will past to JavaScript as well $ovv.version
          */
 
-        public static const RELEASE_VERSION: String = "2.5.1";
+        public static const RELEASE_VERSION: String = "2.5.2";
 
 
         ////////////////////////////////////////////////////////////
