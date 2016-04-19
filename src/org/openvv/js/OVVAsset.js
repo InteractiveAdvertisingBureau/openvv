@@ -447,124 +447,74 @@ try {
         OVVCheck.INFO_ERROR_INVALID_VIEWPORT_RESULT = 'IV',
     ];
 
-    function OVVBrowser(userAgent) {
-
-        var browserIDEnum = {
-            MSIE: 1,
-            Firefox: 2,
-            Chrome: 3,
-            Opera: 4,
-            safari: 5
-        };
-
-        /**
-         * Returns an object that contains the browser name, version, id and os if applicable
-         * @param {String} ua userAgent
-         */
-
-        function getBrowserDetailsByUserAgent(ua, t) {
-
-            var getData = function() {
-                var data = {
-                    ID: 0,
-                    name: '',
-                    version: ''
-                };
-                var dataString = ua;
-                for (var i = 0; i < dataBrowsers.length; i++) {
-                    // Fill Browser ID
-                    if (dataString.match(new RegExp(dataBrowsers[i].brRegex)) != null) {
-                        data.ID = dataBrowsers[i].id;
-                        data.name = dataBrowsers[i].name;
-                        if (dataBrowsers[i].verRegex == null) {
-                            break;
-                        }
-                        //Fill Browser Version
-                        var brverRes = dataString.match(new RegExp(dataBrowsers[i].verRegex + '[0-9]*'));
-                        if (brverRes != null) {
-                            var replaceStr = brverRes[0].match(new RegExp(dataBrowsers[i].verRegex));
-                            data.version = brverRes[0].replace(replaceStr[0], '');
-                        }
-                        var brOSRes = dataString.match(new RegExp(winOSRegex + '[0-9\\.]*'));
-                        if (brOSRes != null) {
-                            data.os = brOSRes[0];
-                        }
-                        break;
-                    }else{
-                        data.ID = 0;
-                        data.name = 'Unknown';
-                        data.version = 0;
-                    }
+    function OVVBrowser() {
+        (function( ) {
+            // Get browser and browser version
+            var searchString = function(data) {
+                for (var i = 0; i < data.length; i++) {
+                    var dataString = data[i].string;
+                    var dataProp = data[i].prop;
+                    versionSearchString = data[i].versionSearch || data[i].identity;
+                    if (dataString) {
+                        if (dataString.indexOf(data[i].subString) != -1)
+                            return data[i].code;
+                    } else if (dataProp)
+                        return data[i].code;
                 }
-                return data;
+            };
+            var searchVersion = function(dataString) {
+                var index = dataString.indexOf(versionSearchString);
+                if (index == -1) {
+                    return;
+                }
+                return parseInt(dataString.substring(index + versionSearchString.length + 1));
             };
 
-            var winOSRegex = '(Windows NT )';
-            var dataBrowsers = [{
-                id: 4,
-                name: 'Opera',
-                brRegex: 'OPR|Opera',
-                verRegex: '(OPR\/|Version\/)'
+            var dataBrowser = [{
+                string: navigator.userAgent,
+                subString: "Chrome",
+                identity: "Chrome",
+                code: OVVBrowser.CHROME
             }, {
-                id: 1,
-                name: 'MSIE',
-                brRegex: 'MSIE|Trident/7.*rv:11|rv:11.*Trident/7',
-                verRegex: '(MSIE |rv:)'
+                string: navigator.vendor,
+                subString: "Apple",
+                identity: "Safari",
+                versionSearch: "Version",
+                code: OVVBrowser.SAFARI
             }, {
-                id: 2,
-                name: 'Firefox',
-                brRegex: 'Firefox',
-                verRegex: 'Firefox\/'
+                prop: window.opera,
+                identity: "Opera",
+                versionSearch: "Version",
+                code: OVVBrowser.OPERA
             }, {
-                id: 3,
-                name: 'Chrome',
-                brRegex: 'Chrome',
-                verRegex: 'Chrome\/'
+                string: navigator.userAgent,
+                subString: "Firefox",
+                identity: "Firefox",
+                code: OVVBrowser.FIREFOX
             }, {
-                id: 5,
-                name: 'Safari',
-                brRegex: 'Safari|(OS |OS X )[0-9].*AppleWebKit',
-                verRegex: 'Version\/'
+                string: navigator.userAgent,
+                subString: "MSIE",
+                identity: "Explorer",
+                versionSearch: "MSIE",
+                code: OVVBrowser.IE
             }];
-
-            return getData();
-        }
-
-        /**
-         * browser:
-         *    {
-		 *        ID: ,
-		 *          name: '',
-		 *          version: '',
-		 *        os: ''
-		 *    };
-         */
-        var browser = getBrowserDetailsByUserAgent(userAgent);
-
-        this.getBrowser = function() {
-            return browser;
-        }
-
-        this.getBrowserIDEnum = function() {
-            return browserIDEnum;
-        }
+            OVVBrowser.browser = searchString(dataBrowser) || OVVBrowser.OTHER;
+            OVVBrowser.version = searchVersion(navigator.userAgent) || searchVersion(navigator.appVersion);
+        })();
     }
+    OVVBrowser.CHROME  = 'CH';
+    OVVBrowser.FIREFOX = 'FF';
+    OVVBrowser.SAFARI  = 'SF';
+    OVVBrowser.IE      = 'IE';
+    OVVBrowser.OPERA   = 'OP';
+    OVVBrowser.OTHER   = '??';
 
-    function OVVBeaconSupportCheck() {
-        var ovvBrowser = new OVVBrowser($ovvs['OVVID'].userAgent);
-
-        var browser = ovvBrowser.getBrowser();
-        var browserIDEnum = ovvBrowser.getBrowserIDEnum();
-
-        this.supportsBeacons = function() {
-            //Windows 8.1 is represented as Windows NT 6.3 in user agent string
-            var WIN_8_1 = 6.3;
-            var isIE = browser.ID == browserIDEnum.MSIE;
-            var isSupportedIEVersion = browser.version >= 11;
-            var ntVersionArr = browser.version ? browser.version.split(' ') : [0];
-            var ntVersion = ntVersionArr[ntVersionArr.length - 1];
-            var isSupportedOSForIE = ntVersion >= WIN_8_1;
-            return !isIE || (isSupportedIEVersion && isSupportedOSForIE);
+    function OVVBeaconSupportCheck(){
+        var br = new OVVBrowser();
+        var os = getOS();
+        console.log(os);
+        this.supportsBeacons = function(){
+            return !(br.browser == br.IE && br.version < 11);
         }
     }
 
@@ -820,8 +770,8 @@ try {
         this.checkViewability = function() {
             var check = new OVVCheck();
             check.id = id;
-            check.inSDIframe = $ovvs['OVVID'].IN_SD_IFRAME;
-            check.inXDIframe = $ovvs['OVVID'].IN_XD_IFRAME;
+            check.inIframeSD = $ovvs['OVVID'].IN_SD_IFRAME;
+            check.inIframeXD = $ovvs['OVVID'].IN_XD_IFRAME;
             check.geometrySupported = $ovvs['OVVID'].geometrySupported;
             check.beaconsSupported =
             check.focus = isInFocus();
@@ -1927,10 +1877,10 @@ try {
         //Allow pubs to add listeners when an existing OVV library is present:
         window.$ovv.addAsset(window.$ovvs['OVVID'].getAssetById('OVVID'));
     }
-    '"'+OVVCheck.INIT_SUCCESS+'"'; // result for 'eval' in Flash OVVAsset constructor i ncase of success
+    OVVCheck.INIT_SUCCESS; // result for 'eval' in Flash OVVAsset constructor i ncase of success
 } catch (e) {
     if (OVVCheck.ERRORS.indexOf(e.message) == -1) {
         e.message = OVVCheck.INFO_ERROR_INIT_ERROR_OTHER;
     }
-    '"'+e.message+'"'; // result for 'eval' in Flash OVVAsset constructor in case of initialization error
+    e.message; // result for 'eval' in Flash OVVAsset constructor in case of initialization error
 }

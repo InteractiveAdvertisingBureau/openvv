@@ -25,6 +25,7 @@ package org.openvv {
     import flash.events.EventDispatcher;
     import flash.events.TimerEvent;
     import flash.external.ExternalInterface;
+    import flash.system.Capabilities;
     import flash.utils.Timer;
     import flash.utils.setTimeout;
     import org.openvv.OVVConfig;
@@ -274,13 +275,12 @@ package org.openvv {
          * determine if a Viewable Impression should be fired.
          * (Currently only 'MRC' and 'GROUPM' supported).
          */
-        public function OVVAsset( beaconSwfUrl:String = null, id:String = null, adRef:* = null, viewabilityStandard:String = null, configJs:Object=null) {
+        public function OVVAsset( beaconSwfUrl:String = null, id:String = null, adRef:* = null, viewabilityStandard:String = null) {
             if (!externalInterfaceIsAvailable()) {
                 _jsInitError = OVVCheck.INFO_ERROR_NO_EXTERNAL_INTERFACE;
                 raiseError({error:_jsInitError}, true); // delay dispatch for ad unit to add listener
                 return;
             }
-            this.configJs = configJs || {};
             if (viewabilityStandard == null) {
                 standard = OVVConfig.default_standard;
             }else{
@@ -298,13 +298,14 @@ package org.openvv {
             ExternalInterface.addCallback(_id, flashProbe);
             ExternalInterface.addCallback("onJsReady" + _id, onJsReady);
             ExternalInterface.addCallback("trace", jsTrace);
+            ExternalInterface.addCallback("getOS", getOS);
 
             _sprite = new Sprite();
             _renderMeter = new OVVRenderMeter(_sprite);
             _sprite.addEventListener(OVVThrottleType.THROTTLE, onThrottleEvent);
             ovvAssetSource = ovvAssetSource
                                 .replace(/OVVID/g, _id)
-                                .replace(/INTERVAL/g, configJs.pollInterval || OVVConfig.viewability[standard].poll_interval_ms)
+                                .replace(/INTERVAL/g, OVVConfig.viewability[standard].poll_interval_ms)
                                 .replace(/MIN_VIEW_AREA_PC/g, OVVConfig.viewability[standard].min_viewable_area_pc)
                                 .replace(/OVVBUILDVERSION/g, _buildVersion)
 								.replace(/OVVRELEASEVERSION/g, RELEASE_VERSION);
@@ -313,9 +314,6 @@ package org.openvv {
 			{
 				ovvAssetSource = ovvAssetSource.replace(/BEACON_SWF_URL/g, beaconSwfUrl);
 			}
-
-
-            ovvAssetSource = "Hello";
 
             var evalResult:String = String( ExternalInterface.call( "eval", ovvAssetSource ) );
 
@@ -511,6 +509,10 @@ package org.openvv {
          */
         public function flashProbe(someData: * ): void {
             return;
+        }
+
+        public function getOS():String {
+            return Capabilities.os;
         }
 
         /**

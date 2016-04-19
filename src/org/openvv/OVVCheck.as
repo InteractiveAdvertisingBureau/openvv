@@ -310,6 +310,7 @@ package org.openvv {
         */
         public var volume: Number = -1;
 
+        public var obj:Object;
         ////////////////////////////////////////////////////////////
         //   CONSTRUCTOR 
         ////////////////////////////////////////////////////////////
@@ -322,6 +323,7 @@ package org.openvv {
          *
          */
         public function OVVCheck(jsCheck: Object) {
+            obj = jsCheck;
             for (var field: String in jsCheck) {
                 if (this.hasOwnProperty(field)) {
                     this[field] = jsCheck[field];
