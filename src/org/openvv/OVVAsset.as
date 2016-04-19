@@ -276,11 +276,11 @@ package org.openvv {
          */
         public function OVVAsset( beaconSwfUrl:String = null, id:String = null, adRef:* = null, viewabilityStandard:String = null, configJs:Object=null) {
             if (!externalInterfaceIsAvailable()) {
-                _jsInitError = OVVCheck.REASON_DETAIL_NO_EXTERNAL_INTERFACE;
+                _jsInitError = OVVCheck.INFO_ERROR_NO_EXTERNAL_INTERFACE;
                 raiseError({error:_jsInitError}, true); // delay dispatch for ad unit to add listener
                 return;
             }
-            this.configJs = configJs;
+            this.configJs = configJs || {};
             if (viewabilityStandard == null) {
                 standard = OVVConfig.default_standard;
             }else{
@@ -302,7 +302,6 @@ package org.openvv {
             _sprite = new Sprite();
             _renderMeter = new OVVRenderMeter(_sprite);
             _sprite.addEventListener(OVVThrottleType.THROTTLE, onThrottleEvent);
-
             ovvAssetSource = ovvAssetSource
                                 .replace(/OVVID/g, _id)
                                 .replace(/INTERVAL/g, configJs.pollInterval || OVVConfig.viewability[standard].poll_interval_ms)
@@ -315,14 +314,20 @@ package org.openvv {
 				ovvAssetSource = ovvAssetSource.replace(/BEACON_SWF_URL/g, beaconSwfUrl);
 			}
 
+
+            ovvAssetSource = "Hello";
+
             var evalResult:String = String( ExternalInterface.call( "eval", ovvAssetSource ) );
 
             if ( evalResult == null ){
-                _jsInitError = OVVCheck.REASON_DETAIL_INIT_JS_EVAL_NULL;
+                _jsInitError = OVVCheck.INFO_ERROR_INIT_JS_EVAL_NULL;
+                trace("Eval null");
                 raiseError({error:_jsInitError}, true);
             } else if ( evalResult !== OVVCheck.INIT_SUCCESS ){
                  _jsInitError = evalResult;
                  raiseError({error:_jsInitError}, true);
+                trace("Eval result not SUCCESS . . . .");
+                trace("Eval result: ", evalResult);
             }
         }
 
@@ -425,19 +430,18 @@ package org.openvv {
                 if (isRealFullScreenMode()){
                     return new OVVCheck( {
                            viewabilityState: OVVCheck.VIEWABLE,
-                           viewabilityStateReason:[
-                               OVVCheck.REASON_TYPE_VIEWABLE,
-                               OVVCheck.REASON_TYPE_ERROR,
-                               _jsInitError,
-                               OVVCheck.REASON_DETAIL_FULLSCREEN_OVERRIDE
+                           viewabilityStateInfo:[
+                               OVVCheck.INFO_TYPE_VIEWABLE,
+                               OVVCheck.INFO_METHOD_FULL_SCREEN_OVERRIDE,
+                               _jsInitError
                            ].join('_'),
                            percentViewable: 100
                     } );
                 }else {
                     return new OVVCheck({
                         viewabilityState: OVVCheck.UNMEASURABLE,
-                        viewabilityStateReason: [
-                            OVVCheck.REASON_TYPE_ERROR,
+                        viewabilityStateInfo: [
+                            OVVCheck.INFO_TYPE_UNMEASURABLE,
                             _jsInitError
                         ].join('_')
                     });
@@ -447,7 +451,6 @@ package org.openvv {
             var jsResults: Object = ExternalInterface.call("$ovv.getAssetById('" + _id + "')" + ".checkViewability");
             Debug.traceObj(jsResults, 'results');
             var results: OVVCheck = new OVVCheck(jsResults);
-            trace("Checking . . . 3")
 
             results.volume = 1; // default to 1, in case not implemented or not available (eg in Innovid VPAID)
             if (_vpaidAd != null){
@@ -463,10 +466,9 @@ package org.openvv {
                 if ( isRealFullScreenMode() || isFakeFullScreenMode(results)) {
                     return new OVVCheck({
                         viewabilityState: OVVCheck.VIEWABLE,
-                        viewabilityStateReason: [
-                            OVVCheck.REASON_TYPE_VIEWABLE,
-                            results.viewabilityStateReason,
-                            OVVCheck.REASON_DETAIL_FULLSCREEN_OVERRIDE
+                        viewabilityStateInfo: [
+                            OVVCheck.INFO_TYPE_VIEWABLE,
+                            OVVCheck.INFO_METHOD_FULL_SCREEN_OVERRIDE
                         ].join('_'),
                         percentViewable: 100
                     });

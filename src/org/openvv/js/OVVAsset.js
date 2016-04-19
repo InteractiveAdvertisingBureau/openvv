@@ -242,130 +242,6 @@ try {
 
 
     /**
-     * A class to detect and store information about the environment in which the player is running
-     * for logging and selecting viewability measurement method.
-     * @class
-     * @constructor
-     */
-    function OVVEnv() {
-        // Get iframe type
-        this.iframe = (function(){
-            try {
-                if (window.top == window) {
-                    return OVVEnv.IFRAME_NONE;
-                } else if (window.top.document.domain == window.document.domain) {
-                    return OVVEnv.IFRAME_SD;
-                }
-            } catch (e) {}
-            return  OVVEnv.IFRAME_XD;
-        })();
-
-
-        // Get OS and Browser info
-        if ( !!window.testOvvConfig ){
-            navigator = window.testOvvConfig.navigator || window.navigator;
-        }
-
-        this.userAgent = navigator.userAgent;
-
-        // Find Browser code and major version : eg "BC:49" (Browser Chrome ver 49)
-        // Based on Peter Paul Koch's 'BrowserDetect' from quirksmode.org
-        this.detect = {
-            init: function() {
-                this.browser = this.searchString(this.dataBrowser) || OVVEnv.BROWSER_OTHER;
-                this.browser += ":" + this.searchVersion(navigator.userAgent) || this.searchVersion(navigator.appVersion) || "?";
-                this.os = this.searchString(this.dataOS) || "OO";
-            },
-            searchString: function(data) {
-                for (var i = 0; i < data.length; i++) {
-                    var dataString = data[i].string;
-                    var dataProp = data[i].prop;
-                    this.versionSearchString = data[i].versionSearch || data[i].identity;
-                    if (dataString) {
-                        if (dataString.indexOf(data[i].subString) != -1)
-                            return data[i].code;
-                    } else if (dataProp)
-                        return data[i].code;
-                }
-            },
-            searchVersion: function(dataString) {
-                var index = dataString.indexOf(this.versionSearchString);
-                if (index == -1) return;
-                return parseInt(dataString.substring(index + this.versionSearchString.length + 1));
-            },
-            dataBrowser: [{
-                string: navigator.userAgent,
-                subString: "Chrome",
-                identity: "Chrome",
-                code: OVVEnv.BROWSER_CHROME
-            }, {
-                string: navigator.vendor,
-                subString: "Apple",
-                identity: "Safari",
-                versionSearch: "Version",
-                code: OVVEnv.BROWSER_SAFARI
-            }, {
-                prop: window.opera,
-                identity: "Opera",
-                versionSearch: "Version",
-                code: OVVEnv.BROWSER_OPERA
-            }, {
-                string: navigator.userAgent,
-                subString: "Firefox",
-                identity: "Firefox",
-                code: OVVEnv.BROWSER_FIREFOX
-            }, {
-                string: navigator.userAgent,
-                subString: "MSIE",
-                identity: "Explorer",
-                versionSearch: "MSIE",
-                code: OVVEnv.BROWSER_IE
-            }],
-
-            dataOS: [{
-                string: navigator.platform,
-                subString: "Win",
-                identity: "Windows",
-                code: OVVEnv.OS_WIN
-            }, {
-                string: navigator.platform,
-                subString: "Mac",
-                identity: "Mac",
-                code: OVVEnv.OS_MAC
-            }, {
-                string: navigator.userAgent,
-                subString: "iPhone",
-                identity: "iPhone/iPod",
-                code: OVVEnv.OS_IPAD_IPHONE
-            }, {
-                string: navigator.platform,
-                subString: "Linux",
-                identity: "Linux",
-                code: OVVEnv.OS_LINUX
-            }]
-
-        };
-        this.detect.init();
-    }
-
-    OVVEnv.OS_MAC = "OM";
-    OVVEnv.OS_WIN = "OW";
-    OVVEnv.OS_LINUX = "OL";
-    OVVEnv.OS_IPAD_IPHONE = "OI";
-    OVVEnv.OS_OTHER = "O?";
-
-    OVVEnv.BROWSER_CHROME = "BC";
-    OVVEnv.BROWSER_FIREFOX = "BF";
-    OVVEnv.BROWSER_SAFARI = "BS";
-    OVVEnv.BROWSER_IE = "BE";
-    OVVEnv.BROWSER_OPERA = "BO";
-    OVVEnv.BROWSER_OTHER = "B?";
-
-    OVVEnv.IFRAME_NONE = "F0";
-    OVVEnv.IFRAME_SD = "SD";
-    OVVEnv.IFRAME_XD = "XD";
-
-    /**
      * A container for all the values that OpenVV collects.
      * @class
      * @constructor
@@ -512,7 +388,7 @@ try {
          * @see {@link OVVCheck.UNMEASURABLE}
          * @see {@link OVVCheck.VIEWABLE}
          */
-        this.viewabilityStateReason = "UNINITIALIZED";
+        this.viewabilityStateInfo = 'UNINITIALIZED';
     }
     /**
      * The value that {@link OVVCheck#viewabilityState} will be set to if OVV cannot
@@ -533,49 +409,43 @@ try {
     OVVCheck.UNVIEWABLE = 'unviewable';
 
 
-    // NEW : Reasons for instantaneous Unviewability or Unmeasurability (passed in viewabilityStateReason)
+    // NEW : Reasons for instantaneous Unviewability or Unmeasurability (passed in viewabilityStateInfo)
 
-    OVVCheck.INIT_SUCCESS = "SUCCESS";
+    OVVCheck.INIT_SUCCESS = 'SUCCESS';
     /**
      * The value that {@link OVVCheck#viewabilityState} will be set to if the beacons
      * are not ready to determine the viewability state
      */
     OVVCheck.NOT_READY = 'not_ready';
 
-    OVVCheck.type = {
-        INIT_ERROR: "E",
-        VIEWABLE: "V",
-        NOT_VIEWABLE: "N",
-        UNMEASURABLE: "U"
-    };
+    OVVCheck.INFO_TYPE_ERROR        = 'E';
+    OVVCheck.INFO_TYPE_VIEWABLE     = 'V';
+    OVVCheck.INFO_TYPE_NOT_VIEWABLE = 'N';
+    OVVCheck.INFO_TYPE_UNMEASURABLE = 'U';
 
-    OVVCheck.env = new OVVEnv();
+    OVVCheck.INFO_METHOD_BROWSER_GEOMETRY  = 'BG';
+    OVVCheck.INFO_METHOD_BEACON_FLASH      = 'FB';
+    OVVCheck.INFO_METHOD_BEACON_MOZPAINT   = 'MB';
+    OVVCheck.INFO_METHOD_ACTIVE_WINDOW     = 'WI';
+    OVVCheck.INFO_METHOD_PLAYER_VISIBILITY = 'VS';
+    OVVCheck.INFO_METHOD_PLAYER_DISPLAY    = 'DS';
+    OVVCheck.INFO_METHOD_PLAYER_OBSCURED   = 'OB';
+    OVVCheck.INFO_METHOD_FULL_SCREEN_OVERRIDE = 'FS';
 
-    OVVCheck.method = {
-        GEOMETRY_AREA: "MG",
-        FLASH_BEACONS: "MF",
-        MOZPAINT_BEACONS: "MM",
-        ACTIVE_WINDOW: "MW",
-        PLAYER_VISIBILITY: "MV",
-        PLAYER_DISPLAY: "MD",
-        PLAYER_OBSCURED: "MO"
-    };
-
-    OVVCheck.detail = {
-        NONE: "!!",
-        EXTERNAL_INTERFACE:"EX",
-        INIT_ERROR_OTHER: "E!",
-        INIT_JS_EVAL_NULL: "EN",
-        INIT_JS_EVAL_ERROR: "EE",
-        PLAYER_NOT_FOUND: "EP",
-        BAD_BEACON_URL: "BB",
-        NO_MEASURING_METHOD: "NM",
-        CTRL_BEACON_NOT_READY: "CN",
-        CTRL_BEACON_IN_VIEW: "CV",
-        BEACONS_NOT_READY: "BN",
-        INVALID_BEACON_RESULT: "IB",
-        INVALID_VIEWPORT_RESULT: "IV"
-    };
+    OVVCheck.INFO_ERROR_INIT_ERROR_OTHER        = 'I?';
+    OVVCheck.ERRORS = [
+        OVVCheck.INFO_ERROR_NO_EXTERNAL_INTERFACE   = 'XI',
+        OVVCheck.INFO_ERROR_INIT_JS_EVAL_NULL       = 'JN',
+        OVVCheck.INFO_ERROR_INIT_JS_EVAL_ERROR      = 'JE',
+        OVVCheck.INFO_ERROR_PLAYER_NOT_FOUND        = 'NP',
+        OVVCheck.INFO_ERROR_BAD_BEACON_URL          = 'BU',
+        OVVCheck.INFO_ERROR_NO_MEASURING_METHOD     = 'NM',
+        OVVCheck.INFO_ERROR_CTRL_BEACON_NOT_READY   = 'CN',
+        OVVCheck.INFO_ERROR_CTRL_BEACON_IN_VIEW     = 'CV',
+        OVVCheck.INFO_ERROR_BEACONS_NOT_READY       = 'BN',
+        OVVCheck.INFO_ERROR_INVALID_BEACON_RESULT   = 'BI',
+        OVVCheck.INFO_ERROR_INVALID_VIEWPORT_RESULT = 'IV',
+    ];
 
     function OVVBrowser(userAgent) {
 
@@ -622,7 +492,7 @@ try {
                         break;
                     }else{
                         data.ID = 0;
-                        data.name = "Unknown";
+                        data.name = 'Unknown';
                         data.version = 0;
                     }
                 }
@@ -697,147 +567,6 @@ try {
             return !isIE || (isSupportedIEVersion && isSupportedOSForIE);
         }
     }
-
-
-/**
- * Class to test for viewability of player (or viewable cropped fraction of player) within the current DOM window
- * @constructor
- * @param {Object Window} domContext - The current document's window
- * @param {Object Element} playerContext - The player element, or iframe element containing the player
- */
-
-function OVVDOMCheck(domContext, playerContext ) {
-    this.domContext = domContext;
-    this.playerContext = playerContext;
-    this.state = "";
-    this.method = "";
-    this.isNotViewable(check, domContext, playerContext){
-        if (isVisibilityHidden()){
-            this.state = OVVCheck.NOT_VIEWABLE;
-            check.technique = OVVCheck.GE
-        }
-    }
-
-    var isVisibilityHidden = function(){
-
-    }
-
-    if ( isVisibilityHidden() ) {
-        var style = window.getComputedStyle(player, null);
-        var visibility = style.getPropertyValue('visibility');
-        if (visibility == 'hidden') {
-            return true;
-        }
-
-    }
-
-
-    var isPlayerVisibilityHidden = function(check, player) {
-        var style = window.getComputedStyle(player, null);
-        var visibility = style.getPropertyValue('visibility');
-        if (visibility == 'hidden') {
-            return true;
-        }
-        return false;
-    };
-
-    /**
-     * Checks if the player element is not displayed, by css attribute 'display:none'.
-     * Is so, viewability at the time of this check is 'not viewable' and no further check
-     * is required.
-     * This property is inherited, so no need to parse up the DOM hierarchy.
-     * If the player is in an iframe inheritance is restricted to elements within
-     * the DOM of the iframe document
-     * @param {OVVCheck} check The OVVCheck object to populate
-     * @param {Element} player The HTML Element to measure
-     */
-    var isPlayerDisplayNone = function(check, player) {
-        var style = window.getComputedStyle(player, null);
-        var display = style.getPropertyValue('display');
-        if (display == 'none') {
-            return true;
-        }
-        return false;
-    };
-
-    /**
-     * Checks if the player is more then 50% obscured by another dom element.
-     * Is so, viewability at the time of this check is 'not viewable' and no further check
-     * is required.
-     * If the player is in an iframe this check is restricted to elements within
-     * the DOM of the iframe document
-     * @param {OVVCheck} check The OVVCheck object to populate
-     * @param {Element} player The HTML Element to measure
-     */
-    var isPlayerObscured = function(check, player) {
-        var playerRect = player.getBoundingClientRect(),
-            percentObscured,
-            offset = 12, // ToDo: Make sure test points don't overlap beacons.
-            xLeft = playerRect.left + offset,
-            xRight = playerRect.right - offset,
-            yTop = playerRect.top + offset,
-            yBottom = playerRect.bottom - offset,
-            xCenter = Math.floor(playerRect.left + playerRect.width / 2),
-            yCenter = Math.floor(playerRect.top + playerRect.height / 2),
-            testPoints = [{
-                x: xLeft,
-                y: yTop
-            }, {
-                x: xCenter,
-                y: yTop
-            }, {
-                x: xRight,
-                y: yTop
-            }, {
-                x: xLeft,
-                y: yCenter
-            }, {
-                x: xCenter,
-                y: yCenter
-            }, {
-                x: xRight,
-                y: yCenter
-            }, {
-                x: xLeft,
-                y: yBottom
-            }, {
-                x: xCenter,
-                y: yBottom
-            }, {
-                x: xRight,
-                y: yBottom
-            }];
-
-        for (var p in testPoints) {
-            if (testPoints[p] && testPoints[p].x >= 0 && testPoints[p].y >= 0) {
-                elem = document.elementFromPoint(testPoints[p].x, testPoints[p].y);
-                if (elem != null && elem != player && !player.contains(elem)) {
-                    var style = window.getComputedStyle(elem, null);
-                    var opacity = style.getPropertyValue('opacity');
-                    if (opacity > 0.5) {
-                        percentObscured = 100 * overlapping(playerRect, elem.getBoundingClientRect());
-                        if (percentObscured > 100 - MIN_VIEW_AREA_PC) {
-                            check.percentViewable = 100 - percentObscured;
-                            return true;
-                        }
-                    }
-                }
-            }
-        }
-        return false;
-    }
-
-    var overlapping = function(playerRect, elem) {
-        var playerArea = playerRect.width * playerRect.height;
-        var x_overlap = Math.max(0, Math.min(playerRect.right, elem.right) - Math.max(playerRect.left, elem.left));
-        var y_overlap = Math.max(0, Math.min(playerRect.bottom, elem.bottom) - Math.max(playerRect.top, elem.top));
-        return (x_overlap * y_overlap) / playerArea;
-    }
-
-
-
-
-}
 
     /**
      * Represents an Asset which OVV is going to determine the viewability of
@@ -1099,95 +828,75 @@ function OVVDOMCheck(domContext, playerContext ) {
 
             // ===== Methods that can only establish a non-viewable state ====== 
             //       They do not require a viewable-area measuring method:
-
+            //
             if (isWindowInactive()) {
-`                setViewabilityInfo(check, OVVCheck.UNVIEWABLE, OVVCheck.technique.ACTIVE_WINDOW );
+                setViewabilityInfo(check, OVVCheck.UNVIEWABLE, OVVCheck.INFO_METHOD_ACTIVE_WINDOW );
                 return check;
             }
 
             if (isPlayerVisibilityHidden(check, player)) {
-                check.technique = OVVCheck.technique.PLAYER_VISIBILITY;
-                setViewabilityInfo(check, OVVCheck.UNVIEWABLE);
+                setViewabilityInfo(check, OVVCheck.UNVIEWABLE, OVVCheck.INFO_METHOD_PLAYER_VISIBILITY);
                 return check;
             }
 
             if (isPlayerDisplayNone(check, player)) {
-                check.technique = OVVCheck.technique.PLAYER_DISPLAY;
-                setViewabilityInfo(check, OVVCheck.UNVIEWABLE);
+                setViewabilityInfo(check, OVVCheck.UNVIEWABLE, OVVCheck.INFO_METHOD_PLAYER_DISPLAY);
                 return check;
             }
 
             if (isPlayerObscured(check, player) === true) {
-                check.technique = OVVCheck.technique.PLAYER_OBSCURED;
-                setViewabilityInfo(check, OVVCheck.UNVIEWABLE);
+                setViewabilityInfo(check, OVVCheck.UNVIEWABLE, OVVCheck.INFO_METHOD_PLAYER_OBSCURED);
                 return check;
             }
+            //
             // =================================================================
 
-            // ===== Methods that can only establish a non-viewable state=======
-
             // Player is on the active browser tab in an un-minimized browser window and
-            // it is not invisible, hidden or obscured. (or DEBUG mode is enabled ) :
-            // Try to measure its viewable area:
-
-            // if we can use the geometry method, use it over the beacon method
+            // it is not invisible, hidden or obscured.
+            // Try to measure its viewable area using browser geometry:
+            //
             if (check.geometrySupported) {
-                check.technique = OVVCheck.technique.GEOMETRY_AREA;
-                console.log("checkGeometry. . . going in");
+                check.technique = OVVCheck.INFO_METHOD_BROWSER_GEOMETRY;
                 checkGeometry(check, player);
-                console.log("checkGeometry. . . coming out");
-
-                for (var p in check) {
-                    console.log("check." + p + " = " + check[p]);
-                }
-
                 if (check.error) {
-                    setViewabilityInfo(check, OVVCheck.UNMEASURABLE, OVVCheck.detail.INVALID_VIEWPORT_RESULT);
+                    setViewabilityInfo(check, OVVCheck.UNMEASURABLE, OVVCheck.INFO_ERROR_INVALID_VIEWPORT_RESULT);
                 } else if (check.percentViewable >= MIN_VIEW_AREA_PC) {
-                    setViewabilityInfo(check, OVVCheck.VIEWABLE);
+                    setViewabilityInfo(check, OVVCheck.VIEWABLE, OVVCheck.INFO_METHOD_BROWSER_GEOMETRY);
                 } else {
-                    setViewabilityInfo(check, OVVCheck.UNVIEWABLE);
+                    setViewabilityInfo(check, OVVCheck.UNVIEWABLE, OVVCheck.INFO_METHOD_BROWSER_GEOMETRY);
                 }
                 return check;
             }
-            console.log("Using beacons . . . going in");
-
             // Geometry not supported (or DEBUG mode is enabled ) :
             // Try to use beacons to determine viewable area of player:
             if (getBeaconFunc == getFlashBeacon) {
-                check.technique = OVVCheck.technique.FLASH_BEACONS;
+                check.technique = OVVCheck.INFO_METHOD_BEACON_FLASH;
             } else {
-                check.technique = OVVCheck.technique.MOZPAINT_BEACONS;
+                check.technique = OVVCheck.INFO_METHOD_BEACON_MOZPAINT;
             }
-            console.log("Using beacons . . . technique : " + check.technique);
 
             if (controlBeaconNotReady()) {
-                console.log("Using beacons . . . controlBeaconNotReady!");
-                setViewabilityInfo(check, OVVCheck.UNMEASURABLE, OVVCheck.detail.CTRL_BEACON_NOT_READY);
+                setViewabilityInfo(check, OVVCheck.UNMEASURABLE, OVVCheck.INFO_ERROR_CTRL_BEACON_NOT_READY);
                 return check;
             }
 
             if (controlBeaconInView()) {
-                console.log("Using beacons . . . controlBeaconInView!");
-                setViewabilityInfo(check, OVVCheck.UNMEASURABLE, OVVCheck.detail.CTRL_BEACON_IN_VIEW);
+                setViewabilityInfo(check, OVVCheck.UNMEASURABLE, OVVCheck.INFO_ERROR_CTRL_BEACON_IN_VIEW);
                 return check;
             }
 
             if (activeBeaconsNotReady()) {
-                console.log("Using beacons . . . activeBeaconsNotReady!");
-                setViewabilityInfo(check, OVVCheck.UNMEASURABLE, OVVCheck.detail.BEACONS_NOT_READY);
+                setViewabilityInfo(check, OVVCheck.UNMEASURABLE, OVVCheck.INFO_ERROR_BEACONS_NOT_READY);
                 return check;
             }
 
-            console.log("Using beacons . . . checkActiveBeacons . . . going in!");
             checkActiveBeacons(check);
-            console.log("Using beacons . . . checkActiveBeacons . . . coming out!");
 
             if (check.viewabilityState == OVVCheck.UNMEASURABLE) {
                 check.beacons = beacons;
-                setViewabilityInfo(check, OVVCheck.UNMEASURABLE, OVVCheck.detail.INVALID_BEACON_RESULT);
+                setViewabilityInfo(check, OVVCheck.UNMEASURABLE, OVVCheck.INFO_ERROR_INVALID_BEACON_RESULT);
             } else {
-                setViewabilityInfo(check, check.viewabilityState);
+                setViewabilityInfo(check, check.viewabilityState, check.technique);
             }
 
             return check;
@@ -1266,29 +975,26 @@ function OVVDOMCheck(domContext, playerContext ) {
         ///////////////////////////////////////////////////////////////////////////
         // PRIVATE FUNCTIONS
         ///////////////////////////////////////////////////////////////////////////
-        var setViewabilityInfo = function(check, state, technique, detail) {
+        var setViewabilityInfo = function(check, state, info) {
+            // 'info' will either be 'measurement method' (for viewable or not viewable) or unmeasureable reason (for unmeasureable)
             check.viewabilityState = state;
             var code;
             switch (state) {
                 case OVVCheck.VIEWABLE:
-                    code = OVVCheck.type.VIEWABLE;
+                    code = OVVCheck.INFO_TYPE_VIEWABLE;
                     break;
                 case OVVCheck.UNVIEWABLE:
-                    code = OVVCheck.type.NOT_VIEWABLE;
+                    code = OVVCheck.INFO_TYPE_NOT_VIEWABLE;
                     break;
                 case OVVCheck.UNMEASURABLE:
-                    code = OVVCheck.type.UNMEASURABLE;
+                    code = OVVCheck.INFO_TYPE_UNMEASURABLE;
                     break;
                 default:
-                    code = "X";
+                    code = 'X';
                     break; // something wrong
             }
-            code += "_" + check.frameEnv;
-            code += "_" + check.technique;
-            if ( !! detail) {
-                code += '_' + detail;
-            }
-            check.viewabilityStateReason = code;
+            code += '_' + info;
+            check.viewabilityStateInfo = code;
         };
 
         // Techniques that can determine the player is Unviewable, but cannot be used to determine the player
@@ -1302,7 +1008,7 @@ function OVVDOMCheck(domContext, playerContext ) {
             //    Failing this test should not indicate Unviewability, unless a specific viewability standard requires it.
             // toDo - re-implement hasFocus test here, if required
             return true;
-        }
+        };
 
 
         var isWindowInactive = function() {
@@ -1419,14 +1125,14 @@ function OVVDOMCheck(domContext, playerContext ) {
                 }
             }
             return false;
-        }
+        };
 
         var overlapping = function(playerRect, elem) {
             var playerArea = playerRect.width * playerRect.height;
             var x_overlap = Math.max(0, Math.min(playerRect.right, elem.right) - Math.max(playerRect.left, elem.left));
             var y_overlap = Math.max(0, Math.min(playerRect.bottom, elem.bottom) - Math.max(playerRect.top, elem.top));
             return (x_overlap * y_overlap) / playerArea;
-        }
+        };
 
 
         /**
@@ -1596,10 +1302,10 @@ function OVVDOMCheck(domContext, playerContext ) {
             // (BEACON_SWF_URL is obfuscated here to prevent it from being
             // String substituted by ActionScript)
             // Dynamically unobfuscate to prevent minify from reconstructing original token string
-            var reversed = "LRU_FWS_NOCAEB";
-            var unreplaced = reversed.split("").reverse().join('');
+            var reversed = 'LRU_FWS_NOCAEB';
+            var unreplaced = reversed.split('').reverse().join('');
             if (url == '' || url == unreplaced) {
-                throw new Error(OVVCheck.detail.BAD_BEACON_URL);
+                throw new Error(OVVCheck.INFO_ERROR_BAD_BEACON_URL);
             }
 
             for (var index = 0; index <= TOTAL_BEACONS; index++) {
@@ -1904,11 +1610,11 @@ function OVVDOMCheck(domContext, playerContext ) {
         player = findPlayer();
 
         if (player == null) {
-            throw new Error(OVVCheck.detail.PLAYER_NOT_FOUND);
+            throw new Error(OVVCheck.INFO_ERROR_PLAYER_NOT_FOUND);
         }
 
         if (!beaconSupportCheck.supportsBeacons() && $ovvs['OVVID'].geometrySupported === false) {
-            throw new Error(OVVCheck.detail.NO_MEASURING_TECHNIQUE);
+            throw new Error(OVVCheck.INFO_ERROR_NO_MEASURING_METHOD);
         }
 
         // only use the beacons if geometry is not supported, or we we are in DEBUG mode.
@@ -2048,8 +1754,8 @@ function OVVDOMCheck(domContext, playerContext ) {
 
         /**
          * Recursive function that return the asset (element) visible dimension
-         * @param {element} The element to get his visible dimension
-         * @param {contextWindow} The relative window
+         * @param element   The element to get his visible dimension
+         * @param contextWindow   The relative window
          */
 
         var getAssetVisibleDimension = function(element, contextWindow) {
@@ -2127,8 +1833,8 @@ function OVVDOMCheck(domContext, playerContext ) {
         };
         /**
          * Calculate asset viewable percentage given the asset size and the viewport
-         * @param {effectiveAssetRect} the asset viewable rect; effectiveAssetRect = {left :, top :,bottom:,right:,}
-         * @param {viewPortSize} the browser viewport size;
+         * @param effectiveAssetRect The asset viewable rect; effectiveAssetRect = {left :, top :,bottom:,right:,}
+         * @param viewPortSize The browser viewport size;
          */
         var getAssetViewablePercentage = function(effectiveAssetRect, viewPortSize) {
             // holds the asset viewable surface
@@ -2221,10 +1927,10 @@ function OVVDOMCheck(domContext, playerContext ) {
         //Allow pubs to add listeners when an existing OVV library is present:
         window.$ovv.addAsset(window.$ovvs['OVVID'].getAssetById('OVVID'));
     }
-    OVVCheck.INIT_SUCCESS; // result for 'eval' in Flash OVVAsset constructor i ncase of success
+    '"'+OVVCheck.INIT_SUCCESS+'"'; // result for 'eval' in Flash OVVAsset constructor i ncase of success
 } catch (e) {
-    if (OVVCheck.INIT_ERRORS.indexOf(e.message) == -1) {
-        e.message = OVVCheck.detail.JS_INIT_OTHER;
+    if (OVVCheck.ERRORS.indexOf(e.message) == -1) {
+        e.message = OVVCheck.INFO_ERROR_INIT_ERROR_OTHER;
     }
-    e.message; // result for 'eval' in Flash OVVAsset constructor in case of initialization error
+    '"'+e.message+'"'; // result for 'eval' in Flash OVVAsset constructor in case of initialization error
 }
