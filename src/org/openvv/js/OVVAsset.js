@@ -782,22 +782,30 @@ try {
             //       They do not require a viewable-area measuring method:
             //
             if (isWindowInactive()) {
-                setViewabilityInfo(check, OVVCheck.UNVIEWABLE, OVVCheck.INFO_METHOD_ACTIVE_WINDOW );
+                check.viewabilityState = OVVCheck.UNVIEWABLE;
+                check.viewabilityStateCode = OVVCheck.INFO_TYPE_NOT_VIEWABLE;
+                check.viewabilityStateInfo = OVVCheck.INFO_METHOD_ACTIVE_WINDOW;
                 return check;
             }
 
             if (isPlayerVisibilityHidden(check, player)) {
-                setViewabilityInfo(check, OVVCheck.UNVIEWABLE, OVVCheck.INFO_METHOD_PLAYER_VISIBILITY);
+                check.viewabilityState = OVVCheck.UNVIEWABLE;
+                check.viewabilityStateCode = OVVCheck.INFO_TYPE_NOT_VIEWABLE;
+                check.viewabilityStateInfo = OVVCheck.INFO_METHOD_PLAYER_VISIBILITY;
                 return check;
             }
 
             if (isPlayerDisplayNone(check, player)) {
-                setViewabilityInfo(check, OVVCheck.UNVIEWABLE, OVVCheck.INFO_METHOD_PLAYER_DISPLAY);
+                check.viewabilityState = OVVCheck.UNVIEWABLE;
+                check.viewabilityStateCode = OVVCheck.INFO_TYPE_NOT_VIEWABLE;
+                check.viewabilityStateInfo = OVVCheck.INFO_METHOD_PLAYER_DISPLAY;
                 return check;
             }
 
             if (isPlayerObscured(check, player) === true) {
-                setViewabilityInfo(check, OVVCheck.UNVIEWABLE, OVVCheck.INFO_METHOD_PLAYER_OBSCURED);
+                check.viewabilityState = OVVCheck.UNVIEWABLE;
+                check.viewabilityStateCode = OVVCheck.INFO_TYPE_NOT_VIEWABLE;
+                check.viewabilityStateInfo = OVVCheck.INFO_METHOD_PLAYER_OBSCURED;
                 return check;
             }
             //
@@ -811,42 +819,68 @@ try {
                 check.technique = OVVCheck.INFO_METHOD_BROWSER_GEOMETRY;
                 checkGeometry(check, player);
                 if (check.error) {
-                    setViewabilityInfo(check, OVVCheck.UNMEASURABLE, OVVCheck.INFO_ERROR_INVALID_VIEWPORT_RESULT);
+                    check.viewabilityState = OVVCheck.UNMEASURABLE;
+                    check.viewabilityStateCode = OVVCheck.INFO_TYPE_ERROR;
+                    check.viewabilityStateInfo = OVVCheck.INFO_ERROR_INVALID_VIEWPORT_RESULT;
                 } else if (check.percentViewable >= MIN_VIEW_AREA_PC) {
-                    setViewabilityInfo(check, OVVCheck.VIEWABLE, OVVCheck.INFO_METHOD_BROWSER_GEOMETRY);
+                    check.viewabilityState = OVVCheck.VIEWABLE;
+                    check.viewabilityStateCode = OVVCheck.INFO_TYPE_VIEWABLE;
+                    check.viewabilityStateInfo = OVVCheck.INFO_METHOD_BROWSER_GEOMETRY;
                 } else {
-                    setViewabilityInfo(check, OVVCheck.UNVIEWABLE, OVVCheck.INFO_METHOD_BROWSER_GEOMETRY);
+                    check.viewabilityState = OVVCheck.UNVIEWABLE;
+                    check.viewabilityStateCode = OVVCheck.INFO_TYPE_NOT_VIEWABLE;
+                    check.viewabilityStateInfo = OVVCheck.INFO_METHOD_BROWSER_GEOMETRY;
                 }
                 return check;
             }
             // Geometry not supported (or DEBUG mode is enabled ) :
             // Try to use beacons to determine viewable area of player:
             if (getBeaconFunc == getFlashBeacon) {
-                check.technique = OVVCheck.INFO_METHOD_BEACON_FLASH;
+                check.technique = OVVCheck.TE;
+                check.viewabilityStateInfo = OVVCheck.INFO_METHOD_BEACON_FLASH;
+
             } else {
                 check.technique = OVVCheck.INFO_METHOD_BEACON_MOZPAINT;
             }
 
             if (controlBeaconNotReady()) {
-                setViewabilityInfo(check, OVVCheck.UNMEASURABLE, OVVCheck.INFO_ERROR_CTRL_BEACON_NOT_READY);
+                check.viewabilityState = OVVCheck.UNMEASURABLE;
+                check.viewabilityStateCode = OVVCheck.INFO_TYPE_ERROR;
+                check.viewabilityStateInfo = OVVCheck.INFO_ERROR_CTRL_BEACON_NOT_READY;
                 return check;
             }
 
             if (controlBeaconInView()) {
-                setViewabilityInfo(check, OVVCheck.UNMEASURABLE, OVVCheck.INFO_ERROR_CTRL_BEACON_IN_VIEW);
+                check.viewabilityState = OVVCheck.UNMEASURABLE;
+                check.viewabilityStateCode = OVVCheck.INFO_TYPE_ERROR;
+                check.viewabilityStateInfo = OVVCheck.INFO_ERROR_CTRL_BEACON_IN_VIEW;
                 return check;
             }
 
             if (activeBeaconsNotReady()) {
-                setViewabilityInfo(check, OVVCheck.UNMEASURABLE, OVVCheck.INFO_ERROR_BEACONS_NOT_READY);
+                check.viewabilityState = OVVCheck.UNMEASURABLE;
+                check.viewabilityStateCode = OVVCheck.INFO_TYPE_ERROR;
+                check.viewabilityStateInfo = OVVCheck.INFO_ERROR_BEACONS_NOT_READY;
                 return check;
             }
 
             checkActiveBeacons(check);
 
-            if (check.viewabilityState == OVVCheck.UNMEASURABLE) {
-                check.beacons = beacons;
-                setViewabilityInfo(check, OVVCheck.UNMEASURABLE, OVVCheck.INFO_ERROR_INVALID_BEACON_RESULT);
+            switch (check.viewabilityState) {
+                case OVVCheck.UNMEASURABLE:
+                    check.beacons = beacons;
+                    check.viewabilityStateCode = OVVCheck.INFO_TYPE_UNMEASURABLE;
+                    check.viewabilityStateInfo = OVVCheck.INFO_ERROR_INVALID_BEACON_RESULT;
+                    break;
+                case OVVCheck.UNVIEWABLE:
+                    check.viewabilityStateCode = OVVCheck.INFO_TYPE_NOT_VIEWABLE;
+                    break;
+                case OVVCheck.VIEWABLE:
+                    check.viewabilityStateCode = OVVCheck.INFO_TYPE_VIEWABLE;
+                    break;
+
+
+
             } else {
                 setViewabilityInfo(check, check.viewabilityState, check.technique);
             }
@@ -928,7 +962,7 @@ try {
         // PRIVATE FUNCTIONS
         ///////////////////////////////////////////////////////////////////////////
         var setViewabilityInfo = function(check, state, info) {
-            // 'info' will either be 'measurement method' (for viewable or not viewable) or unmeasureable reason (for unmeasureable)
+            // 'info' will either be 'measurement method' (for viewable or not viewable) or unmeasurable reason (for unmeasurable)
             check.viewabilityState = state;
             var code;
             switch (state) {
@@ -950,7 +984,7 @@ try {
         };
 
         // Techniques that can determine the player is Unviewable, but cannot be used to determine the player
-        // meets the crieia for Viewability: measure Viewable
+        // meets the criteria for Viewability: measure Viewable
         var isInFocus = function() {
             //    NOTE : MRC requires an in-focus BROWSER TAB (which is tested by document.hidden) but here we were
             //    testing for an out-of-focus BROWSER WINDOW, which can (and often is) viewable if user

@@ -435,7 +435,7 @@ package org.openvv {
                     return new OVVCheck({
                         viewabilityState: OVVCheck.UNMEASURABLE,
                         viewabilityStateInfo: [
-                            OVVCheck.INFO_TYPE_UNMEASURABLE,
+                            OVVCheck.INFO_TYPE_ERROR,
                             _jsInitError
                         ].join('_')
                     });

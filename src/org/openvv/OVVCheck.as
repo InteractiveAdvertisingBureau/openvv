@@ -111,10 +111,11 @@ package org.openvv {
         //         'E?' : Init Error Other
 
         // Example 'info' codes:
-        // 'E_BN'   : Beacons not ready
-        // 'U_NM'   : Unmeasurable - No Measuring method available
-        // 'V_BG'   : Measured Viewable, using Browser Geometry method
-        // 'N_MB'   : Measured Not Viewable, using MozPaintCount Beacons method
+        // 'E_IV'   : Error _ Invalid Viewport
+        // 'U_BN'   : Unmeasurable _ Beacons not ready
+        // 'U_NM'   : Unmeasurable _ No Measuring method available
+        // 'V_BG'   : Viewable _ Measured using Browser Geometry method
+        // 'N_MB'   : Not Viewable _ Measured using MozPaintCount Beacons method
 
         public static const INFO_TYPE_ERROR:String        = "E";
         public static const INFO_TYPE_VIEWABLE:String     = "V";
@@ -130,37 +131,24 @@ package org.openvv {
         public static const INFO_METHOD_PLAYER_OBSCURED:String   = "OB";
         public static const INFO_METHOD_FULL_SCREEN_OVERRIDE:String = "FS";
 
-        public static const INFO_ERROR_NO_EXTERNAL_INTERFACE:String   = "XI";
-        public static const INFO_ERROR_INIT_JS_EVAL_NULL:String       = "JN";
-        public static const INFO_ERROR_INIT_JS_EVAL_ERROR:String      = "JE";
-        public static const INFO_ERROR_PLAYER_NOT_FOUND:String        = "NP";
-        public static const INFO_ERROR_BAD_BEACON_URL:String          = "BU";
-        public static const INFO_ERROR_NO_MEASURING_METHOD:String     = "NM";
-        public static const INFO_ERROR_CTRL_BEACON_NOT_READY:String   = "CN";
-        public static const INFO_ERROR_CTRL_BEACON_IN_VIEW:String     = "CV";
-        public static const INFO_ERROR_BEACONS_NOT_READY:String       = "BN";
-        public static const INFO_ERROR_INVALID_BEACON_RESULT:String   = "BI";
-        public static const INFO_ERROR_INVALID_VIEWPORT_RESULT:String = "IV";
-        public static const INFO_ERROR_INIT_ERROR_OTHER:String        = "I?";
-/*
-        public static const INFO_OS_MAC:String = "OM";
-        public static const INFO_OS_WIN:String = "OW";
-        public static const INFO_OS_LIN:String = "OL";
-        public static const INFO_OS_IOS:String = "OI";
-        public static const INFO_OS_OTHER:String = "O?";
+        // Error info for errors detected in  OVVAsset.js
+        public static const INFO_ERROR_PLAYER_NOT_FOUND:String              = "NP";
+        public static const INFO_ERROR_BAD_BEACON_URL:String                = "BU";
+        public static const INFO_ERROR_NO_MEASURING_METHOD:String           = "NM";
+        public static const INFO_ERROR_CTRL_BEACON_NOT_READY:String         = "CN";
+        public static const INFO_ERROR_CTRL_BEACON_IN_VIEW:String           = "CV";
+        public static const INFO_ERROR_BEACONS_NOT_READY:String             = "BN";
+        public static const INFO_ERROR_INVALID_BEACON_RESULT:String         = "BI";
+        public static const INFO_ERROR_INVALID_VIEWPORT_RESULT:String       = "IV";
+        public static const INFO_ERROR_INIT_ERROR_OTHER:String              = "I?";
 
-        public static const INFO_BROWSER_CHROME:String = "BC";
-        public static const INFO_BROWSER_FIREFOX:String = "BF";
-        public static const INFO_BROWSER_SAFARI:String = "BS";
-        public static const INFO_BROWSER_IE:String = "BI";
-        public static const INFO_BROWSER_OPERA:String = "BO";
-        public static const INFO_BROWSER_OTHER:String = "B?";
+        // Error info for errors detected in  OVVAsset.as
+        public static const INFO_ERROR_NO_EXTERNAL_INTERFACE:String         = "XI";
+        public static const INFO_ERROR_INIT_JS_EVAL_NULL:String             = "JN";
+        public static const INFO_ERROR_INIT_JS_EVAL_ERROR:String            = "JE";
 
-        public static const INFO_IFRAME_NONE:String = "F0";
-        public static const INFO_IFRAME_SD:String = "FS";
-        public static const INFO_IFRAME_XD:String = "FX";
-*/
-
+        // Error info for errors detected in Flash Ad Unit (ViewabilityApi.as)
+        public static const INFO_ERROR_NULL_CHECK_RESULT:String = "NC";
 
         /**
          * The value that {@link OVVCheck#viewabilityState} will be set to if the beacons
