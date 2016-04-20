@@ -126,10 +126,6 @@ package org.openvv {
          */
         public static const UNMEASURABLE_IMPRESSION_THRESHOLD: Number = 5;
 
-        // Moved declaration out of constructor and made 'protected'
-        // to allow access by subclass, if required.
-        protected var ovvAssetSource: String = "{{OVVAssetJS}}";
-
         ////////////////////////////////////////////////////////////
         //   ATTRIBUTES
         ////////////////////////////////////////////////////////////
@@ -303,6 +299,9 @@ package org.openvv {
             _sprite = new Sprite();
             _renderMeter = new OVVRenderMeter(_sprite);
             _sprite.addEventListener(OVVThrottleType.THROTTLE, onThrottleEvent);
+
+            var ovvAssetSource:String = "{{OVVAssetJS}}";
+
             ovvAssetSource = ovvAssetSource
                                 .replace(/OVVID/g, _id)
                                 .replace(/INTERVAL/g, OVVConfig.viewability[standard].poll_interval_ms)
@@ -315,7 +314,7 @@ package org.openvv {
 				ovvAssetSource = ovvAssetSource.replace(/BEACON_SWF_URL/g, beaconSwfUrl);
 			}
 
-            var evalResult:String = String( ExternalInterface.call( "eval", ovvAssetSource ) );
+            var evalResult:String = String( ExternalInterface.call( 'eval', ovvAssetSource ) );
 
             if ( evalResult == null ){
                 _jsInitError = OVVCheck.INFO_ERROR_INIT_JS_EVAL_NULL;
@@ -349,9 +348,6 @@ package org.openvv {
             return isEIAvailable;
         }
 
-        protected function get _ovvAssetSource():String {
-            return "{{OVVAssetJS}}";
-        }
 	/**
 	 * Register to the vpaidEventsDispatcher VPAID's events and allows 3rd parties to more easily provide video viewability measurement
 	 * by exposing the VPAID data as well as the viewability data via a JavaScript API.

@@ -448,7 +448,9 @@ try {
     ];
 
     function OVVBrowser() {
-        (function( ) {
+        this.browser = 'uninitialized';
+        this.version = 'uninitialized';
+        (function(_this) {
             // Get browser and browser version
             var searchString = function(data) {
                 for (var i = 0; i < data.length; i++) {
@@ -498,23 +500,25 @@ try {
                 versionSearch: "MSIE",
                 code: OVVBrowser.IE
             }];
-            OVVBrowser.browser = searchString(dataBrowser) || OVVBrowser.OTHER;
-            OVVBrowser.version = searchVersion(navigator.userAgent) || searchVersion(navigator.appVersion);
-        })();
+            _this.browser = searchString(dataBrowser) || OVVBrowser.OTHER;
+            _this.version = searchVersion(navigator.userAgent) || searchVersion(navigator.appVersion);
+        })(this);
     }
-    OVVBrowser.CHROME  = 'CH';
-    OVVBrowser.FIREFOX = 'FF';
-    OVVBrowser.SAFARI  = 'SF';
+    OVVBrowser.CHROME  = 'Ch';
+    OVVBrowser.FIREFOX = 'Ff';
+    OVVBrowser.SAFARI  = 'Sf';
     OVVBrowser.IE      = 'IE';
-    OVVBrowser.OPERA   = 'OP';
+    OVVBrowser.OPERA   = 'Op';
     OVVBrowser.OTHER   = '??';
 
-    function OVVBeaconSupportCheck(){
+    function OVVBeaconSupportCheck(player){
         var br = new OVVBrowser();
-        var os = getOS();
+        var os = player.getOS();
         console.log(os);
+        console.log(br.browser+':'+br.version);
+
         this.supportsBeacons = function(){
-            return !(br.browser == br.IE && br.version < 11);
+            return !(br.browser == br.IE && br.version < 11 && /Windows);
         }
     }
 
@@ -727,8 +731,6 @@ try {
         var getBeaconContainerFunc = function() {
             return null
         };
-
-        var beaconSupportCheck = new OVVBeaconSupportCheck();
 
         ///////////////////////////////////////////////////////////////////////////
         // PUBLIC FUNCTIONS
@@ -1562,6 +1564,8 @@ try {
         if (player == null) {
             throw new Error(OVVCheck.INFO_ERROR_PLAYER_NOT_FOUND);
         }
+
+        var beaconSupportCheck = new OVVBeaconSupportCheck(player);
 
         if (!beaconSupportCheck.supportsBeacons() && $ovvs['OVVID'].geometrySupported === false) {
             throw new Error(OVVCheck.INFO_ERROR_NO_MEASURING_METHOD);
