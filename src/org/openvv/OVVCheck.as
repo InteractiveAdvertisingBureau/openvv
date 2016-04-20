@@ -26,13 +26,6 @@ package org.openvv {
         ////////////////////////////////////////////////////////////
         //   CONSTANTS 
         ////////////////////////////////////////////////////////////
-
-        /**
-         * When OVVCheck.technique is set to BEACON, the beacon technique
-         * was used to determine the viewabilityState
-         */
-        public static const BEACON: String = "beacon";
-
         /**
          * A string used to indicate that the viewabilityState reported
          * by JavaScript was overridden by ActionScript due to the
@@ -40,36 +33,63 @@ package org.openvv {
          *
          * @see #viewabilityStateOverrideReason
          */
-        public static const FULLSCREEN:String = "fullscreen"
+        public static const FULLSCREEN:String = 'fullscreen';
 
         /**
+         * When OVVCheck.technique is set to BEACON, the beacon technique
+         * was used to determine the viewabilityState
+         */
+        public static const BEACON:String = 'beacon';
+
+         /**
          * When OVVCheck.technique is set to GEOMETRY, the geometry technique
          * was used to determine the viewabilityState
          */
-        public static const GEOMETRY: String = "geometry";
+        public static const GEOMETRY:String = 'geometry';
 
         /**
-         * OVVCheck.technique is set to CSS_VISIBILITY when a property value of
-         * 'visibility:hidden' or 'display:none' on the player's embed object,
-         * or on any containing element in the same javascript domain (page or iframe)
-         * is used to determine that viewability state is OVVCheck.UNVIEWABLE
+         * When OVVCheck.technique is set to WINDOW if player is on an
+         * inactive browser tab or in a minified browser window.
+         * Only used to determine that viewability state is OVVCheck.UNVIEWABLE
          */
-        public static const CSS_VISIBILITY: String = "css_visibility";
+        public static const WINDOW:String = 'window';
+
+        /**
+         * OVVCheck.technique is set to VISIBILITY when the player's embed object,
+         * has or inherits a 'visibility' attribute of 'hidden'
+         * Only used to determine that viewability state is OVVCheck.UNVIEWABLE
+         */
+        public static const VISIBILITY:String = 'visibility';
+
+        /**
+         * OVVCheck.technique is set to DISPLAY when the player's embed object,
+         * has or inherits a 'display' attribute of 'none'
+         * Only used to determine that viewability state is OVVCheck.UNVIEWABLE
+         */
+        public static const DISPLAY:String = 'display';
+
+        /**
+         * OVVCheck.technique is set to OBSCURED when the player is wholly or
+         * partially (depending on viewability standard in force) obscured by
+         * an overlapping DOM element.
+         * Only used to determine that viewability state is OVVCheck.UNVIEWABLE
+         */
+        public static const OBSCURED:String = 'obscured';
 
         /**
          * OpenVV was unable to determine whether the asset was viewable or not
          */
-        public static const UNMEASURABLE: String = 'unmeasurable';
+        public static const UNMEASURABLE:String = 'unmeasurable';
 
         /**
          * Less than 50% of the asset is viewable within the viewport
          */
-        public static const UNVIEWABLE: String = 'unviewable';
+        public static const UNVIEWABLE:String = 'unviewable';
 
         /**
          * At least 50% of the asset is viewable within the viewport
          */
-        public static const VIEWABLE: String = 'viewable';
+        public static const VIEWABLE:String = 'viewable';
 
         // NEW : Reasons for instantaneous Unviewability or Unmeasurability (passed in viewabilityStateInfo)
         public static const INIT_SUCCESS:String = "SUCCESS";
@@ -277,17 +297,30 @@ package org.openvv {
         public var viewabilityState: String;
 
         /**
-         * if viewabilityState is not VIEWABLE this property holds the
-         * reason why it is either unviewable or unmeasurable
+         * A one-character code representing the type of result,
+         * 'V' : viewable
+         * 'N' : not viewable
+         * 'U' : Unmeasurable
+         * 'E' : Error
          *
          * @see #UNVIEWABLE
          * @see #UNMEASURABLE
          */
+         public var viewabilityStateCode: String;
+
+        /**
+         * A 2-character code representing either the method used to obtain a viewability
+         * state code of 'V' or 'N', or the reason for a reporting a code of 'U' or 'E'
+         *
+         * @see {@link OVVCheck.UNMEASURABLE}
+         * @see {@link OVVCheck.UNVIEWABLE}
+         * @see {@link OVVCheck.VIEWABLE}
+         */
         public var viewabilityStateInfo: String;
 
         /**
-         * When the viewabilityState is changed by ActionScript detecting that
-         * the asset is in fullscreen, this will be set to FULLSCREEN;
+         * Set to FULLSCREEN when the viewabilityState is changed from Unviewable
+         * or Unmeasurable by ActionScript detecting tha the player is in fullscreen mode.
          *
          * @see #FULLSCREEN
          */

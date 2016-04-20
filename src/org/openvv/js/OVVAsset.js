@@ -382,14 +382,68 @@ try {
         this.viewabilityState = '';
 
         /**
-         * if viewabilityState is not VIEWABLE this property holds the
-         * reason why it is either unviewable or unmeasurable
+         * A one-character code representing the type of result,
+         * 'V' : viewable
+         * 'N' : not viewable
+         * 'U' : Unmeasurable
+         * 'E' : Error
+         *
+         * @see #UNVIEWABLE
+         * @see #UNMEASURABLE
+         */
+        this.viewabilityStateCode = '';
+
+        /**
+         * A 2-character code representing either the method used to obtain a viewability
+         * state code of 'V' or 'N', or the reason for a reporting a code of 'U' or 'E'
          *
          * @see {@link OVVCheck.UNMEASURABLE}
+         * @see {@link OVVCheck.UNVIEWABLE}
          * @see {@link OVVCheck.VIEWABLE}
          */
-        this.viewabilityStateInfo = 'UNINITIALIZED';
-    }
+        this.viewabilityStateInfo = '';
+
+    /**
+     * When OVVCheck.technique is set to BEACON if the beacon technique
+     * was used to determine the viewabilityState
+     */
+    OVVCheck.BEACON = 'beacon';
+
+    /**
+     * When OVVCheck.technique is set to GEOMETRY, the geometry technique
+     * was used to determine the viewabilityState
+     */
+    OVVCheck.GEOMETRY = 'geometry';
+
+    /**
+     * When OVVCheck.technique is set to WINDOW if player is on an
+     * inactive browser tab or in a minified browser window.
+     * Only used to determine that viewability state is OVVCheck.UNVIEWABLE
+     */
+    OVVCheck.WINDOW = 'window';
+
+    /**
+     * OVVCheck.technique is set to VISIBILITY when the player's embed object,
+     * has or inherits a 'visibility' attribute of 'hidden'
+     * Only used to determine that viewability state is OVVCheck.UNVIEWABLE
+     */
+    OVVCheck.VISIBILITY = 'visibility';
+
+    /**
+     * OVVCheck.technique is set to DISPLAY when the player's embed object,
+     * has or inherits a 'display' attribute of 'none'
+     * Only used to determine that viewability state is OVVCheck.UNVIEWABLE
+     */
+    OVVCheck.DISPLAY = 'display';
+
+    /**
+     * OVVCheck.technique is set to OBSCURED when the player is wholly or
+     * partially (depending on viewability standard in force) obscured by
+     * an overlapping DOM element.
+     * Only used to determine that viewability state is OVVCheck.UNVIEWABLE
+     */
+    OVVCheck.OBSCURED = 'obscured';
+
     /**
      * The value that {@link OVVCheck#viewabilityState} will be set to if OVV cannot
      * determine whether the asset is at least 50% viewable.
@@ -504,11 +558,11 @@ try {
             _this.version = searchVersion(navigator.userAgent) || searchVersion(navigator.appVersion);
         })(this);
     }
-    OVVBrowser.CHROME  = 'Ch';
-    OVVBrowser.FIREFOX = 'Ff';
-    OVVBrowser.SAFARI  = 'Sf';
+    OVVBrowser.CHROME  = 'CH';
+    OVVBrowser.FIREFOX = 'FF';
+    OVVBrowser.SAFARI  = 'SF';
     OVVBrowser.IE      = 'IE';
-    OVVBrowser.OPERA   = 'Op';
+    OVVBrowser.OPERA   = 'OP';
     OVVBrowser.OTHER   = '??';
 
     function OVVBeaconSupportCheck(player){
@@ -518,7 +572,7 @@ try {
         console.log(br.browser+':'+br.version);
 
         this.supportsBeacons = function(){
-            return !(br.browser == br.IE && br.version < 11 && /Windows);
+            return !(br.browser == br.IE && br.version < 11);
         }
     }
 
@@ -782,6 +836,7 @@ try {
             //       They do not require a viewable-area measuring method:
             //
             if (isWindowInactive()) {
+                check.technique = OVVCheck.WINDOW;
                 check.viewabilityState = OVVCheck.UNVIEWABLE;
                 check.viewabilityStateCode = OVVCheck.INFO_TYPE_NOT_VIEWABLE;
                 check.viewabilityStateInfo = OVVCheck.INFO_METHOD_ACTIVE_WINDOW;
@@ -789,6 +844,7 @@ try {
             }
 
             if (isPlayerVisibilityHidden(check, player)) {
+                check.technique = OVVCheck.VISIBILITY;
                 check.viewabilityState = OVVCheck.UNVIEWABLE;
                 check.viewabilityStateCode = OVVCheck.INFO_TYPE_NOT_VIEWABLE;
                 check.viewabilityStateInfo = OVVCheck.INFO_METHOD_PLAYER_VISIBILITY;
@@ -796,6 +852,7 @@ try {
             }
 
             if (isPlayerDisplayNone(check, player)) {
+                check.technique = OVVCheck.DISPLAY;
                 check.viewabilityState = OVVCheck.UNVIEWABLE;
                 check.viewabilityStateCode = OVVCheck.INFO_TYPE_NOT_VIEWABLE;
                 check.viewabilityStateInfo = OVVCheck.INFO_METHOD_PLAYER_DISPLAY;
@@ -803,6 +860,7 @@ try {
             }
 
             if (isPlayerObscured(check, player) === true) {
+                check.technique = OVVCheck.OBSCURED;
                 check.viewabilityState = OVVCheck.UNVIEWABLE;
                 check.viewabilityStateCode = OVVCheck.INFO_TYPE_NOT_VIEWABLE;
                 check.viewabilityStateInfo = OVVCheck.INFO_METHOD_PLAYER_OBSCURED;
@@ -816,7 +874,7 @@ try {
             // Try to measure its viewable area using browser geometry:
             //
             if (check.geometrySupported) {
-                check.technique = OVVCheck.INFO_METHOD_BROWSER_GEOMETRY;
+                check.technique = OVVCheck.GEOMETRY;
                 checkGeometry(check, player);
                 if (check.error) {
                     check.viewabilityState = OVVCheck.UNMEASURABLE;
@@ -835,13 +893,7 @@ try {
             }
             // Geometry not supported (or DEBUG mode is enabled ) :
             // Try to use beacons to determine viewable area of player:
-            if (getBeaconFunc == getFlashBeacon) {
-                check.technique = OVVCheck.TE;
-                check.viewabilityStateInfo = OVVCheck.INFO_METHOD_BEACON_FLASH;
-
-            } else {
-                check.technique = OVVCheck.INFO_METHOD_BEACON_MOZPAINT;
-            }
+            check.technique = OVVCheck.BEACON;
 
             if (controlBeaconNotReady()) {
                 check.viewabilityState = OVVCheck.UNMEASURABLE;
@@ -878,13 +930,14 @@ try {
                 case OVVCheck.VIEWABLE:
                     check.viewabilityStateCode = OVVCheck.INFO_TYPE_VIEWABLE;
                     break;
-
-
-
-            } else {
-                setViewabilityInfo(check, check.viewabilityState, check.technique);
             }
-
+            if ( !check.viewabilityStateInfo ) {
+                if (getBeaconFunc == getFlashBeacon) {
+                    check.viewabilityStateInfo = OVVCheck.INFO_METHOD_BEACON_FLASH;
+                } else {
+                    check.viewabilityStateInfo = OVVCheck.INFO_METHOD_BEACON_MOZPAINT;
+                }
+            }
             return check;
         };
 

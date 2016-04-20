@@ -86,10 +86,14 @@ package org.openvv {
         /**
          * Hold OVV version. Will pass to JavaScript as well as $ovv.version
          */
-        public static const RELEASE_VERSION: String = "1.3.8";
+        public static const RELEASE_VERSION: String = "1.3.9";
+        /** Changes in v1.3.9 :
+         * Added codes and info to report on measurement methods and reasons for unmeasurability or errors.
+         */
         /** Changes in v1.3.8 :
          * Fixed geometry-breaking bug introduced in AD-1854 : StickyAds solution
          * Added more functionality to build.xml to facilitate debugging OVVAsset.js in browser Developer Tools
+         *
         /** Changes in v1.3.7 :
          * AD-1912 : Merged and enhanced functionality of AD-1832 & AD-1802
          */
@@ -421,29 +425,23 @@ package org.openvv {
          */
         public function checkViewability(): OVVCheck {
             if ( _jsInitError ) {
-                if (isRealFullScreenMode()){
-                    return new OVVCheck( {
-                           viewabilityState: OVVCheck.VIEWABLE,
-                           viewabilityStateInfo:[
-                               OVVCheck.INFO_TYPE_VIEWABLE,
-                               OVVCheck.INFO_METHOD_FULL_SCREEN_OVERRIDE,
-                               _jsInitError
-                           ].join('_'),
-                           percentViewable: 100
-                    } );
-                }else {
+                if (isRealFullScreenMode()) {
+                    return new OVVCheck({
+                        viewabilityState: OVVCheck.VIEWABLE,
+                        viewabilityStateCode: OVVCheck.INFO_TYPE_VIEWABLE,
+                        viewabilityStateInfo: OVVCheck.INFO_METHOD_FULL_SCREEN_OVERRIDE,
+                        percentViewable: 100
+                    });
+                } else {
                     return new OVVCheck({
                         viewabilityState: OVVCheck.UNMEASURABLE,
-                        viewabilityStateInfo: [
-                            OVVCheck.INFO_TYPE_ERROR,
-                            _jsInitError
-                        ].join('_')
+                        viewabilityStateCode: OVVCheck.INFO_TYPE_ERROR,
+                        viewabilityStateInfo: _jsInitError
                     });
                 }
             }
 
             var jsResults: Object = ExternalInterface.call("$ovv.getAssetById('" + _id + "')" + ".checkViewability");
-            Debug.traceObj(jsResults, 'results');
             var results: OVVCheck = new OVVCheck(jsResults);
 
             results.volume = 1; // default to 1, in case not implemented or not available (eg in Innovid VPAID)
@@ -460,16 +458,15 @@ package org.openvv {
                 if ( isRealFullScreenMode() || isFakeFullScreenMode(results)) {
                     return new OVVCheck({
                         viewabilityState: OVVCheck.VIEWABLE,
-                        viewabilityStateInfo: [
-                            OVVCheck.INFO_TYPE_VIEWABLE,
-                            OVVCheck.INFO_METHOD_FULL_SCREEN_OVERRIDE
-                        ].join('_'),
+                        viewabilityStateCode: OVVCheck.INFO_TYPE_VIEWABLE,
+                        viewabilityStateInfo: OVVCheck.INFO_METHOD_FULL_SCREEN_OVERRIDE + '::' +
+                                                           results.viewabilityStateCode + '_' +
+                                                           results.viewabilityStateInfo,
                         percentViewable: 100
                     });
                 }
             }
-            trace("Checking . . . 5");
-
+            Debug.traceObj(jsResults, 'results');
             return results;
         }
 
