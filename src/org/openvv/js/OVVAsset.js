@@ -39,7 +39,7 @@ try {
          * @see {@link OVVCheck#beaconViewabilityState}
          * @see {@link OVVAsset#BEACON_SIZE}
          */
-        this.DEBUG = true;
+        this.DEBUG = false;
         /**
          * The last asset added to OVV. Useful for easy access from the
          * JavaScript console.
@@ -402,6 +402,7 @@ try {
          * @see {@link OVVCheck.VIEWABLE}
          */
         this.viewabilityStateInfo = '';
+    }
 
     /**
      * When OVVCheck.technique is set to BEACON if the beacon technique
@@ -498,7 +499,7 @@ try {
         OVVCheck.INFO_ERROR_CTRL_BEACON_IN_VIEW     = 'CV',
         OVVCheck.INFO_ERROR_BEACONS_NOT_READY       = 'BN',
         OVVCheck.INFO_ERROR_INVALID_BEACON_RESULT   = 'BI',
-        OVVCheck.INFO_ERROR_INVALID_VIEWPORT_RESULT = 'IV',
+        OVVCheck.INFO_ERROR_INVALID_VIEWPORT_RESULT = 'IV'
     ];
 
     function OVVBrowser() {
@@ -1678,6 +1679,7 @@ try {
             }, 5); //Use a tiny timeout to keep this async like the beacons
         }
     }
+    // End OVVAsset
 
 
     function OVVGeometryViewabilityCalculator() {
