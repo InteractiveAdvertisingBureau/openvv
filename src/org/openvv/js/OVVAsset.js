@@ -42,7 +42,7 @@ try {
         this.DEBUG = false;
         /**
          * The last asset added to OVV. Useful for easy access from the
-         * JavaScript console.
+         * JavaScript console.  
          * @type {OVVAsset}
          */
         this.asset = null;
@@ -571,7 +571,7 @@ try {
         var os = player.getOS();
         console.log(os);
         console.log(br.browser+':'+br.version);
-
+        console.log("Build : {{TIMESTAMP}}");
         this.supportsBeacons = function(){
             return !(br.browser == br.IE && br.version < 11);
         }
