@@ -1312,7 +1312,7 @@ function OVVBeaconSupportCheck()
         checkActiveBeacons(check);
 
         switch (check.viewabilityState) {
-            case OVVCheck.UNMEASURABLE:
+            case OVVCheck.UNVIEWABLE:
                 check.viewabilityStateCode = OVVCheck.INFO_TYPE_UNMEASURABLE;
                 check.viewabilityStateInfo = OVVCheck.INFO_ERROR_INVALID_BEACON_RESULT;
                 break;
