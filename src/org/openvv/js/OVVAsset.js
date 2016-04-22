@@ -21,9 +21,777 @@
  * @constructor
  */
 
-try {
 
-    function OVV() {
+window.DEBUG = false;
+
+function OVV() {
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+/////////////////////////////                                                     ////////////////////////////////
+/////////////////////////////   IAB OVV - DO NOT EDIT - NOT USED BY TM OVVAsset   ////////////////////////////////
+/////////////////////////////   Copied from the latest IAB OpenVV Github Release  ////////////////////////////////
+/////////////////////////////                                                     ////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    ///////////////////////////////////////////////////////////////////////////
+    // PUBLIC ATTRIBUTES
+    ///////////////////////////////////////////////////////////////////////////
+
+    /**
+     * Determines whether OpenVV should run in debug mode. Debug mode always
+     * adds beacon SWFs to the page, which are color-coded based on their
+     * status. OVVCheck.beaconViewabilityState and
+     * OVVCheck.geometryViewabilityState are also populated in debug mode.
+     * @type {Boolean}
+     * @see {@link OVVCheck#geometryViewabilityState}
+     * @see {@link OVVCheck#beaconViewabilityState}
+     * @see {@link OVVAsset#BEACON_SIZE}
+     */
+    this.DEBUG = false;
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+/////////////////////////////                                                     ////////////////////////////////
+/////////////////////////////   IAB OVV - DO NOT EDIT - NOT USED BY TM OVVAsset   ////////////////////////////////
+/////////////////////////////   Copied from the latest IAB OpenVV Github Release  ////////////////////////////////
+/////////////////////////////                                                     ////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    /**
+     * The last asset added to OVV. Useful for easy access from the
+     * JavaScript console.
+     * @type {OVVAsset}
+     */
+    this.asset = null;
+    /**
+     * The id of the interval responsible for positioning beacons.
+     */
+    this.positionInterval;
+
+    this.userAgent = window.testOvvConfig && window.testOvvConfig.userAgent ? window.testOvvConfig.userAgent : navigator.userAgent;
+
+    this.servingScenarioEnum = { OnPage: 1, SameDomainIframe: 2, CrossDomainIframe: 3 };
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+/////////////////////////////                                                     ////////////////////////////////
+/////////////////////////////   IAB OVV - DO NOT EDIT - NOT USED BY TM OVVAsset   ////////////////////////////////
+/////////////////////////////   Copied from the latest IAB OpenVV Github Release  ////////////////////////////////
+/////////////////////////////                                                     ////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    function getServingScenarioType(servingScenarioEnum) {
+        try {
+            if (window.top == window) {
+                return servingScenarioEnum.OnPage;
+            }
+            var curWin=window;
+            var level=0;
+            while(curWin.parent != curWin  && level<1000){
+                if (curWin.parent.document.domain != curWin.document.domain) {
+                    return servingScenarioEnum.CrossDomainIframe;
+                }
+                curWin = curWin.parent;
+            }
+            return servingScenarioEnum.SameDomainIframe;
+        } catch (e) { }
+        return servingScenarioEnum.CrossDomainIframe;
+    }
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+/////////////////////////////                                                     ////////////////////////////////
+/////////////////////////////   IAB OVV - DO NOT EDIT - NOT USED BY TM OVVAsset   ////////////////////////////////
+/////////////////////////////   Copied from the latest IAB OpenVV Github Release  ////////////////////////////////
+/////////////////////////////                                                     ////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    this.servingScenario = getServingScenarioType(this.servingScenarioEnum);
+    this.IN_IFRAME = (this.servingScenario != this.servingScenarioEnum.OnPage);
+    this.IN_XD_IFRAME =  (this.servingScenario == this.servingScenarioEnum.CrossDomainIframe);
+    this.geometrySupported = !this.IN_XD_IFRAME;
+
+    // To support older versions of OVVAsset
+    var browserData = new OVVBrowser(this.userAgent);
+
+    this.browser = browserData.getBrowser();
+
+    this.browserIDEnum = browserData.getBrowserIDEnum();
+
+    /**
+     * The interval in which ActionScript will poll OVV for viewability
+     * information
+     * @type {Number}
+     */
+    this.interval = INTERVAL;
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+/////////////////////////////                                                     ////////////////////////////////
+/////////////////////////////   IAB OVV - DO NOT EDIT - NOT USED BY TM OVVAsset   ////////////////////////////////
+/////////////////////////////   Copied from the latest IAB OpenVV Github Release  ////////////////////////////////
+/////////////////////////////                                                     ////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    /**
+     * OVV version
+     * @type {Number}
+     */
+    this.releaseVersion = 'OVVRELEASEVERSION';
+
+    /**
+     * OVV build version
+     * @type {String}
+     */
+    this.buildVersion = 'OVVBUILDVERSION';
+
+    ///////////////////////////////////////////////////////////////////////////
+    // PRIVATE ATTRIBUTES
+    ///////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+/////////////////////////////                                                     ////////////////////////////////
+/////////////////////////////   IAB OVV - DO NOT EDIT - NOT USED BY TM OVVAsset   ////////////////////////////////
+/////////////////////////////   Copied from the latest IAB OpenVV Github Release  ////////////////////////////////
+/////////////////////////////                                                     ////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    /**
+     * An object for storing OVVAssets. {@link OVVAsset}s are stored with their
+     * id as the key and the OVVAsset as the value.
+     * @type {Object}
+     */
+    var assets = {};
+
+    /**
+     * An array for storing the first PREVIOUS_EVENTS_CAPACITY events for each event type. {@see PREVIOUS_EVENTS_CAPACITY}
+     * @type {Array}
+     */
+    var previousEvents = [];
+
+    /**
+     * Number of event to store
+     * @type {int}
+     */
+    var PREVIOUS_EVENTS_CAPACITY = 1000;
+
+    /**
+     * An array that holds all the subscribes for a eventName+uid combination
+     * @type {Array}
+     */
+    var subscribers = [];
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+/////////////////////////////                                                     ////////////////////////////////
+/////////////////////////////   IAB OVV - DO NOT EDIT - NOT USED BY TM OVVAsset   ////////////////////////////////
+/////////////////////////////   Copied from the latest IAB OpenVV Github Release  ////////////////////////////////
+/////////////////////////////                                                     ////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    ///////////////////////////////////////////////////////////////////////////
+    // PUBLIC FUNCTIONS
+    ///////////////////////////////////////////////////////////////////////////
+
+    /**
+     * Stores an asset which can be retrieved later using
+     * {@link OVV#getAssetById}. The latest asset added to OVV can also be
+     * retrieved via the {@link OVV#asset} property.
+     * @param {OVVAsset} ovvAsset An asset to observe
+     */
+    this.addAsset = function (ovvAsset) {
+        if (!assets.hasOwnProperty(ovvAsset.getId())) {
+            assets[ovvAsset.getId()] = ovvAsset;
+            // save a reference for convenience
+            this.asset = ovvAsset;
+        }
+    };
+
+    /**
+     * Removes an {@link OVVAsset} from OVV.
+     * @param {OVVAsset} ovvAsset An {@link OVVAsset} to remove
+     */
+    this.removeAsset = function (ovvAsset) {
+        delete assets[ovvAsset.getId()];
+    };
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+/////////////////////////////                                                     ////////////////////////////////
+/////////////////////////////   IAB OVV - DO NOT EDIT - NOT USED BY TM OVVAsset   ////////////////////////////////
+/////////////////////////////   Copied from the latest IAB OpenVV Github Release  ////////////////////////////////
+/////////////////////////////                                                     ////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    /**
+     * Retrieves an {@link OVVAsset} based on its ID
+     * @param {String} The id of the element to retrieve
+     * @returns {OVVAsset|null} The element matching the given ID, or null if
+     * one could not be found
+     */
+    this.getAssetById = function (id) {
+        return assets[id];
+    };
+
+    /**
+     * @returns {Object} Object an object containing all of the OVVAssets being tracked
+     */
+    this.getAds = function () {
+        var copy = {};
+        for (var id in assets) {
+            if (assets.hasOwnProperty(id)) {
+                copy[id] = assets[id];
+            }
+        }
+        return copy;
+    };
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+/////////////////////////////                                                     ////////////////////////////////
+/////////////////////////////   IAB OVV - DO NOT EDIT - NOT USED BY TM OVVAsset   ////////////////////////////////
+/////////////////////////////   Copied from the latest IAB OpenVV Github Release  ////////////////////////////////
+/////////////////////////////                                                     ////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    /**
+     * Subscribe the {func} to the list of {events}. When getPreviousEvents is true all the stored events that were passed will be fired
+     * in a chronological order
+     * @param {events} array with all the event names to subscribe to
+     * @param {uid} asset identifier
+     * @param {func} a function to execute once the assert raise the event
+     * @param {getPreviousEvents} if true all buffered event will be triggered
+     */
+    this.subscribe = function (events, uid, func, getPreviousEvents) {
+
+        if (getPreviousEvents) {
+            for (key in previousEvents[uid]) {
+                if (previousEvents[uid][key] && contains(previousEvents[uid][key].eventName, events)) {
+                    runSafely(function () {
+                        func(uid, previousEvents[uid][key]);
+                    });
+                }
+            }
+        }
+
+        for (key in events) {
+            if (!subscribers[events[key] + uid])
+                subscribers[events[key] + uid] = [];
+            subscribers[events[key] + uid].push({
+                Func: func
+            });
+        }
+    };
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+/////////////////////////////                                                     ////////////////////////////////
+/////////////////////////////   IAB OVV - DO NOT EDIT - NOT USED BY TM OVVAsset   ////////////////////////////////
+/////////////////////////////   Copied from the latest IAB OpenVV Github Release  ////////////////////////////////
+/////////////////////////////                                                     ////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    /**
+     * Publish {eventName} to all the subscribers. Also, storing the publish event in a buffered array is the capacity wasn't reached
+     * @param {eventName} name of the event to publish
+     * @param {uid} asset identifier
+     * @param {args} argument to send to the published function
+     */
+    this.publish = function (eventName, uid, args) {
+        var eventArgs = {
+            eventName: eventName,
+            eventTime: getCurrentTime(),
+            ovvArgs: args
+        };
+
+        if (!previousEvents[uid]) {
+            previousEvents[uid] = [];
+        }
+        if (previousEvents[uid].length < PREVIOUS_EVENTS_CAPACITY) {
+            previousEvents[uid].push(eventArgs);
+        }
+
+        if (eventName && uid && subscribers[eventName + uid] instanceof Array) {
+            for (var i = 0; i < subscribers[eventName + uid].length; i++) {
+                var funcObject = subscribers[eventName + uid][i];
+                if (funcObject && funcObject.Func && typeof funcObject.Func === 'function') {
+                    runSafely(function () {
+                        funcObject.Func(uid, eventArgs);
+                    });
+                }
+            }
+        }
+    };
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+/////////////////////////////                                                     ////////////////////////////////
+/////////////////////////////   IAB OVV - DO NOT EDIT - NOT USED BY TM OVVAsset   ////////////////////////////////
+/////////////////////////////   Copied from the latest IAB OpenVV Github Release  ////////////////////////////////
+/////////////////////////////                                                     ////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    /**
+     * Return all published events
+     * @param {uid} asset identifier
+     */
+    this.getAllReceivedEvents = function(uid) {
+        return previousEvents[uid];
+    }
+
+    var getCurrentTime = function () {
+        'use strict';
+        if (Date.now) {
+            return Date.now();
+        }
+        return (new Date()).getTime();
+    };
+
+    var contains = function (item, list) {
+        for (var i = 0; i < list.length; i++) {
+            if (list[i] === item) {
+                return true;
+            }
+        }
+        return false;
+    };
+
+    var runSafely = function (action) {
+        try {
+            var ret = action();
+            return ret !== undefined ? ret : true;
+        } catch (e) {
+            return false;
+        }
+    };
+}
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+/////////////////////////////                                                     ////////////////////////////////
+/////////////////////////////   IAB OVV - DO NOT EDIT - NOT USED BY TM OVVAsset   ////////////////////////////////
+/////////////////////////////   Copied from the latest IAB OpenVV Github Release  ////////////////////////////////
+/////////////////////////////                                                     ////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+/**
+ * A container for all the values that OpenVV collects.
+ * @class
+ * @constructor
+ */
+function OVVCheck() {
+
+    ///////////////////////////////////////////////////////////////////////////
+    // PUBLIC ATTRIBUTES
+    ///////////////////////////////////////////////////////////////////////////
+
+    /**
+     * The height of the viewport
+     * @type {Number}
+     */
+    this.clientHeight = -1;
+
+    /**
+     * The width of the viewport
+     * @type {Number}
+     */
+    this.clientWidth = -1;
+
+    /**
+     * A description of any error that occurred
+     * @type {String}
+     */
+    this.error = '';
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////                                                          /////////////////////////////
+///////////////////////////   IAB OVVCheck - DO NOT EDIT - NOT USED BY TM OVVAsset   /////////////////////////////
+///////////////////////////   Copied from the latest IAB OpenVV Github Release       /////////////////////////////
+///////////////////////////                                                           ////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    /**
+     * Whether the tab is focused or not (populated by ActionScript)
+     * @type {Boolean}
+     */
+    this.focus = null;
+
+    /**
+     * The frame rate of the asset (populated by ActionScript)
+     * @type {Number}
+     */
+    this.fps = -1;
+
+    /**
+     * A unique identifier of the asset
+     * @type {String}
+     */
+    this.id = '';
+
+    /**
+     * Whether beacon checking is supported. Beacon support is defined by
+     * placing a 'control beacon' SWF off screen, and verifying that it is
+     * throttled as expected.
+     * @type {Boolean}
+     */
+    this.beaconsSupported = null;
+
+    /**
+     * Whether geometry checking is supported. Geometry support requires
+     * that the asset is not within an iframe.
+     * @type {Boolean}
+     */
+    this.geometrySupported = null;
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////                                                          /////////////////////////////
+///////////////////////////   IAB OVVCheck - DO NOT EDIT - NOT USED BY TM OVVAsset   /////////////////////////////
+///////////////////////////   Copied from the latest IAB OpenVV Github Release       /////////////////////////////
+///////////////////////////                                                           ////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    /**
+     * The viewability state measured by the geometry technique. Only populated
+     * when OVV.DEBUG is true.
+     * @type {String}
+     * @see {@link checkGeometry}
+     * @see {@link OVV#DEBUG}
+     */
+    this.geometryViewabilityState = '';
+
+    /**
+     * The viewability state measured by the beacon technique. Only populated
+     * when OVV.DEBUG is true.
+     * @type {String}
+     * @see {@link OVVAsset#checkBeacons}
+     * @see {@link OVV#DEBUG}
+     */
+    this.beaconViewabilityState = '';
+
+    /**
+     * The viewability state measured by the css visibility technique. Only populated
+     * when OVV.DEBUG is true.
+     * @type {String}
+     * @see {@link checkCssInvisibility}
+     * @see {@link OVV#DEBUG}
+     */
+    this.cssViewabilityState = '';
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////                                                          /////////////////////////////
+///////////////////////////   IAB OVVCheck - DO NOT EDIT - NOT USED BY TM OVVAsset   /////////////////////////////
+///////////////////////////   Copied from the latest IAB OpenVV Github Release       /////////////////////////////
+///////////////////////////                                                           ////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    /**
+     * The viewability state measured by the dom_obs curing technique. Only populated
+     * when OVV.DEBUG is true.
+     * @type {String}
+     * @see {@link checkDomObscuring}
+     * @see {@link OVV#DEBUG}
+     */
+    this.domViewabilityState = '';
+
+
+    /**
+     * The technique used to populate OVVCheck.viewabilityState. Will be either
+     * OVV.GEOMETRY when OVV is run in the root page, or OVV.BEACON when OVV is
+     * run in an iframe. When in debug mode, will always remain blank.
+     * @type {String}
+     * @see {@link OVV#GEOMETRY}
+     * @see {@link OVV#BEACON}
+     */
+    this.technique = '';
+
+    /**
+     * When OVV is run in an iframe and the beacon technique is used, this array
+     * is populated with the states of each beacon, identified by their index.
+     * True means the beacon was viewable and false means the beacon was
+     * unviewable. Beacon 0 is the 'control beacon' and should always be false.
+     * @type {Array.<Boolean>|null}
+     * @see {@link OVVAsset.CONTROL}
+     * @see {@link OVVAsset.CENTER}
+     * @see {@link OVVAsset.OUTER_TOP_LEFT}
+     * @see {@link OVVAsset.OUTER_TOP_RIGHT}
+     * @see {@link OVVAsset.OUTER_BOTTOM_LEFT}
+     * @see {@link OVVAsset.OUTER_BOTTOM_RIGHT}
+     * @see {@link OVVAsset.MIDDLE_TOP_LEFT}
+     * @see {@link OVVAsset.MIDDLE_TOP_RIGHT}
+     * @see {@link OVVAsset.MIDDLE_BOTTOM_LEFT}
+     * @see {@link OVVAsset.MIDDLE_BOTTOM_RIGHT}
+     * @see {@link OVVAsset.INNER_TOP_LEFT}
+     * @see {@link OVVAsset.INNER_TOP_RIGHT}
+     * @see {@link OVVAsset.INNER_BOTTOM_LEFT}
+     * @see {@link OVVAsset.INNER_BOTTOM_RIGHT}
+     */
+    this.beacons = new Array();
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////                                                          /////////////////////////////
+///////////////////////////   IAB OVVCheck - DO NOT EDIT - NOT USED BY TM OVVAsset   /////////////////////////////
+///////////////////////////   Copied from the latest IAB OpenVV Github Release       /////////////////////////////
+///////////////////////////                                                           ////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    /**
+     * Whether this asset is in an iframe.
+     * @type {Boolean}
+     * @see {@link OVV#IN_IFRAME}
+     * @see {@link OVV#DEBUG}
+     */
+    this.inIframe = null;
+
+    /**
+     * The distance, in pixels, from the bottom of the asset to the bottom of
+     * the viewport
+     * @type {Number}
+     */
+    this.objBottom = -1;
+
+    /**
+     * The distance, in pixels, from the left of the asset to the left of
+     * the viewport
+     * @type {Number}
+     */
+    this.objLeft = -1;
+
+    /**
+     * The distance, in pixels, from the right of the asset to the right of
+     * the viewport
+     * @type {Number}
+     */
+    this.objRight = -1;
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////                                                          /////////////////////////////
+///////////////////////////   IAB OVVCheck - DO NOT EDIT - NOT USED BY TM OVVAsset   /////////////////////////////
+///////////////////////////   Copied from the latest IAB OpenVV Github Release       /////////////////////////////
+///////////////////////////                                                           ////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    /**
+     * The distance, in pixels, from the top of the asset to the top of
+     * the viewport
+     * @type {Number}
+     */
+    this.objTop = -1;
+
+    /**
+     * The percentage of the player that is viewable within the viewport
+     * @type {Number}
+     */
+    this.percentViewable = -1;
+
+    /**
+     * The percentage of the player that is obscured by an overlapping element
+     * @type {Number}
+     */
+    this.percentObscured = 0;
+
+    /**
+     * Set to {@link OVVCheck#VIEWABLE} when the player was at least 50%
+     * viewable. Set to OVVCheck when the player was less than 50% viewable.
+     * Set to {@link OVVCheck#UNMEASURABLE} when a determination could not be made.
+     * @type {String}
+     * @see {@link OVVCheck.UNMEASURABLE}
+     * @see {@link OVVCheck.VIEWABLE}
+     * @see {@link OVVCheck.UNVIEWABLE}
+     * @see {@link OVVCheck.NOT_READY}
+     */
+    this.viewabilityState = '';
+}
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////                                                          /////////////////////////////
+///////////////////////////   IAB OVVCheck - DO NOT EDIT - NOT USED BY TM OVVAsset   /////////////////////////////
+///////////////////////////   Copied from the latest IAB OpenVV Github Release       /////////////////////////////
+///////////////////////////                                                           ////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+/**
+ * The value that {@link OVVCheck#viewabilityState} will be set to if OVV cannot
+ * determine whether the asset is at least 50% viewable.
+ */
+OVVCheck.UNMEASURABLE = 'unmeasurable';
+
+/**
+ * The value that {@link OVVCheck#viewabilityState} will be set to if OVV
+ * determines that the asset is at least 50% viewable.
+ */
+OVVCheck.VIEWABLE = 'viewable';
+
+/**
+ * The value that {@link OVVCheck#viewabilityState} will be set to if OVV
+ * determines that the asset is less than 50% viewable.
+ */
+OVVCheck.UNVIEWABLE = 'unviewable';
+
+/**
+ * The value that {@link OVVCheck#viewabilityState} will be set to if the beacons
+ * are not ready to determine the viewability state
+ */
+OVVCheck.NOT_READY = 'not_ready';
+
+/**
+ * The value that {@link OVVCheck#technique} will be set to if OVV
+ * uses the beacon technique to determine {@link OVVCheck#viewabilityState}
+ */
+OVVCheck.BEACON = 'beacon';
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////                                                          /////////////////////////////
+///////////////////////////   IAB OVVCheck - DO NOT EDIT - NOT USED BY TM OVVAsset   /////////////////////////////
+///////////////////////////   Copied from the latest IAB OpenVV Github Release       /////////////////////////////
+///////////////////////////                                                           ////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+/**
+ * The value that {@link OVVCheck#technique} will be set to if OVV
+ * uses the geometry technique to determine {@link OVVCheck#viewabilityState}
+ */
+OVVCheck.GEOMETRY = 'geometry';
+
+/**
+ * The value that {@link OVVCheck#technique} will be set to if OVV
+ * uses css 'visibility' or 'display' state to determine an unviewable '
+ * value for {@link OVVCheck#viewabilityState}
+ */
+OVVCheck.CSS_INVISIBILITY = 'css_invisibility';
+
+/**
+ * The value that {@link OVVCheck#technique} will be set to if OVV
+ * determines the ad is more than 50% obscured by a floating element in fromt
+ * of the player in {@link OVVCheck#viewabilityState}
+ */
+OVVCheck.DOM_OBSCURING = 'dom_obscuring';
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////                                                          /////////////////////////////
+///////////////////////////   IAB OVVCheck - DO NOT EDIT - NOT USED BY TM OVVAsset   /////////////////////////////
+///////////////////////////   Copied from the latest IAB OpenVV Github Release       /////////////////////////////
+///////////////////////////                                                          /////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+
+function OVVBrowser(userAgent)
+{
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////                                                          /////////////////////////////
+///////////////////////////   IAB OVVBrowser - DO NOT EDIT - NOT USED BY TM OVVAsset /////////////////////////////
+///////////////////////////   Copied from the latest IAB OpenVV Github Release       /////////////////////////////
+///////////////////////////                                                          /////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    var browserIDEnum = {
+        MSIE: 1,
+        Firefox: 2,
+        Chrome: 3,
+        Opera: 4,
+        safari: 5
+    };
+
+    /**
+     * Returns an object that contains the browser name, version, id and os if applicable
+     * @param {String} ua userAgent
+     */
+    function getBrowserDetailsByUserAgent(ua, t) {
+
+        var getData = function () {
+            var data = { ID: 0, name: '', version: '' };
+            var dataString = ua;
+            for (var i = 0; i < dataBrowsers.length; i++) {
+                // Fill Browser ID
+                if (dataString.match(new RegExp(dataBrowsers[i].brRegex)) != null) {
+                    data.ID = dataBrowsers[i].id;
+                    data.name = dataBrowsers[i].name;
+                    if (dataBrowsers[i].verRegex == null) {
+                        break;
+                    }
+                    //Fill Browser Version
+                    var brverRes = dataString.match(new RegExp(dataBrowsers[i].verRegex + '[0-9]*'));
+                    if (brverRes != null) {
+                        var replaceStr = brverRes[0].match(new RegExp(dataBrowsers[i].verRegex));
+                        data.version = brverRes[0].replace(replaceStr[0], '');
+                    }
+                    var brOSRes = dataString.match(new RegExp(winOSRegex + '[0-9\\.]*'));
+                    if (brOSRes != null) {
+                        data.os = brOSRes[0];
+                    }
+                    break;
+                }
+            }
+            return data;
+        };
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////                                                          /////////////////////////////
+///////////////////////////   IAB OVVBrowser - DO NOT EDIT - NOT USED BY TM OVVAsset /////////////////////////////
+///////////////////////////   Copied from the latest IAB OpenVV Github Release       /////////////////////////////
+///////////////////////////                                                          /////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+        var winOSRegex = '(Windows NT )';
+        var dataBrowsers = [{
+            id: 4,
+            name: 'Opera',
+            brRegex: 'OPR|Opera',
+            verRegex: '(OPR\/|Version\/)'
+        }, {
+            id: 1,
+            name: 'MSIE',
+            brRegex: 'MSIE|Trident/7.*rv:11|rv:11.*Trident/7',
+            verRegex: '(MSIE |rv:)'
+        }, {
+            id: 2,
+            name: 'Firefox',
+            brRegex: 'Firefox',
+            verRegex: 'Firefox\/'
+        }, {
+            id: 3,
+            name: 'Chrome',
+            brRegex: 'Chrome',
+            verRegex: 'Chrome\/'
+        }, {
+            id: 5,
+            name: 'Safari',
+            brRegex: 'Safari|(OS |OS X )[0-9].*AppleWebKit',
+            verRegex: 'Version\/'
+        }
+        ];
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////                                                          /////////////////////////////
+///////////////////////////   IAB OVVBrowser - DO NOT EDIT - NOT USED BY TM OVVAsset /////////////////////////////
+///////////////////////////   Copied from the latest IAB OpenVV Github Release       /////////////////////////////
+///////////////////////////                                                          /////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+        return getData();
+    }
+
+    /**
+     * browser:
+     *	{
+    *		ID: ,
+    *	  	name: '',
+    *	  	version: '',
+    *	    os: ''
+    *	};
+     */
+    var  browser = getBrowserDetailsByUserAgent(userAgent);
+
+    this.getBrowser = function()
+    {
+        return browser;
+    }
+
+    this.getBrowserIDEnum = function()
+    {
+        return browserIDEnum;
+    }
+}
+
+function OVVBeaconSupportCheck()
+{
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////                                                                      /////////////////////
+///////////////////////   IAB OVVBeaconSupportCheck - DO NOT EDIT - NOT USED BY TM OVVAsset  /////////////////////
+///////////////////////   Copied from the latest IAB OpenVV Github Release                   /////////////////////
+///////////////////////                                                                      /////////////////////
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    var ovvBrowser = new OVVBrowser($ovv.userAgent);
+
+    var browser = ovvBrowser.getBrowser();
+    var browserIDEnum = ovvBrowser.getBrowserIDEnum();
+
+    this.supportsBeacons = function()
+    {
+        //Windows 8.1 is represented as Windows NT 6.3 in user agent string
+        var WIN_8_1 = 6.3;
+        var isIE = browser.ID == browserIDEnum.MSIE;
+        var isSupportedIEVersion = browser.version >= 11;
+        var ntVersionArr = browser.os ? browser.os.split(' ') : [0];
+        var ntVersion = ntVersionArr[ntVersionArr.length - 1];
+        var isSupportedOSForIE = ntVersion >= WIN_8_1;
+        return !isIE || (isSupportedIEVersion && isSupportedOSForIE);
+    }
+}
+
+///////////////////////////// END IAB OVV ///////////////////////////////////
+
+// Namespace OVV & OVVCheck, etc for TM OVVAsset instance to use (but register
+// instance on existing or new global IAB  OVV instance)
+function TM(){
+    this.OVV = function() {
 
         ///////////////////////////////////////////////////////////////////////////
         // PUBLIC ATTRIBUTES
@@ -39,13 +807,57 @@ try {
          * @see {@link OVVCheck#beaconViewabilityState}
          * @see {@link OVVAsset#BEACON_SIZE}
          */
-        this.DEBUG = false;
+        this.DEBUG = true;
+
+        /**
+         * Whether OpenVV is running within an iframe or not.
+         * @type {Boolean}
+         */
+        this.IN_IFRAME = (window.top !== window.self);
+
+
+
+
         /**
          * The last asset added to OVV. Useful for easy access from the
-         * JavaScript console.  
+         * JavaScript console.
          * @type {OVVAsset}
          */
         this.asset = null;
+
+        /**
+         * The id of the interval responsible for positioning beacons.
+         */
+        this.positionInterval;
+
+        this.userAgent = window.testOvvConfig && window.testOvvConfig.userAgent ? window.testOvvConfig.userAgent : navigator.userAgent;
+
+        this.servingScenarioEnum = { OnPage: 1, SameDomainIframe: 2, CrossDomainIframe: 3 };
+
+        function getServingScenarioType(servingScenarioEnum) {
+            try {
+                if (window.top == window) {
+                    return servingScenarioEnum.OnPage;
+                } else if (window.top.document.domain == window.document.domain) {
+                    return servingScenarioEnum.SameDomainIframe;
+                }
+            } catch (e) { }
+            return servingScenarioEnum.CrossDomainIframe;
+        };
+
+        this.servingScenario = getServingScenarioType(this.servingScenarioEnum);
+        this.IN_XD_IFRAME =  (this.servingScenario == this.servingScenarioEnum.CrossDomainIframe);
+
+        // Temporarily restore beacon testing for same-domain iframes: Iframe geometry calculation is broken
+        this.geometrySupported = !this.IN_IFRAME;
+
+        // To support older versions of OVVAsset
+        var browserData = new OVVBrowser(this.userAgent);
+
+        this.browser = browserData.getBrowser();
+
+        this.browserIDEnum = browserData.getBrowserIDEnum();
+
 
         /**
          * The interval in which ActionScript will poll OVV for viewability
@@ -66,179 +878,7 @@ try {
          */
         this.buildVersion = 'OVVBUILDVERSION';
 
-        ///////////////////////////////////////////////////////////////////////////
-        // PRIVATE ATTRIBUTES
-        ///////////////////////////////////////////////////////////////////////////
-
-        /**
-         * An object for storing OVVAssets. {@link OVVAsset}s are stored with their
-         * id as the key and the OVVAsset as the value.
-         * @type {Object}
-         */
-        var assets = {};
-
-        /**
-         * An array for storing the first PREVIOUS_EVENTS_CAPACITY events for each event type. {@see PREVIOUS_EVENTS_CAPACITY}
-         * @type {Array}
-         */
-        var previousEvents = [];
-
-        /**
-         * Number of event to store
-         * @type {int}
-         */
-        var PREVIOUS_EVENTS_CAPACITY = 1000;
-
-        /**
-         * An array that holds all the subscribes for a eventName+uid combination
-         * @type {Array}
-         */
-        var subscribers = [];
-
-        ///////////////////////////////////////////////////////////////////////////
-        // PUBLIC FUNCTIONS
-        ///////////////////////////////////////////////////////////////////////////
-
-        /**
-         * Stores an asset which can be retrieved later using
-         * {@link OVV#getAssetById}. The latest asset added to OVV can also be
-         * retrieved via the {@link OVV#asset} property.
-         * @param {OVVAsset} ovvAsset An asset to observe
-         */
-        this.addAsset = function(ovvAsset) {
-            if (!assets.hasOwnProperty(ovvAsset.getId())) {
-                assets[ovvAsset.getId()] = ovvAsset;
-                // save a reference for convenience
-                this.asset = ovvAsset;
-            }
-        };
-
-        /**
-         * Removes an {@link OVVAsset} from OVV.
-         * @param {OVVAsset} ovvAsset An {@link OVVAsset} to remove
-         */
-        this.removeAsset = function(ovvAsset) {
-            delete assets[ovvAsset.getId()];
-        };
-
-        /**
-         * Retrieves an {@link OVVAsset} based on its ID
-         * @param {String} The id of the element to retrieve
-         * @returns {OVVAsset|null} The element matching the given ID, or null if
-         * one could not be found
-         */
-        this.getAssetById = function(id) {
-            return assets[id];
-        };
-
-        /**
-         * @returns {Object} Object an object containing all of the OVVAssets being tracked
-         */
-        this.getAds = function() {
-            var copy = {};
-            for (var id in assets) {
-                if (assets.hasOwnProperty(id)) {
-                    copy[id] = assets[id];
-                }
-            }
-            return copy;
-        };
-
-        /**
-         * Subscribe the {func} to the list of {events}. When getPreviousEvents is true all the stored events that were passed will be fired
-         * in a chronological order
-         * @param {events} array with all the event names to subscribe to
-         * @param {uid} asset identifier
-         * @param {func} a function to execute once the assert raise the event
-         * @param {getPreviousEvents} if true all buffered event will be triggered
-         */
-        this.subscribe = function(events, uid, func, getPreviousEvents) {
-
-            if (getPreviousEvents) {
-                for (key in previousEvents[uid]) {
-                    if (previousEvents[uid][key] && contains(previousEvents[uid][key].eventName, events)) {
-                        runSafely(function() {
-                            func(uid, previousEvents[uid][key]);
-                        });
-                    }
-                }
-            }
-
-            for (key in events) {
-                if (!subscribers[events[key] + uid])
-                    subscribers[events[key] + uid] = [];
-                subscribers[events[key] + uid].push({
-                    Func: func
-                });
-            }
-        };
-
-        /**
-         * Publish {eventName} to all the subscribers. Also, storing the publish event in a buffered array is the capacity wasn't reached
-         * @param {eventName} name of the event to publish
-         * @param {uid} asset identifier
-         * @param {args} argument to send to the published function
-         */
-        this.publish = function(eventName, uid, args) {
-            var eventArgs = {
-                eventName: eventName,
-                eventTime: getCurrentTime(),
-                ovvArgs: args
-            };
-
-            if (!previousEvents[uid]) {
-                previousEvents[uid] = [];
-            }
-            if (previousEvents[uid].length < PREVIOUS_EVENTS_CAPACITY) {
-                previousEvents[uid].push(eventArgs);
-            }
-
-            if (eventName && uid && subscribers[eventName + uid] instanceof Array) {
-                for (var i = 0; i < subscribers[eventName + uid].length; i++) {
-                    var funcObject = subscribers[eventName + uid][i];
-                    if (funcObject && funcObject.Func && typeof funcObject.Func === 'function') {
-                        runSafely(function() {
-                            funcObject.Func(uid, eventArgs);
-                        });
-                    }
-                }
-            }
-        };
-
-        /**
-         * Return all published events
-         * @param {uid} asset identifier
-         */
-        this.getAllReceivedEvents = function(uid) {
-            return previousEvents[uid];
-        }
-
-        var getCurrentTime = function() {
-            'use strict';
-            if (Date.now) {
-                return Date.now();
-            }
-            return (new Date()).getTime();
-        };
-
-        var contains = function(item, list) {
-            for (var i = 0; i < list.length; i++) {
-                if (list[i] === item) {
-                    return true;
-                }
-            }
-            return false;
-        };
-
-        var runSafely = function(action) {
-            try {
-                var ret = action();
-                return ret !== undefined ? ret : true;
-            } catch (e) {
-                return false;
-            }
-        };
-    }
+   }
 
 
     /**
@@ -247,7 +887,7 @@ try {
      * @constructor
      */
 
-    function OVVCheck() {
+    this.OVVCheck = function() {
         ///////////////////////////////////////////////////////////////////////////
         // PUBLIC ATTRIBUTES
         ///////////////////////////////////////////////////////////////////////////
@@ -267,7 +907,7 @@ try {
          * A description of any error that occurred
          * @type {String}
          */
-        this.error = false;
+        this.error = '';
 
         /**
          * Whether the tab is focused or not (populated by ActionScript)
@@ -286,6 +926,14 @@ try {
          * @type {String}
          */
         this.id = '';
+
+        /**
+         * Whether beacon checking is supported. Beacon support is defined by
+         * placing a 'control beacon' SWF off screen, and verifying that it is
+         * throttled as expected.
+         * @type {Boolean}
+         */
+        this.beaconsSupported = null;
 
         /**
          * Whether geometry checking is supported. Geometry support requires
@@ -368,6 +1016,12 @@ try {
          * @type {Number}
          */
         this.percentViewable = -1;
+
+        /**
+         * The percentage of the player that is obscured by an overlapping element
+         * @type {Number}
+         */
+        this.percentObscured = 0;
 
         /**
          * Set to {@link OVVCheck#VIEWABLE} when the player was at least 50%
@@ -576,6 +1230,7 @@ try {
             return !(br.browser == br.IE && br.version < 11);
         }
     }
+}; // End TM
 
     /**
      * Represents an Asset which OVV is going to determine the viewability of
@@ -755,7 +1410,8 @@ try {
          * for {@link OVV#DEBUG} mode.
          * @type {Number}
          */
-        var BEACON_SIZE = $ovvs['OVVID'].DEBUG ? 20 : 1;
+        var BEACON_SIZE = window.DEBUG ? 1 : 1;
+        var BEACON_ZINDEX = window.DEBUG ? -99999 : -99999;
 
         /**
          * The last known location of the player on the page
@@ -825,11 +1481,11 @@ try {
          * @see {@link checkBeacons}
          */
         this.checkViewability = function() {
-            var check = new OVVCheck();
+            var check = new  window.$tms['OVVID'].OVVCheck();
             check.id = id;
-            check.inIframeSD = $ovvs['OVVID'].IN_SD_IFRAME;
-            check.inIframeXD = $ovvs['OVVID'].IN_XD_IFRAME;
-            check.geometrySupported = $ovvs['OVVID'].geometrySupported;
+            check.inIframeSD = window.$ovv.IN_IFRAME && !window.$ovv.IN_XD_IFRAME;
+            check.inIframeXD = window.$ovv.IN_XD_IFRAME;
+            check.geometrySupported = window.$tms['OVVID'].geometrySupported;
             check.beaconsSupported =
             check.focus = isInFocus();
 
@@ -892,7 +1548,7 @@ try {
                 }
                 return check;
             }
-            // Geometry not supported (or DEBUG mode is enabled ) :
+            // Geometry not supported :
             // Try to use beacons to determine viewable area of player:
             check.technique = OVVCheck.BEACON;
 
@@ -967,7 +1623,7 @@ try {
          */
         this.beaconStarted = function(index) {
 
-            if ($ovvs['OVVID'].DEBUG && getBeacon(index).debug) {
+            if (window.DEBUG && getBeacon(index).debug) {
                 getBeacon(index).debug();
             }
 
@@ -994,8 +1650,8 @@ try {
                     container.parentElement.removeChild(container);
                 }
             }
-            clearInterval(window.$ovvs['OVVID'].positionInterval);
-            window.$ovvs['OVVID'].removeAsset(this);
+            clearInterval(window.$tms['OVVID'].$ovv.positionInterval);
+            window.$ovv.removeAsset(this);
         };
 
         /**
@@ -1354,7 +2010,7 @@ try {
                 swfContainer.id = 'OVVBeaconContainer_' + index + '_' + id;
 
                 swfContainer.style.position = 'absolute';
-                swfContainer.style.zIndex = $ovvs['OVVID'].DEBUG ? 99999 : -99999;
+                swfContainer.style.zIndex = BEACON_ZINDEX;
 
                 var html =
                     '<object classid="clsid:D27CDB6E-AE6D-11cf-96B8-444553540000" width="' + BEACON_SIZE + '" height="' + BEACON_SIZE + '">' +
@@ -1393,11 +2049,11 @@ try {
             for (var index = 0; index <= TOTAL_BEACONS; index++) {
                 var iframe = document.createElement('iframe');
                 iframe.name = iframe.id = 'OVVFrame_' + id + '_' + index;
-                iframe.width = $ovvs['OVVID'].DEBUG ? 20 : 1;
-                iframe.height = $ovvs['OVVID'].DEBUG ? 20 : 1;
+                iframe.width = BEACON_SIZE; // $ovvs['OVVID'].DEBUG ? 20 : 1;
+                iframe.height = BEACON_SIZE; // $ovvs['OVVID'].DEBUG ? 20 : 1;
                 iframe.frameBorder = 0;
                 iframe.style.position = 'absolute';
-                iframe.style.zIndex = $ovvs['OVVID'].DEBUG ? 99999 : -99999;
+                iframe.style.zIndex = BEACON_ZINDEX;
 
                 iframe.src = 'javascript: ' +
                     'window.isInViewArea = undefined; ' +
@@ -1431,7 +2087,7 @@ try {
                                 'document.body.style.background = "#ff" + rnd1 + rnd2; ' +
                             '}' +
                             'if (window.started === false) {' +
-                                'parent.$ovvs["OVVID"].getAssetById("' + id + '")' + '.beaconStarted(window.index);' +
+                                'parent.$ovv.getAssetById("' + id + '")' + '.beaconStarted(window.index);' +
                                 'window.started = true;' +
                             '}' +
                     '}' +
@@ -1655,12 +2311,12 @@ try {
 
         var beaconSupportCheck = new OVVBeaconSupportCheck(player);
 
-        if (!beaconSupportCheck.supportsBeacons() && $ovvs['OVVID'].geometrySupported === false) {
+        if (!beaconSupportCheck.supportsBeacons() && $tms['OVVID'].$ovv.geometrySupported === false) {
             throw new Error(OVVCheck.INFO_ERROR_NO_MEASURING_METHOD);
         }
 
-        // only use the beacons if geometry is not supported, or we we are in DEBUG mode.
-        if ($ovvs['OVVID'].geometrySupported == false || $ovvs['OVVID'].DEBUG) {
+        // only use the beacons if geometry is not supported.
+        if ($tms['OVVID'].$ovv.geometrySupported == false || window.DEBUG) {
             if (typeof(window.mozPaintCount) == 'number') {
                 //Use frame technique to measure viewability in cross domain FF scenario
                 getBeaconFunc = getFrameBeacon;
@@ -1956,20 +2612,23 @@ try {
         }
     };
 
-    //Create a new instance of OVV every time:
-    window.$ovvs = window.$ovvs || [];
-    window.$ovvs['OVVID'] = new OVV();
+try{
+    window.$tms = window.$tms || [];
+    window.$tms['OVVID'] = new window.TM;
     // 'OVVID' is String substituted from AS
-    window.$ovvs['OVVID'].addAsset(new OVVAsset('OVVID', {
+    window.$tms['OVVID'].$ovv = new $tms['OVVID'].OVV;
+
+    var tmAsset = new OVVAsset('OVVID', {
         geometryViewabilityCalculator: new OVVGeometryViewabilityCalculator()
-    }));
+    });
+
+    // Create a new instance of IAB_OVV if one does not exist. Wwe (TM) will not
+    // use this instance for anything other than registering our OVVAsset instance(s):
     if (typeof window.$ovv == 'undefined') {
-        //Allow pubs to add listeners using the standard object name:
-        window.$ovv = window.$ovvs['OVVID'];
-    } else {
-        //Allow pubs to add listeners when an existing OVV library is present:
-        window.$ovv.addAsset(window.$ovvs['OVVID'].getAssetById('OVVID'));
+        window.$ovv = new OVV;
     }
+    //Allow pubs to add listeners;
+    window.$ovv.addAsset(tmAsset);
     OVVCheck.INIT_SUCCESS; // result for 'eval' in Flash OVVAsset constructor i ncase of success
 } catch (e) {
     if (OVVCheck.ERRORS.indexOf(e.message) == -1) {
