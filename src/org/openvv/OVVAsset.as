@@ -442,6 +442,8 @@ package org.openvv {
             }
 
             var jsResults: Object = ExternalInterface.call("$ovv.getAssetById('" + _id + "')" + ".checkViewability");
+            Debug.traceObj(jsResults, 'results');
+
             var results: OVVCheck = new OVVCheck(jsResults);
 
             results.volume = 1; // default to 1, in case not implemented or not available (eg in Innovid VPAID)
@@ -452,7 +454,6 @@ package org.openvv {
                     }
                 }
             }
-            trace("Checking . . . 4 " + results.viewabilityState)
 
             if (results.viewabilityState !== OVVCheck.VIEWABLE) {
                 if ( isRealFullScreenMode() || isFakeFullScreenMode(results)) {
@@ -466,7 +467,6 @@ package org.openvv {
                     });
                 }
             }
-            Debug.traceObj(jsResults, 'results');
             return results;
         }
 
