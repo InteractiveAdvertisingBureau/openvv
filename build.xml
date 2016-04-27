@@ -9,6 +9,7 @@
     <property name="src.dir" value="src" />
     <property name="bin.dir" value="bin" />
     <property name="tmp.dir" value="tmp" />
+    <property name="bin.dir" value="bin" />
     <property name="asdoc.dir" value="asdoc" />
 
     <condition property="debug_ovv" value="true">

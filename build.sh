@@ -1,11 +1,5 @@
 #!/bin/bash
-
-export FLEX_HOME=/Applications/Adobe\ Flash\ Builder\ 4.7/sdks/4.5.0
-export ANT_HOME=/Applications/Ant
-export OVV_LIB=/Users/steve.thorpe/Documents/git/sourcetree/openvv/bin/openvv.swc
-export AD_LIB=/Users/steve.thorpe/Documents/git/sourcetree/adunit/src
 chmod 777 ./build.sh
-
 
 # git commit id
 git_sha="`git rev-parse HEAD`"
@@ -22,6 +16,9 @@ if [[ $git_dirty -ne 0 ]]; then
 fi
 
 echo "Building with git_sha=${git_sha}"
+
+# Set PATH and Environment Vars
+source ./env.sh
 
 # build, passing version to ant, ant will burn this into the code
 ant -Dbuild.version="${git_sha}" $@
