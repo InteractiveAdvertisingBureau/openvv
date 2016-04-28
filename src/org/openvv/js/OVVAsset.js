@@ -1221,6 +1221,7 @@ function OVVBeaconSupportCheck()
         check.inIframeSD = $NSs['OVVID'].$ovv.IN_SD_IFRAME;
         check.inIframeXD = $NSs['OVVID'].$ovv.IN_XD_IFRAME;
         check.geometrySupported = $NSs['OVVID'].$ovv.geometrySupported;
+        setPlayerSize(check);
         check.focus = isInFocus();
 
         // ===== Methods that can only establish a non-viewable state ======
@@ -1428,6 +1429,14 @@ function OVVBeaconSupportCheck()
         check.viewabilityStateInfo = code;
     };
 
+    var setPlayerSize = function(check){
+        var playerRect = player.getBoundingClientRect();
+        check.objLeft = playerRect.left;
+        check.objTop  = playerRect.top;
+        check.objRight  = playerRect.right;
+        check.objBottom  = playerRect.bottom;
+    };
+
     // Techniques that can determine the player is Unviewable, but cannot be used to determine the player
     // meets the criteria for Viewability: measure Viewable
     var isInFocus = function() {
@@ -1576,10 +1585,6 @@ function OVVBeaconSupportCheck()
             check.clientWidth = viewabilityResult.clientWidth;
             check.clientHeight = viewabilityResult.clientHeight;
             check.percentViewable = viewabilityResult.percentViewable;
-            check.objTop = viewabilityResult.objTop;
-            check.objBottom = viewabilityResult.objBottom;
-            check.objLeft = viewabilityResult.objLeft;
-            check.objRight = viewabilityResult.objRight;
         }
     };
 
@@ -1597,18 +1602,6 @@ function OVVBeaconSupportCheck()
         var innerCornersVisible = 0;
         var beacons = new Array(TOTAL_BEACONS);
         check.beacons = beacons;
-
-        //Get player dimensions:
-        var objRect = player.getClientRects ? player.getClientRects()[0] : {
-            top: -1,
-            bottom: -1,
-            left: -1,
-            right: -1
-        };
-        check.objTop = objRect.top;
-        check.objBottom = objRect.bottom;
-        check.objLeft = objRect.left;
-        check.objRight = objRect.right;
 
         // Active beacons start at index 1
         for (var index = 1; index <= TOTAL_BEACONS; index++) {
@@ -1954,7 +1947,7 @@ function OVVBeaconSupportCheck()
         }
         var screenWidth = Math.max(document.body.clientWidth, window.innerWidth);
         var screenHeight = Math.max(document.body.clientHeight, window.innerHeight);
-        var objRect = element.getClientRects()[0];
+        var objRect = element.getBoundingClientRect();
 
         return (objRect.top < screenHeight && objRect.bottom > 0 && objRect.left < screenWidth && objRect.right > 0);
     };
@@ -2067,7 +2060,6 @@ function OVVBeaconSupportCheck()
 
 
   function OVVGeometryViewabilityCalculator() {
-
         this.getViewabilityState = function(player, contextWindow) {
             var minViewPortSize = getMinViewPortSize(),
                 viewablePercentage;
@@ -2107,10 +2099,6 @@ function OVVBeaconSupportCheck()
             var result = {
                 clientWidth: viewPortSize.width,
                 clientHeight: viewPortSize.height,
-                objTop: assetRect.top,
-                objBottom: assetRect.bottom,
-                objLeft: assetRect.left,
-                objRight: assetRect.right,
                 percentViewable: viewablePercentage
             };
             return result;

@@ -86,7 +86,10 @@ package org.openvv {
         /**
          * Hold OVV version. Will pass to JavaScript as well as $ovv.version
          */
-        public static const RELEASE_VERSION: String = "1.3.9";
+        public static const RELEASE_VERSION: String = "1.3.10";
+        /** Changes in v1.3.10 :
+         * Prevent uninitialized player width / height from causing 'fake full screen' viewable report
+         */
         /** Changes in v1.3.9 :
          * Added codes and info to report on measurement methods and reasons for unmeasurability or errors.
          */
@@ -500,7 +503,7 @@ package org.openvv {
          *
          * @param someData An optional parameter which is ignored
          */
-        public function flashProbe(someData: * ): void {
+        public function flashProbe(someData:*):void {
             return;
         }
 
@@ -512,30 +515,32 @@ package org.openvv {
          * When the JavaScript portion of OpenVV is ready and the beacons have loaded (if needed),
          * this function is called so that the ad can wait for the beacons to load before dispatching AdLoaded
          */
-        public function onJsReady(): void {
+        public function onJsReady():void {
             trace("JS READY!")
             jsReady = true;
-            if ( adStarted ) {
+            if (adStarted) {
                 startImpressionTimer();
             }
             raiseReady();
         }
-        public function jsTrace(obj:Object): void {
+
+        public function jsTrace(obj:Object):void {
             // Debug.traceObj(obj);
         }
 
         /**
-		 * Ready state from the JS code, including beacons.
-		 * @return
-		 */
-		public function get isJsReady():Boolean {
-			return jsReady;
-		}
-		/**
+         * Ready state from the JS code, including beacons.
+         * @return
+         */
+        public function get isJsReady():Boolean {
+            return jsReady;
+        }
+
+        /**
          * When the VPAID AdImpression event is received, it triggers this function
          * to start the interval timer which does viewability checks every 200ms (POLL_INTERVAL)
          */
-        public function startImpressionTimer(): void {
+        public function startImpressionTimer():void {
             if (!_intervalTimer) {
                 _intervalsInView = 0;
                 _intervalsUnMeasurable = 0;
@@ -546,7 +551,7 @@ package org.openvv {
             }
         }
 
-        public function stopImpressionTimer(): void {
+        public function stopImpressionTimer():void {
             // stop time on ad completion
             if (_intervalTimer != null) {
                 _intervalTimer.stop();
@@ -555,42 +560,82 @@ package org.openvv {
             }
         }
 
-        private function setStage(evt:Event = null):void
-        {
+        private function setStage(evt:Event = null):void {
 
-            if(!_ad) return;
+            if (!_ad) return;
 
             _ad.removeEventListener(Event.ADDED_TO_STAGE, setStage);
-            try{
+            try {
                 _stage = _ad.stage;
             }
-            catch(ignore:Error){
+            catch (ignore:Error) {
                 //stage is inaccessible
             }
-            if(!_stage)
+            if (!_stage)
                 _ad.addEventListener(Event.ADDED_TO_STAGE, setStage);
         }
 
-        private function isRealFullScreenMode():Boolean{
-            var displayState:String = StageDisplayState.NORMAL;
+        private function inFullScreenMode():String{
+            // Structured this way so _jsInitError can be overriden by real full screen mode
+            // while updateResultsFromDisplayState() can fall back on testing for 'fake' full
+            // screen mode by comparing player size to _ad size
             try{
-                displayState   = _stage.displayState;
+                if (_stage.displayState !== StageDisplayState.NORMAL){
+                    return _stage.displayState;
+                }else{
+                    return '';
+                }
+            }catch(e:*){
+                // ignore
             }
-            catch(ignore:Error){
-                // Either stage was null or we can't access it due to security
-                // restrictions, either way we can ignore this error
-            }
-            return displayState == StageDisplayState.FULL_SCREEN || displayState == 'fullScreenInteractive'
+            return null; // must be null here, not false
         }
 
-        private function isFakeFullScreenMode(results:OVVCheck):Boolean
-        {
-            if(_ad && (_ad is DisplayObject)) {
-                if ((_ad.width - (results.objRight - results.objLeft)) > 10 && (_ad.height - (results.objBottom - results.objTop)) > 10) {
-                    return true;
+        private function updateResultsFromDisplayState(results:Object):void {
+            var displayState:String;
+            var fsMode:* = inFullScreenMode();
+            switch (fsMode){
+                case null:
+                     // HOW IS THIS A DETERMINATION THAT THE PLAYER IS VIEWABLE?
+                     // comparing the _ad size to the player asset size reveals nothing about whether
+                     // the player is in an active browser window, or even within the browser viewport.
+
+                    // stage object was unavailable
+                    /*if (_ad && (_ad is DisplayObject)) {
+                        var playerWidth:int = (results.objRight - results.objLeft);
+                        var playerHeight:int = (results.objBottom - results.objTop);
+
+                        if ((_ad.width - playerWidth) < 10 && (_ad.height - playerHeight) < 10) {
+                            displayState = StageDisplayState.FULL_SCREEN;
+                        }
+                    }*/
+
+                    displayState = StageDisplayState.NORMAL;
+                    break;
+                case false:
+                    // stage object was available, and we are not in full screen mode.
+                    displayState = StageDisplayState.NORMAL;
+                    break
+                default:
+                    // we are in either StageDisplayState.FULL_SCREEN or StageDisplayState.FULL_SCREEN_INTERACTIVE
+                    displayState = fsMode;
+                    break;
+            }
+
+            if (displayState !== StageDisplayState.NORMAL) {
+                results.displayState = displayState;
+                results.viewabilityState = OVVCheck.VIEWABLE;
+                results.viewabilityStateOverrideReason = OVVCheck.FULLSCREEN;
+                // extra info for ADS-748
+                var exInfo:String = results.viewabilityStateInfo;
+                var exCode:String = results.viewabilityStateCode;
+                results.viewabilityStateCode = OVVCheck.INFO_TYPE_VIEWABLE;
+                results.viewabilityStateInfo = OVVCheck.INFO_METHOD_FULL_SCREEN_OVERRIDE + '::' + exInfo + '_' + exCode;
+
+                if (results.technique == OVVCheck.GEOMETRY) {
+                    results.percentViewable = 100;
                 }
             }
-            return false;
         }
 
         ////////////////////////////////////////////////////////////
