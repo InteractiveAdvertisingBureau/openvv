@@ -426,14 +426,13 @@ package org.openvv {
          *
          * @see org.openvv.OVVCheck
          */
-        public function checkViewability(): OVVCheck {
-            if ( _jsInitError ) {
-                if (isRealFullScreenMode()) {
+        public function checkViewability():OVVCheck {
+            if (_jsInitError) {
+                if (!!inFullScreenMode()) {
                     return new OVVCheck({
                         viewabilityState: OVVCheck.VIEWABLE,
                         viewabilityStateCode: OVVCheck.INFO_TYPE_VIEWABLE,
-                        viewabilityStateInfo: OVVCheck.INFO_METHOD_FULL_SCREEN_OVERRIDE,
-                        percentViewable: 100
+                        viewabilityStateInfo: OVVCheck.INFO_METHOD_FULL_SCREEN_OVERRIDE + '::' + OVVCheck.INFO_TYPE_ERROR + '_' + _jsInitError
                     });
                 } else {
                     return new OVVCheck({
@@ -458,18 +457,7 @@ package org.openvv {
                 }
             }
 
-            if (results.viewabilityState !== OVVCheck.VIEWABLE) {
-                if ( isRealFullScreenMode() || isFakeFullScreenMode(results)) {
-                    return new OVVCheck({
-                        viewabilityState: OVVCheck.VIEWABLE,
-                        viewabilityStateCode: OVVCheck.INFO_TYPE_VIEWABLE,
-                        viewabilityStateInfo: OVVCheck.INFO_METHOD_FULL_SCREEN_OVERRIDE + '::' +
-                                                           results.viewabilityStateCode + '_' +
-                                                           results.viewabilityStateInfo,
-                        percentViewable: 100
-                    });
-                }
-            }
+            updateResultsFromDisplayState(results);
             return results;
         }
 
