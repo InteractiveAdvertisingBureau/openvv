@@ -162,7 +162,9 @@ package org.openvv {
         /**
          * The timer used to measure intervals
          */
-        private var _intervalTimer: Timer;
+        private var _intervalTimer: Timer = null;
+
+        private var _allowImpressionPollingStart: Boolean = true;
 
         /**
          * The number of consecutive intervals in which the asset has been
@@ -322,16 +324,28 @@ package org.openvv {
 			}
 
             var evalResult:String = String( ExternalInterface.call( 'eval', ovvAssetSource ) );
+            switch (evalResult){
+                case OVVCheck.INIT_SUCCESS:
+                    // Do nothing
+                    break;
 
-            if ( evalResult == null ){
-                _jsInitError = OVVCheck.INFO_ERROR_INIT_JS_EVAL_NULL;
-                trace("Eval null");
-                raiseError({error:_jsInitError}, true);
-            } else if ( evalResult !== OVVCheck.INIT_SUCCESS ){
-                 _jsInitError = evalResult;
-                 raiseError({error:_jsInitError}, true);
-                trace("Eval result not SUCCESS . . . .");
-                trace("Eval result: ", evalResult);
+                case null:
+                    _jsInitError = OVVCheck.INFO_ERROR_INIT_JS_EVAL_NULL;
+                    trace("Eval null");
+                    raiseError({error:_jsInitError}, true);
+                    break;
+                
+                case OVVCheck.INFO_ERROR_NO_MEASURING_METHOD:
+                    _jsInitError = OVVCheck.INFO_ERROR_NO_MEASURING_METHOD;
+                    // ToDo : Make this work, and create VTS scenarios that trigger loading of IEv10 in Win 8.0
+                    //raiseImpressionUnmeasurable({error:_jsInitError});
+                    raiseError({error:_jsInitError});
+                    break;
+                
+                default:
+                    _jsInitError = evalResult;
+                    raiseError({error:_jsInitError}, true);
+                    break;
             }
         }
 
@@ -468,7 +482,7 @@ package org.openvv {
         public function dispose(): void {
             ExternalInterface.call("$ovv.getAssetById('" + _id + "')" + ".dispose");
 
-            if (_intervalTimer) {
+            if (_intervalTimer !== null) {
                 _intervalTimer.stop();
                 _intervalTimer.removeEventListener(TimerEvent.TIMER, onIntervalCheck);
                 _intervalTimer = null;
@@ -529,7 +543,8 @@ package org.openvv {
          * to start the interval timer which does viewability checks every 200ms (POLL_INTERVAL)
          */
         public function startImpressionTimer():void {
-            if (!_intervalTimer) {
+            if (_allowImpressionPollingStart && _intervalTimer === null) {
+                _allowImpressionPollingStart = false;
                 _intervalsInView = 0;
                 _intervalsUnMeasurable = 0;
 
@@ -541,11 +556,9 @@ package org.openvv {
 
         public function stopImpressionTimer():void {
             // stop time on ad completion
-            if (_intervalTimer != null) {
-                _intervalTimer.stop();
-                _intervalTimer.removeEventListener(TimerEvent.TIMER, onIntervalCheck);
-                _intervalTimer = null;
-            }
+            _intervalTimer.stop();
+            _intervalTimer.removeEventListener(TimerEvent.TIMER, onIntervalCheck);
+            _intervalTimer = null;
         }
 
         private function setStage(evt:Event = null):void {
@@ -826,9 +839,11 @@ package org.openvv {
 			_impressionEventRaised = true;
 		}
 
-		private function raiseImpressionUnmeasurable(ovvData:*):void
+		private function raiseImpressionUnmeasurable(ovvData:*, delay:Boolean=false):void
 		{
-			dispatchEvent(new OVVEvent(OVVEvent.OVVImpressionUnmeasurable, ovvData));
+            setTimeout(function():void{
+                dispatchEvent(new OVVEvent(OVVEvent.OVVImpressionUnmeasurable, ovvData));
+            },delay?200:0);
 			_impressionUnmeasurableEventRaised = true;
 		}
 

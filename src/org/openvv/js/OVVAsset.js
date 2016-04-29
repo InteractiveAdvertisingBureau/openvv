@@ -685,9 +685,9 @@ function OVVBeaconSupportCheck()
          console.log(br.browser+':'+br.version);
          console.log("Build : {{TIMESTAMP}}");
          this.supportsBeacons = function(){
-             return !(br.browser == br.IE && br.version < 11 && /Windows/.test(os));
+             return !(br.browser == OVVBrowser.IE && br.version < 11 && /Windows/.test(os));
          }
-     }
+     }  
 
  }// END NS : Namespace
 
