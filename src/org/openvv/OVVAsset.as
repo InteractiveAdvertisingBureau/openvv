@@ -428,7 +428,7 @@ package org.openvv {
          */
         public function checkViewability():OVVCheck {
             if (_jsInitError) {
-                if (!!inFullScreenMode()) {
+                if (getDisplayState() !== StageDisplayState.NORMAL) {
                     return new OVVCheck({
                         viewabilityState: OVVCheck.VIEWABLE,
                         viewabilityStateCode: OVVCheck.INFO_TYPE_VIEWABLE,
@@ -563,62 +563,27 @@ package org.openvv {
                 _ad.addEventListener(Event.ADDED_TO_STAGE, setStage);
         }
 
-        private function inFullScreenMode():String{
-            // Structured this way so _jsInitError can be overriden by real full screen mode
-            // while updateResultsFromDisplayState() can fall back on testing for 'fake' full
-            // screen mode by comparing player size to _ad size
+        private function getDisplayState():String{
             try{
-                if (_stage.displayState !== StageDisplayState.NORMAL){
-                    return _stage.displayState;
-                }else{
-                    return '';
-                }
+                var displayState:String = _stage.displayState;
+                return _stage.displayState;
             }catch(e:*){
                 // ignore
             }
-            return null; // must be null here, not false
+            return StageDisplayState.NORMAL;
         }
 
         private function updateResultsFromDisplayState(results:Object):void {
-            var displayState:String;
-            var fsMode:* = inFullScreenMode();
-            switch (fsMode){
-                case null:
-                     // HOW IS THIS A DETERMINATION THAT THE PLAYER IS VIEWABLE?
-                     // comparing the _ad size to the player asset size reveals nothing about whether
-                     // the player is in an active browser window, or even within the browser viewport.
-
-                    // stage object was unavailable
-                    /*if (_ad && (_ad is DisplayObject)) {
-                        var playerWidth:int = (results.objRight - results.objLeft);
-                        var playerHeight:int = (results.objBottom - results.objTop);
-
-                        if ((_ad.width - playerWidth) < 10 && (_ad.height - playerHeight) < 10) {
-                            displayState = StageDisplayState.FULL_SCREEN;
-                        }
-                    }*/
-
-                    displayState = StageDisplayState.NORMAL;
-                    break;
-                case false:
-                    // stage object was available, and we are not in full screen mode.
-                    displayState = StageDisplayState.NORMAL;
-                    break
-                default:
-                    // we are in either StageDisplayState.FULL_SCREEN or StageDisplayState.FULL_SCREEN_INTERACTIVE
-                    displayState = fsMode;
-                    break;
-            }
-
+            var displayState:String = getDisplayState();
             if (displayState !== StageDisplayState.NORMAL) {
                 results.displayState = displayState;
                 results.viewabilityState = OVVCheck.VIEWABLE;
                 results.viewabilityStateOverrideReason = OVVCheck.FULLSCREEN;
                 // extra info for ADS-748
-                var exInfo:String = results.viewabilityStateInfo;
-                var exCode:String = results.viewabilityStateCode;
+                var exInfo:String = results.viewabilityStateInfo; // info before full-screen override
+                var exCode:String = results.viewabilityStateCode; // code before full-screen override
                 results.viewabilityStateCode = OVVCheck.INFO_TYPE_VIEWABLE;
-                results.viewabilityStateInfo = OVVCheck.INFO_METHOD_FULL_SCREEN_OVERRIDE + '::' + exInfo + '_' + exCode;
+                results.viewabilityStateInfo = OVVCheck.INFO_METHOD_FULL_SCREEN_OVERRIDE + '::' + exCode + '_' + exInfo;
 
                 if (results.technique == OVVCheck.GEOMETRY) {
                     results.percentViewable = 100;
