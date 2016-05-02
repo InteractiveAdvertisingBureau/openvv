@@ -635,7 +635,7 @@ function OVVBeaconSupportCheck()
                      var nameRegExp = new RegExp(data[i].nameRegExStr);
                      if (nameRegExp.test(nameSearchString)){
                          var verRegExp = new RegExp('.*' + data[i].verRegExStr + '.*');
-                         info = {name:data[i].name};
+                         info = {name:data[i].name, code:data[i].code};
                          info.version = navigator.userAgent.replace(verRegExp, '$1');
                          return info;
                      }
