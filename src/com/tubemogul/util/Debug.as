@@ -199,7 +199,7 @@ internal class Trace{
 			retStr += String.fromCharCode(10);
 		}else{
 			// Use a prefix, with elapsed time, for filtering in debug trace viewer (eg Vizzy)
-			var prefix:String = "TubeMogul [" + ((mins<10)?"0":"") + mins + ":" + ((secs<10)?"0":"") + secs + "] ";
+			var prefix:String = "TM-TRACE-OVV [" + ((mins<10)?"0":"") + mins + ":" + ((secs<10)?"0":"") + secs + "] ";
 			trace(prefix + str);
 		}
 	}
