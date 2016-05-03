@@ -51,8 +51,14 @@
             <arg value="-o"/>
             <arg path="${tmp.dir}/OVVAsset.min.js"/>
             <arg value="-c"/>
-            <arg value="evaluate=false"/>
+            <arg value="sequences=false, properties=false, conditionals=false"/>
         </exec>
+        <tstamp>
+            <format property="time.stamp" pattern="yyyy-MM-dd_HH:mm:ss"/>
+        </tstamp>
+
+        <replace file="${tmp.dir}/OVVAsset.min.js" token="{{TIMESTAMP}}" value="${time.stamp}" />
+
         <concat destfile="${tmp.dir}/OVVAsset.min.js" append="true">//# sourceURL=ovvaset.js</concat>
     </target>
 

@@ -1,4 +1,5 @@
 #!/bin/bash
+chmod 777 ./build.sh
 
 # git commit id
 git_sha="`git rev-parse HEAD`"
@@ -15,6 +16,9 @@ if [[ $git_dirty -ne 0 ]]; then
 fi
 
 echo "Building with git_sha=${git_sha}"
+
+# Set PATH and Environment Vars
+source ./env.sh
 
 # build, passing version to ant, ant will burn this into the code
 ant -Dbuild.version="${git_sha}" $@
