@@ -88,7 +88,13 @@ package org.openvv {
          */
         public static const RELEASE_VERSION: String = "1.3.10";
         /** Changes in v1.3.10 :
+         * Created namespaced version of OVV global classes that could conflict with 3rd party ads implementing OpenVV
+         * in the same document window.
+         * Updated browser detection to correctly handle Edge and IE 11.
          * Prevent uninitialized player width / height from causing 'fake full screen' viewable report
+         * Correctly assign player size in 'check' object before starting to attempt to measure viewability
+         * Added addional information properties for use in stats pixels params.
+         *
          */
         /** Changes in v1.3.9 :
          * Added codes and info to report on measurement methods and reasons for unmeasurability or errors.
