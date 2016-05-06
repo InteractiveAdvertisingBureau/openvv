@@ -21,7 +21,7 @@ package org.openvv {
     import flash.display.Stage;
     import flash.display.StageDisplayState;
     import flash.events.Event;
-	import flash.events.IEventDispatcher
+    import flash.events.IEventDispatcher
     import flash.events.EventDispatcher;
     import flash.events.TimerEvent;
     import flash.external.ExternalInterface;
@@ -34,9 +34,13 @@ package org.openvv {
     import com.tubemogul.util.Debug;
 
     /**
-     * The event dispatched when the asset has been viewable for 5 contiguous seconds
+     * The event dispatched when the asset has been viewable for 2 contiguous seconds
      */
     [Event(name = "OVVImpression", type = "org.openvv.events.OVVEvent")]
+    /**
+     * The Event dispatched when the asset has been unmeasurable for 1 contiguous second
+     */
+    [Event(name = "OVVImpressionUnmeasurable", type = "org.openvv.events.OVVEvent")]
     /**
      * The Event dispatched when OVV emits information messages
      */
@@ -148,7 +152,7 @@ package org.openvv {
          * Holds repository latest commit number
          */
         public static var _buildVersion: String = OVVVersion.getVersion();
-
+        public static var _buildTime: String = '{{TIMESTAMP}}';
 		/**
          * Whether the asset has dispatched the DISCERNABLE_IMPRESSION event
          */
@@ -643,19 +647,24 @@ package org.openvv {
                                         focusOk(results);
 
                 _intervalsUnMeasurable = unmeasurable ? _intervalsUnMeasurable + 1 : 0;
+
+
                 if (viewable) {
                     _intervalsInView += 1;
                 }else if (OVVConfig.viewability[standard].viewable_polls_consecutive){
                     _intervalsInView = 0;
                 }
 
-                if (_impressionEventRaised == false && _intervalsInView >= VIEWABLE_IMPRESSION_THRESHOLD) {
-                    raiseImpression(results);
-                }else if (_impressionUnmeasurableEventRaised == false &&
-                            _intervalsUnMeasurable >= UNMEASURABLE_IMPRESSION_THRESHOLD) {
-                    raiseImpressionUnmeasurable(results);
+                if ( _impressionEventRaised == false) {
+                    if (_intervalsInView >= VIEWABLE_IMPRESSION_THRESHOLD ||
+                            _intervalsUnMeasurable >= UNMEASURABLE_IMPRESSION_THRESHOLD ){
+                        _impressionEventRaised = true;
+                        stopImpressionTimer();
+                        dispatchEvent(new OVVEvent(OVVEvent.OVVImpression, results));
+                    }
                 }
             }
+
         }
 
         private function volumeOk(results:Object):Boolean {
@@ -843,30 +852,35 @@ package org.openvv {
 		{
 			dispatchEvent(new OVVEvent(OVVEvent.OVVReady, null));
 		}
-		private function raiseImpression(ovvData:*):void
+
+        /*
+        private function raiseImpression(ovvData:*):void{
+            if (ovv)
+        }
+
+        private function raiseViewableImpression(ovvData:*):void
 		{
 			dispatchEvent(new OVVEvent(OVVEvent.OVVImpression, ovvData));
 			_impressionEventRaised = true;
 		}
 
-		private function raiseImpressionUnmeasurable(ovvData:*, delay:Boolean=false):void
+		private function raiseUnmeasurableImpression(ovvData:*):void
 		{
-            setTimeout(function():void{
-                dispatchEvent(new OVVEvent(OVVEvent.OVVImpressionUnmeasurable, ovvData));
-            },delay?200:0);
-			_impressionUnmeasurableEventRaised = true;
+            dispatchEvent(new OVVEvent(OVVEvent.OVVImpressionUnmeasurable, ovvData));
+            _impressionEventRaised = true;
 		}
+		*/
 
 		private function raiseLog(ovvData:*):void
 		{
 			dispatchEvent(new OVVEvent(OVVEvent.OVVLog, ovvData));
 		}
 
-		private function raiseError(ovvData:*, delay:Boolean = false):void
+		private function raiseError(ovvData:*, async:Boolean = false):void
 		{
             setTimeout(function():void{
                 dispatchEvent(new OVVEvent(OVVEvent.OVVError, ovvData));
-            },delay?200:0);
+            },async?200:0);
         }
     }
 }

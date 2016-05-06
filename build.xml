@@ -53,12 +53,6 @@
             <arg value="-c"/>
             <arg value="sequences=false, properties=false, conditionals=false"/>
         </exec>
-        <tstamp>
-            <format property="time.stamp" pattern="yyyy-MM-dd_HH:mm:ss"/>
-        </tstamp>
-
-        <replace file="${tmp.dir}/OVVAsset.min.js" token="{{TIMESTAMP}}" value="${time.stamp}" />
-
         <concat destfile="${tmp.dir}/OVVAsset.min.js" append="true">//# sourceURL=ovvaset.js</concat>
     </target>
 
@@ -89,6 +83,12 @@
         </loadresource>
         <!-- Store the escaped and minified JS code in OVVAsset -->
         <replace file="${tmp.dir}/org/openvv/OVVAsset.as" token="{{OVVAssetJS}}" value="${js-src-esc}" />
+        <!-- add a build-time stamp to OVVAsset.as -->
+        <tstamp>
+            <format property="time.stamp" pattern="yyyy-MM-dd_HH:mm:ss"/>
+        </tstamp>
+
+        <replace file="${tmp.dir}/org/openvv/OVVAsset.as" token="{{TIMESTAMP}}" value="${time.stamp}" />
     </target>
 
     <target name="-comp-lib">

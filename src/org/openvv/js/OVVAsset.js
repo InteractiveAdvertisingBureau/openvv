@@ -614,97 +614,6 @@ function OVVBeaconSupportCheck()
 
      };
 
-     function OVVBrowser() {
-         this.getBrowserInfo = function(){
-
-             var BROWSER = {
-                 CHROME: {code: 'CH', name: 'chrome'},
-                 FIREFOX: {code: 'FF', name: 'firefox'},
-                 SAFARI: {code: 'SF', name: 'safari'},
-                 IE: {code: 'IE', name: 'internet explorer'},
-                 OPERA: {code: 'OP', name: 'opera'},
-                 EDGE: {code: 'ME', name: 'MicroSoftEdge'},
-                 OTHER: {code: '??', name: 'Unknown'}
-             };
-
-             // Get browser name and version
-             var findBrowserInfo = function(data) {
-                 var info;
-                 for (var i = 0; i < data.length; i++) {
-                     var nameSearchString = data[i].nameSearch || navigator.userAgent;
-                     var nameRegExp = new RegExp(data[i].nameRegExStr);
-                     if (nameRegExp.test(nameSearchString)){
-                         var verRegExp = new RegExp('.*' + data[i].verRegExStr + '.*');
-                         info = {name:data[i].name, code:data[i].code};
-                         info.version = navigator.userAgent.replace(verRegExp, '$1');
-                         return info;
-                     }
-                 }
-             };
-
-             // Order is important. Do not change.
-             var browserData = [
-                 {
-                     nameRegExStr: 'Edge',
-                     verRegExStr: 'Edge.([0-9]+)',
-                     name: BROWSER.EDGE.name,
-                     code: BROWSER.EDGE.code
-                 }, {
-                     nameRegExStr: 'Chrome',
-                     verRegExStr: 'Chrome.([0-9]+)',
-                     name: BROWSER.CHROME.name,
-                     code: BROWSER.CHROME.code
-                 }, {
-                     nameSearch: navigator.vendor,
-                     nameRegExStr: 'Apple',
-                     verRegExStr: '(?:Version|Safari).([1-9]?\\d)[^0-9]',
-                     name: BROWSER.SAFARI.name,
-                     code: BROWSER.SAFARI.code
-                 }, {
-                     nameRegExStr: 'Opera',
-                     verRegExStr: 'Version.([0-9]+)',
-                     name: BROWSER.OPERA.name,
-                     code: BROWSER.OPERA.code
-                 }, {
-                     nameRegExStr: 'Firefox',
-                     verRegExStr: 'Firefox.([0-9]+)',
-                     name: BROWSER.FIREFOX.name,
-                     code: BROWSER.FIREFOX.code
-                 }, {
-                     nameRegExStr: 'MSIE|Trident.7',
-                     verRegExStr: '(?:MSIE| rv).([0-9]+)',
-                     name: BROWSER.IE.name,
-                     code: BROWSER.IE.code
-                 }
-             ];
-
-             var info = findBrowserInfo(browserData) || {name: BROWSER.OTHER.code, version: 0};
-             info.browser = BROWSER;
-             return info;
-         }
-     }
-
-     this.OVVBeaconSupportCheck = function(player){
-         var br = new OVVBrowser();
-         var info = br.getBrowserInfo();
-         var osParts = player.getOS().split(' ');
-         var osName = osParts[0];
-         var osVer = osParts[1];
-         console.log("Build 1: {{TIMESTAMP}}");
-
-         this.supportsBeacons = function(){
-             console.log("Build 2: {{TIMESTAMP}}");
-             return !(  osName == "Windows" && parseFloat(osVer) < 8.1 &&
-                        info.code == info.BROWSER.IE.code &&
-                        info.version < 11 );
-         };
-
-         // console.log(os);
-         // console.log(br.browser+':'+br.version);
-         // this.supportsBeaconsx = function(){
-         //     return !(br.browser == OVVBrowser.IE && br.version < 11 && /Windows/.test(os));
-         // }
-     }  
 
  }// END NS : Namespace
 
@@ -2023,13 +1932,7 @@ function OVVBeaconSupportCheck()
         throw new Error(OVVCheck.INFO_ERROR_PLAYER_NOT_FOUND);
     }
 
-    var beaconSupportCheck = new ($NSs['OVVID'].OVVBeaconSupportCheck)(player);
-
-    if (!beaconSupportCheck.supportsBeacons() && $NSs['OVVID'].$ovv.geometrySupported === false) {
-        throw new Error(OVVCheck.INFO_ERROR_NO_MEASURING_METHOD);
-    }
-
-    // only use the beacons if geometry is not supported.
+      // only use the beacons if geometry is not supported.
     if ( $NSs['OVVID'].$ovv.geometrySupported === false ) {
         if (typeof(window.mozPaintCount) == 'number') {
             //Use frame technique to measure viewability in cross domain FF scenario
