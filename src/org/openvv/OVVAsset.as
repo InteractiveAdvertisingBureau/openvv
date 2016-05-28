@@ -166,7 +166,7 @@ package org.openvv {
         private var _validDurationReported:Boolean = false;
 
         /**
-         * The randomly generated unique identifier of this asset
+         * The unique identifier of this asset 
          */
         private var _id: String;
 
@@ -213,14 +213,9 @@ package org.openvv {
         private var _throttleState: String;
 
 		/**
-		 * Indicate whether the Impression event was raised
+		 * Track which impression event, if any, has been raised.
 		 */
-		private var _impressionEventRaised: Boolean = false;
-
-		/**
-		* Indicate whether the ImpressionUnmeasurable event was raised
-		*/
-		private var _impressionUnmeasurableEventRaised: Boolean = false;
+		private var _impressionEventRaised: String = null;
 
 		/**
 		* Flag to record javascript  initialization error
@@ -303,7 +298,8 @@ package org.openvv {
                 standard = viewabilityStandard;
             }
 
-            _id = (id !== null) ? "ovv" + id.replace(/([^a-z0-9]+)/gi, '') : "ovv" + Math.floor(Math.random() * 1000000000).toString();
+            // DO NOT MODIFY 'id' if non-null. DoubleVerify param, 'adid' is set to this value if DV pixel present
+            _id = (id !== null) ? id : ("ovv" + Math.floor(Math.random() * 1000000000).toString());
             ////////  ????  ///////////////
             if ( !!adRef ) {
                 _ad = adRef as DisplayObject;
@@ -469,7 +465,7 @@ package org.openvv {
             }
 
             var jsResults: Object = ExternalInterface.call("$ovv.getAssetById('" + _id + "')" + ".checkViewability");
-            Debug.traceObj(jsResults, 'results');
+            // Debug.traceObj(jsResults, 'results');
 
             var results: OVVCheck = new OVVCheck(jsResults);
 
@@ -655,12 +651,15 @@ package org.openvv {
                     _intervalsInView = 0;
                 }
 
-                if ( _impressionEventRaised == false) {
-                    if (_intervalsInView >= VIEWABLE_IMPRESSION_THRESHOLD ||
-                            _intervalsUnMeasurable >= UNMEASURABLE_IMPRESSION_THRESHOLD ){
-                        _impressionEventRaised = true;
+                if ( _impressionEventRaised == null ) {
+                    if ( _intervalsInView >= VIEWABLE_IMPRESSION_THRESHOLD) {
+                        _impressionEventRaised = OVVEvent.OVVImpression;
+                    }else if (_intervalsUnMeasurable >= UNMEASURABLE_IMPRESSION_THRESHOLD ) {
+                        _impressionEventRaised = OVVEvent.OVVImpressionUnmeasurable;
+                    }
+                    if (!!_impressionEventRaised){
                         stopImpressionTimer();
-                        dispatchEvent(new OVVEvent(OVVEvent.OVVImpression, results));
+                        dispatchEvent(new OVVEvent(_impressionEventRaised, results));
                     }
                 }
             }
@@ -740,7 +739,6 @@ package org.openvv {
 				if (!externalInterfaceIsAvailable()) {
 					return;
 				}
-
 				var injectTag:String =
 					'function () {' +
 					'var tag = document.createElement("script");' +
@@ -789,7 +787,6 @@ package org.openvv {
 		 */
 		public function handleVpaidEvent(event:Event):void
 		{
-            Debug.trace("console.log :VPAID EVENT : " + event.type)
 			var ovvData:OVVCheck = checkViewability();
 			switch(event.type){
 				case VPAIDEvent.AdVideoComplete:
@@ -853,34 +850,16 @@ package org.openvv {
 			dispatchEvent(new OVVEvent(OVVEvent.OVVReady, null));
 		}
 
-        /*
-        private function raiseImpression(ovvData:*):void{
-            if (ovv)
-        }
-
-        private function raiseViewableImpression(ovvData:*):void
-		{
-			dispatchEvent(new OVVEvent(OVVEvent.OVVImpression, ovvData));
-			_impressionEventRaised = true;
-		}
-
-		private function raiseUnmeasurableImpression(ovvData:*):void
-		{
-            dispatchEvent(new OVVEvent(OVVEvent.OVVImpressionUnmeasurable, ovvData));
-            _impressionEventRaised = true;
-		}
-		*/
-
 		private function raiseLog(ovvData:*):void
 		{
 			dispatchEvent(new OVVEvent(OVVEvent.OVVLog, ovvData));
 		}
 
-		private function raiseError(ovvData:*, async:Boolean = false):void
+		private function raiseError(ovvData:*, asyncExec:Boolean = false):void
 		{
             setTimeout(function():void{
                 dispatchEvent(new OVVEvent(OVVEvent.OVVError, ovvData));
-            },async?200:0);
+            },asyncExec?200:0);
         }
     }
 }
