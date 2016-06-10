@@ -90,7 +90,11 @@ package org.openvv {
         /**
          * Hold OVV version. Will pass to JavaScript as well as $ovv.version
          */
-        public static const RELEASE_VERSION: String = "1.3.10";
+        public static const RELEASE_VERSION: String = "1.3.11";
+        /** Changes in v1.3.11 :
+         * UD-1947 : Removed asset id decoration after receiving it in Constructor (critical for DV
+         * JS tag integration ) 
+         */
         /** Changes in v1.3.10 :
          * Created namespaced version of OVV global classes that could conflict with 3rd party ads implementing OpenVV
          * in the same document window.
