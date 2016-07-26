@@ -1387,7 +1387,7 @@ function OVVAsset(uid, dependencies) {
 
         var playerLocation = player.getClientRects()[0];
 
-        // when we don't have an initial position, or the position hasn't changed 
+        // when we don't have an initial position, or the position hasn't changed
         if (lastPlayerLocation && playerLocation && (lastPlayerLocation.left === playerLocation.left && lastPlayerLocation.right === playerLocation.right && lastPlayerLocation.top === playerLocation.top && lastPlayerLocation.bottom === playerLocation.bottom)) {
             // no need to update positions
             return;
@@ -1406,7 +1406,7 @@ function OVVAsset(uid, dependencies) {
         var middleHeight = playerHeight / SQRT_2;
 
         for (var index = 0; index <= TOTAL_BEACONS; index++) {
-
+            var offset = Math.round(Math.random()*5);
             var left = playerLocation.left + document.body.scrollLeft;
             var top = playerLocation.top + document.body.scrollTop;
 
@@ -1416,53 +1416,56 @@ function OVVAsset(uid, dependencies) {
                     top = -100000;
                     break;
                 case CENTER:
-                    left += (playerWidth - BEACON_SIZE) / 2;
-                    top += (playerHeight - BEACON_SIZE) / 2;
+                    left += (playerWidth - BEACON_SIZE) / 2 + offset;
+                    top += (playerHeight - BEACON_SIZE) / 2 + offset;
                     break;
                 case OUTER_TOP_LEFT:
-                    // nothing to do, already at default position
+                    left+= offset;
+                    top+= offset;
                     break;
                 case OUTER_TOP_RIGHT:
-                    left += playerWidth - BEACON_SIZE;
+                    top+= offset;
+                    left += playerWidth - BEACON_SIZE - offset;
                     break;
                 case OUTER_BOTTOM_LEFT:
-                    top += playerHeight - BEACON_SIZE;
+                    left+= offset;
+                    top += playerHeight - BEACON_SIZE - offset;
                     break;
                 case OUTER_BOTTOM_RIGHT:
-                    left += playerWidth - BEACON_SIZE;
-                    top += playerHeight - BEACON_SIZE;
+                    left += playerWidth - BEACON_SIZE - offset;
+                    top += playerHeight - BEACON_SIZE - offset;
                     break;
                 case MIDDLE_TOP_LEFT:
-                    left += (playerWidth - middleWidth) / 2;
-                    top += (playerHeight - middleHeight) / 2;
+                    left += (playerWidth - middleWidth) / 2 + offset;
+                    top += (playerHeight - middleHeight) / 2 + offset;
                     break;
                 case MIDDLE_TOP_RIGHT:
-                    left += ((playerWidth - middleWidth) / 2) + middleWidth;
-                    top += (playerHeight - middleHeight) / 2;
+                    left += ((playerWidth - middleWidth) / 2) + middleWidth - offset;
+                    top += (playerHeight - middleHeight) / 2 + offset;
                     break;
                 case MIDDLE_BOTTOM_LEFT:
-                    left += (playerWidth - middleWidth) / 2;
-                    top += ((playerHeight - middleHeight) / 2) + middleHeight;
+                    left += (playerWidth - middleWidth) / 2 + offset;
+                    top += ((playerHeight - middleHeight) / 2) + middleHeight - offset;
                     break;
                 case MIDDLE_BOTTOM_RIGHT:
-                    left += ((playerWidth - middleWidth) / 2) + middleWidth;
-                    top += ((playerHeight - middleHeight) / 2) + middleHeight;
+                    left += ((playerWidth - middleWidth) / 2) + middleWidth - offset;
+                    top += ((playerHeight - middleHeight) / 2) + middleHeight - offset;
                     break;
                 case INNER_TOP_LEFT:
-                    left += (playerWidth - innerWidth) / 2;
-                    top += (playerHeight - innerHeight) / 2;
+                    left += (playerWidth - innerWidth) / 2 + offset;
+                    top += (playerHeight - innerHeight) / 2 + offset;
                     break;
                 case INNER_TOP_RIGHT:
-                    left += ((playerWidth - innerWidth) / 2) + innerWidth;
-                    top += (playerHeight - innerHeight) / 2;
+                    left += ((playerWidth - innerWidth) / 2) + innerWidth - offset;
+                    top += (playerHeight - innerHeight) / 2 + offset;
                     break;
                 case INNER_BOTTOM_LEFT:
-                    left += (playerWidth - innerWidth) / 2;
-                    top += ((playerHeight - innerHeight) / 2) + innerHeight;
+                    left += (playerWidth - innerWidth) / 2 + offset;
+                    top += ((playerHeight - innerHeight) / 2) + innerHeight - offset;
                     break;
                 case INNER_BOTTOM_RIGHT:
-                    left += ((playerWidth - innerWidth) / 2) + innerWidth;
-                    top += ((playerHeight - innerHeight) / 2) + innerHeight;
+                    left += ((playerWidth - innerWidth) / 2) + innerWidth - offset;
+                    top += ((playerHeight - innerHeight) / 2) + innerHeight - offset;
                     break;
             }
             // center the middle and inner beacons on their intended point
