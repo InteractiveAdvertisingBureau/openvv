@@ -75,6 +75,8 @@ function OVV() {
     this.IN_IFRAME = (this.servingScenario != this.servingScenarioEnum.OnPage);
     this.IN_XD_IFRAME =  (this.servingScenario == this.servingScenarioEnum.CrossDomainIframe);
     this.geometrySupported = !this.IN_XD_IFRAME;
+    this.beaconsPositioned = false;
+    this.intersectionObserverSupported = !!window.IntersectionObserver;
 	
     // To support older versions of OVVAsset
     var browserData = new OVVBrowser(this.userAgent);
@@ -1330,39 +1332,82 @@ function OVVAsset(uid, dependencies) {
             iframe.style.position = 'absolute';
             iframe.style.zIndex =  $ovv.DEBUG ? 99999 : -99999;
 
-            iframe.src = 'javascript: ' +
-                'window.isInViewArea = undefined; ' +
-                'window.wasInViewArea = false; ' +
-                'window.isInView = undefined; ' +
-                'window.wasViewed = false; ' +
-                'window.started = false; ' +
-                'window.index = ' + index + ';'  +
-                'window.isViewable = function() { return window.isInView; }; ' +
-                'var cnt = 0; ' +
-                'setTimeout(function() {' +
-                                'var span = document.createElement("span");' +
-                                'span.id = "ad1";' +
-                                'document.body.insertBefore(span, document.body.firstChild);' +
-                            '},300);' +
-                'setTimeout(function() {setInterval(' +
-                    'function() { ' +
-                        'ad1 = document.getElementById("ad1");' +
-                        'ad1.innerHTML = window.mozPaintCount > cnt ? "In View" : "Out of View";' +
-                        'var paintCount = window.mozPaintCount; ' +
-                        'window.isInView = (paintCount>cnt); ' +
-                        'cnt = paintCount; ' +
-                        'if (parent.$ovv.DEBUG == true) {' +
-                            'if(window.isInView === true){' +
-                                'document.body.style.background = "green";' +
-                            '} else {' +
-                                'document.body.style.background = "red";' +
+            if($ovv.intersectionObserverSupported) {
+                
+                // Add element to be tracked and ensure it takes up the entire iframe document
+                var src = 
+                    'javascript:' +
+                    'window.isInView = undefined;' + 
+                    'window.isViewable = function(){ return window.isInView; };' +
+                    'window.index = ' + index + ';' +
+                    'var styles = document.createElement("style");' +
+                    'styles.innerHTML = ".intersecter { position: absolute; left: 0; top: 0; right: 0; bottom: 0; margin: auto }";' +
+                    'document.head.appendChild(styles);' +
+                    'var intersectionElement = document.createElement("div");' +
+                    'intersectionElement.setAttribute("class","intersecter");' +
+                    'document.body.appendChild(intersectionElement);';
+
+                // the IntersectionObserver callback fires each time the element
+                // comes in and out of view. The element is out of view initially.
+                // We toggle the "view state" whenever the callback is fired
+                src +=
+                    'var observer = new IntersectionObserver(function(entries){ ' + 
+                      'window.isInView = !window.isInView;' + 
+                      'if(parent.$ovv.DEBUG){ ' + 
+                        'if(window.isInView){ document.body.style.background = "green"; } ' +
+                        'else { document.body.style.background = "red"; }' + 
+                      '}' +
+                    '},{ threshold: 1.0 });' + 
+                    'setTimeout(function(){ parent.$ovv.getAssetById("'+id+'")' + '.beaconStarted(window.index);';
+
+                // We can't activate the IntersectionObserver watcher until the 
+                // control beacon has been positioned (otherwise beaconSupported will be false).
+                // So we need to poll for beaconsPositioned before activating the watcher
+                src += 
+                    'var interval = setInterval(function(){ ' +
+                        'if(parent.$ovv.beaconsPositioned) {' +
+                            'clearInterval(interval);' +
+                            'observer.observe(intersectionElement);' +
+                        '}' +
+                    '},100); },0); ';
+
+                iframe.src = src;
+            }
+            else {
+                iframe.src = 'javascript: ' +
+                    'window.isInViewArea = undefined; ' +
+                    'window.wasInViewArea = false; ' +
+                    'window.isInView = undefined; ' +
+                    'window.wasViewed = false; ' +
+                    'window.started = false; ' +
+                    'window.index = ' + index + ';'  +
+                    'window.isViewable = function() { return window.isInView; }; ' +
+                    'var cnt = 0; ' +
+                    'setTimeout(function() {' +
+                                    'var span = document.createElement("span");' +
+                                    'span.id = "ad1";' +
+                                    'document.body.insertBefore(span, document.body.firstChild);' +
+                                '},300);' +
+                    'setTimeout(function() {setInterval(' +
+                        'function() { ' +
+                            'ad1 = document.getElementById("ad1");' +
+                            'ad1.innerHTML = window.mozPaintCount > cnt ? "In View" : "Out of View";' +
+                            'var paintCount = window.mozPaintCount; ' +
+                            'window.isInView = (paintCount>cnt); ' +
+                            'cnt = paintCount; ' +
+                            'if (parent.$ovv.DEBUG == true) {' +
+                                'if(window.isInView === true){' +
+                                    'document.body.style.background = "green";' +
+                                '} else {' +
+                                    'document.body.style.background = "red";' +
+                                '}' +
                             '}' +
-                        '}' +
-                        'if (window.started === false) {' +
-                            'parent.$ovv.getAssetById("'+id+'")' + '.beaconStarted(window.index);' +
-                            'window.started = true;' +
-                        '}' +
-                    '}, 500)},400);';
+                            'if (window.started === false) {' +
+                                'parent.$ovv.getAssetById("'+id+'")' + '.beaconStarted(window.index);' +
+                                'window.started = true;' +
+                            '}' +
+                        '}, 500)},400);';
+            }
 
             document.body.insertBefore(iframe, document.body.firstChild);
         }
@@ -1480,6 +1525,7 @@ function OVVAsset(uid, dependencies) {
             var swfContainer = getBeaconContainer(index);
             swfContainer.style.left = left + 'px';
             swfContainer.style.top = top + 'px';
+            window.$ovv.beaconsPositioned = true;
         }
     };
 
@@ -1610,7 +1656,7 @@ function OVVAsset(uid, dependencies) {
 
     // only use the beacons if geometry is not supported, or we we are in DEBUG mode.
     if ($ovv.geometrySupported == false || $ovv.DEBUG) {
-        if ($ovv.browser.ID === $ovv.browserIDEnum.Firefox){
+        if ($ovv.browser.ID === $ovv.browserIDEnum.Firefox || $ovv.intersectionObserverSupported){
             //Use frame technique to measure viewability in cross domain FF scenario
             getBeaconFunc = getFrameBeacon;
             getBeaconContainerFunc = getFrameBeaconContainer;
