@@ -547,7 +547,7 @@
 		}
 		
 		
-		console.log(event);
+		console.log(eventObj);
 	}
 	
 	function handleFlashOvvEventCall(eventObj, data){
