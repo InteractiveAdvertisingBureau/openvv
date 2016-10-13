@@ -368,12 +368,37 @@
 		
 		if(options.topFrame && !ovvtest.isTopFrame()){
 			twin = window.top;
-			tdoc = twin.document;
-			el = util.getEl(elemOrId, tdoc);
-			regTopWindow = true;
-			id = el.getAttribute('id');
-			
-			opts.valuesOutputElem.push(el);
+			try{
+				tdoc = twin.document;
+				el = util.getEl(elemOrId, tdoc);
+				regTopWindow = true;
+				id = el.getAttribute('id');
+				
+				opts.valuesOutputElem.push(el);
+			}
+			catch(ex){
+				// Cross domain iframe
+				
+				var parentUrl = (window.location != window.parent.location)
+					? document.referrer
+					: document.location;
+				
+				// instruct parent to build the info window and exit
+				var pmsg = {
+					func : "buildInfoWindow",
+					params : ""
+				}
+				
+				ovvtest.isCrossDomain = true;
+				twin.postMessage(JSON.stringify(pmsg), "*");
+				return;
+				
+				/*
+				console.error(ex);
+				console.log(location);
+				console.log(twin.location);
+				*/
+			}
 			
 		}
 		else{
