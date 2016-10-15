@@ -132,12 +132,42 @@
 		return targ;
 	}
 	
+	/**
+	* Route a message to to parent page, if applicable
+	*/
+	function notifyParentPage(message){
+		var topWin, msg;
+		
+		// exit if we are the top frame
+		if(ovvtest.isTopFrame() || message == null){
+			return;
+		}
+		
+		if(typeof(message) == 'string'){
+			msg = message;
+		}
+		else{
+			try{
+				msg = JSON.stringify(message);
+			}
+			catch(ex){
+				console.error(ex);
+				console.error("Failure parsing parent message");
+				return;
+			}
+			
+			topWin = window.top;
+			topWin.postMessage(msg, "*");
+		}		
+	}
+	
+	
 	function displayQuartileViewability(eventName, data){
 		var el = opts.quartileValuesOutputElem;
-		var stateEl = doc.getElementById('ovvExecutionState');
 		var id, nd;
 		var k, val, i;
 		var buf = [];
+		var msg;
 		var css = '';
 		if(typeof(el) === 'string'){
 			id = el;
@@ -147,11 +177,18 @@
 			}
 		}
 		
+		msg = {
+			func : 'displayQuartileViewability',
+			eventName: eventName,
+			data: data
+		}
+		
+		notifyParentPage(msg);
+		
+		
 		if(el == null || data == null){
 			return;			
 		}
-		
-		stateEl.innerHtml != eventName;
 		
 		buf.push('<div class="eventName">', eventName, '</div>');
 		buf.push('<div class="viewabilityState">Viewable State: ', data.viewabilityState, '</div>');
@@ -390,14 +427,8 @@
 				}
 				
 				ovvtest.isCrossDomain = true; // flag as cross domain case
-				twin.postMessage(JSON.stringify(pmsg), "*");
+				notifyParentPage(pmsg);
 				return;
-				
-				/*
-				console.error(ex);
-				console.log(location);
-				console.log(twin.location);
-				*/
 			}
 			
 		}
@@ -542,17 +573,13 @@
 				
 		// ovvtest.log(eventObj, data);
 		if(opts.displayOvvValues){
-			if(ovvtest.isCrossDomain){
-				twin = window.top;
-				msg = {
-					func : 'displayViewableData',
-					data : dataObj
-				}
-				msg = JSON.stringify(msg);
-				twin.postMessage(msg, '*');
-			}
-			
 			displayViewableData(dataObj);
+			
+			msg = {
+				func : 'displayViewableData',
+				data : dataObj
+			}
+			notifyParentPage(msg);
 		}
 	}
 	
@@ -563,8 +590,8 @@
 		var name = eventObj && eventObj.eventName || '';
 		
 		var dataObj = data.ovvData;
-		var el = doc.getElementById('ovvStartBox');
-		el.style.display='block';
+		// var el = doc.getElementById('ovvStartBox');
+		// el.style.display='block';
 		
 		updateViewEngine(eventObj, dataObj);
 		
@@ -634,6 +661,8 @@
 		buildInfoWindow: buildInfoWindow,
 		
 		displayViewableData: displayViewableData,
+		
+		displayQuartileViewability: displayQuartileViewability,
 		
 		isTopFrame: function(){
 			if(window === window.top){

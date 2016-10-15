@@ -19,13 +19,22 @@
 
 	<div id="wrapper">
 <iframe id="videoFrame" 
-src="http://testad.iabtechlab.net:8080/openvv/ad_xframed_host.html"
+src="http://testad.iabtechlab.net:8080/openvv/ad_framed.html"
 style="margin-left:30px;border:1px solid blue;width:700px;height:600px;background:green;"></iframe>
 
 		</div>
 
 	
-	
+	<div class="quartileViewWrapper chip_shadow">
+		<div class="title underlined">
+			<h3>Quartile Viewability</h3>
+		</div>
+		<div id="ovvQuartileViewValues" class="scrollContent"></div>
+	</div>
+<div id="ovvExecutionState"></div>
+
+<div id="ovvStartBox" style="display:none;">x</div>
+
 
 <script src="scripts/ovvtest_core.js" type="text/javascript"></script>
 <script src="scripts/ovvtest_player.js" type="text/javascript"></script>
@@ -56,11 +65,20 @@ style="margin-left:30px;border:1px solid blue;width:700px;height:600px;backgroun
 			case 'displayViewableData':
 				ovvtest.displayViewableData(message.data);
 				break;
+				
+			case 'displayQuartileViewability':
+				ovvtest.displayQuartileViewability(message.eventName, message.data);
+				break;
 		}
 	});
 		
 	window.addEventListener("load", function load(event){
 		window.removeEventListener("load", load, false); //remove listener, no longer needed
+		
+			ovvtest.setOptions({ 
+				quartileValuesOutputElem: 'ovvQuartileViewValues'
+			});
+
 		
 
 		// Attach our listeners through javascript
