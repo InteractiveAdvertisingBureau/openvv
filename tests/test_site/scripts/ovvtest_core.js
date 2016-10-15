@@ -389,7 +389,7 @@
 					params : ""
 				}
 				
-				ovvtest.isCrossDomain = true;
+				ovvtest.isCrossDomain = true; // flag as cross domain case
 				twin.postMessage(JSON.stringify(pmsg), "*");
 				return;
 				
@@ -528,6 +528,7 @@
 	*/
 	function handleOvvEvent(eventObj, data){
 		var dataObj;
+		var twin, msg;
 		if(data.ovvData != null){
 			dataObj = data.ovvData;
 		}
@@ -541,6 +542,16 @@
 				
 		// ovvtest.log(eventObj, data);
 		if(opts.displayOvvValues){
+			if(ovvtest.isCrossDomain){
+				twin = window.top;
+				msg = {
+					func : 'displayViewableData',
+					data : dataObj
+				}
+				msg = JSON.stringify(msg);
+				twin.postMessage(msg, '*');
+			}
+			
 			displayViewableData(dataObj);
 		}
 	}
@@ -621,6 +632,8 @@
 		},
 		
 		buildInfoWindow: buildInfoWindow,
+		
+		displayViewableData: displayViewableData,
 		
 		isTopFrame: function(){
 			if(window === window.top){
