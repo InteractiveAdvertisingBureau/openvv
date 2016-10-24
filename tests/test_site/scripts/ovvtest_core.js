@@ -166,6 +166,7 @@
 		var el = opts.quartileValuesOutputElem;
 		var id, nd;
 		var k, val, i;
+		var isViewable;
 		var buf = [];
 		var msg;
 		var css = '';
@@ -202,8 +203,10 @@
 		}
 		buf.push('</span>');
 		
+		isViewable = (data.viewabilityState == 'viewable');
 		
-		if(data.percentViewable >= 50){
+		
+		if(isViewable || data.percentViewable >= 50){
 			css = 'inView'
 			if(data.focus === false){
 				css += ' noFocus';
@@ -475,7 +478,12 @@
 			regTimer = 0;
 		}
 		
-		if(!window['$ovv']){
+		var ovvReady = (window['$ovv'] != null);
+		if(ovvReady && $ovv.DEBUG_LOAD){
+			
+		}
+		
+		if(!ovvReady){
 			if(++attachRetries < 60000){
 				regTimer = setTimeout(function(){
 					registerOvvListeners();
