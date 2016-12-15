@@ -44,10 +44,6 @@ function OVV() {
     * @type {OVVAsset}
     */
     this.asset = null;
-    /**
-    * The id of the interval responsible for positioning beacons.
-    */
-    this.positionInterval;
 
     this.userAgent = window.testOvvConfig && window.testOvvConfig.userAgent ? window.testOvvConfig.userAgent : navigator.userAgent;
 
@@ -1068,7 +1064,7 @@ function OVVAsset(uid, dependencies) {
                 container.parentElement.removeChild(container);
             }
         }
-        clearInterval( window.$ovv.positionInterval );
+        clearInterval( this.positionInterval );
         window.$ovv.removeAsset(this);
     };
 
@@ -1085,6 +1081,11 @@ function OVVAsset(uid, dependencies) {
     this.getPlayer = function () {
         return player;
     };
+
+    /**
+    * The id of the interval responsible for positioning beacons.
+    */
+    this.positionInterval;
 
     ///////////////////////////////////////////////////////////////////////////
     // PRIVATE FUNCTIONS
